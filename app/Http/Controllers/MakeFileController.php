@@ -62,8 +62,8 @@ class MakeFileController extends Controller
         // Get real path for our folder
         $this->makeZip($generated_files_path);
 
-        return response()->json(['file_path' => public_path($generated_files_path . '.zip')]);
-        
+        return response()->json(['file_path' => $generated_files_path . '.zip']);
+        // return response()->json(['file_path' => public_path($generated_files_path . '.zip')]);
         // return response()->download(public_path($generated_files_path . '.zip'));
         // return storage_path("app/".$generated_files_path."/".$model_name.".php");
     }

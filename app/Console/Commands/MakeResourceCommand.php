@@ -124,7 +124,7 @@ class MakeResourceCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('App/Http/Resources') .'/' .$this->getSingularClassName($this->argument('name')) . '/Resource.php';
+        return base_path('app/Http/Resources') .'/' .$this->getSingularClassName($this->argument('name')) . '/Resource.php';
     }
 
     /**

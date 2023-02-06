@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Http\Resources\$CLASS_NAME$;
+
+use App\Traits\ResourceFilterable;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class Resource extends JsonResource
+{
+    use ResourceFilterable;
+    protected $model = '$CLASS_NAME$';
+
+    public function toArray($request)
+    {
+        $data = $this->fields();
+        return $data;
+    }
+}

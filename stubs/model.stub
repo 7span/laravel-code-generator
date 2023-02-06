@@ -1,0 +1,27 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class {{ class }} extends Model
+{
+    use HasFactory;
+
+    protected $table = '';
+
+    public $fillable = [];
+
+    protected $dates = [];
+
+    protected $hidden = [];
+
+    protected $casts = [];
+
+    public $queryable = [
+        'id'
+    ];
+    
+    protected $relationship = [];
+}

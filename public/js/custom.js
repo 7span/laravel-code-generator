@@ -94,7 +94,6 @@ $('#myEditForm').on('submit', function(e){
 
 $("body").on("click", ".btn-edit", function(){
     row = $(this).closest('tr');
-    console.log(row.attr('data-row'));
     var column_type = $(this).parents("tr").attr('data-column-type');
     var column_name = $(this).parents("tr").attr('data-column-name');
     var column_validation = $(this).parents("tr").attr('data-column-validation');
@@ -105,7 +104,7 @@ $("body").on("click", ".btn-edit", function(){
     // alert($('#edit_column_name').html());
 
     if (column_type == 'enum') {
-        var json_for_possible_values = $("input[name='table_fields[kajal]']").attr('value').replace(/'/g, '"');
+        var json_for_possible_values = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
         var all_pos_values_to_array = JSON.parse(json_for_possible_values);
         var pos_values_string = all_pos_values_to_array['possible_values'];
         var pos_values_array = pos_values_string.split(",");

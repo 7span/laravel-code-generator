@@ -2,7 +2,7 @@
 <option value="text">Text</option>
 <option value="boolean">Boolean</option>
 <option value="integer">Integer</option>
-<option value="double">Double</option>
+<option value="decimal">Decimal</option>
 <option value="tinyInteger">Tiny Integer</option>
 <option value="enum">Enum</option>
 

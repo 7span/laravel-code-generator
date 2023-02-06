@@ -40,7 +40,10 @@ $('#myForm').on('submit', function(e){
     var new_tr_row = parseInt($('.table tbody tr:last').attr('data-row')) + 1;
     $(".table tbody").append("<tr data-row='"+new_tr_row+"' data-column-type='"+column_type+"' data-column-name='"+column_name+"' data-column-validation='"+column_validation+"'><th scope='row'>"+column_type+"</th><td>"+column_name+"</td><td>"+column_validation+"</td><td><button type='button' class='btn btn-success btn-edit'><i class='fas fa-edit'></i></button></td><td><button type='button' class='btn btn-danger btn-delete'><i class='far fa-trash-alt btn-delete'></i></button></td></tr>");
 
-    if (column_type == 'enum' || column_type == 'checkbox') {
+    if (column_type == 'enum') {
+        var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";
+        $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
+    } else if (column_type == 'decimal') {
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     } else {
@@ -75,14 +78,14 @@ $('#myEditForm').on('submit', function(e){
     $('.table tbody tr[data-row="'+which_row+'"]').find("td:eq(0)").text(column_name);  
     $('.table tbody tr[data-row="'+which_row+'"]').find("td:eq(1)").text(column_validation);
 
-    if (column_type == 'enum' || column_type == 'checkbox') {
+    if (column_type == 'enum') {
         $("input[name='table_fields["+column_name+"]']").remove();
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     } else {
         $("input[name='table_fields["+column_name+"]']").remove();
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':''}";
-        $('#makeFileForm #model_name').after('<input type="'+column_type+'" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
+        $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     }
 
     $('#myEditModal').modal('toggle');
@@ -130,10 +133,15 @@ $("body").on("click", ".btn-delete", function(){
 
 $("#column_type").on('change', function(){
     var column_type = $('#column_type').find(":selected").val();
-    if (column_type == 'enum' || column_type == 'checkbox') {
+    if (column_type == 'enum') {
         $(".intro").remove();
         $(".possible").css("display", "block");
         $(".cloning_div").find("input:last").clone().attr('name', 'possible_values[]').addClass("intro").insertAfter(".cloning_div");
+    } else if (column_type == 'decimal') {
+        $(".intro").remove();
+        $(".decimal_div").css("display", "block");
+        $(".cloning_decimal_div").find("input:last").clone().attr('name', 'decimal_min_value[]').addClass("intro").insertAfter(".cloning_decimal_div");
+        $(".cloning_decimal_div").find("input:last").clone().attr('name', 'decimal_max_value[]').addClass("intro").insertAfter(".cloning_decimal_div");
     } else {
         $(".possible").css("display", "none");
         $(".intro").remove();
@@ -142,7 +150,11 @@ $("#column_type").on('change', function(){
 
 $("#edit_column_type").on('change', function(){
     var edit_column_type = $('#edit_column_type').find(":selected").val();
-    if (edit_column_type == 'enum' || edit_column_type == 'checkbox') {
+    if (edit_column_type == 'enum') {
+        $(".intro").remove();
+        $(".edit_possible").css("display", "block");
+        $(".edit_cloning_div").find("input:last").clone().attr('name', 'possible_values[]').addClass("intro").insertAfter(".edit_cloning_div");
+    } else if (edit_column_type == 'decimal') {
         $(".intro").remove();
         $(".edit_possible").css("display", "block");
         $(".edit_cloning_div").find("input:last").clone().attr('name', 'possible_values[]').addClass("intro").insertAfter(".edit_cloning_div");

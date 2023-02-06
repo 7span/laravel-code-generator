@@ -36,6 +36,12 @@
                             <input type="text" class="form-control input-lg" name="">
                         </div>
                     </div>
+                    <div class="form-group decimal_div" style="display:none">
+                        <label class="control-label">Minimum and Maximum values</label>
+                        <div class="cloning_decimal_div" style="display:none">
+                            <input type="text" class="form-control input-lg" name="" pattern="[0-9]+">
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>

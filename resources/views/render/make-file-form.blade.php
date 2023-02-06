@@ -8,8 +8,8 @@
     <span style="color:red" class="modelNameError"></span><br><br>
 
     <!-- <input type="text" name="table_fields[kajal]" value="{'type':'enum', 'validation':'optional', 'possible_values':'jenish,kajal'}" style="display:none"> -->
-    <!-- <input type="text" name="table_fields[first_name]" value='{"type":"text","validation":"required"}' style="display:none">
-    <input type="text" name="table_fields[mobile]" value='{"type":"integer","validation":"required","default":0}' style="display:none"> -->
+    <!-- <input type="text" name="table_fields[first_name]" value='{"type":"text","validation":"required", 'possible_values':''}' style="display:none">
+    <input type="text" name="table_fields[mobile]" value='{"type":"integer","validation":"required","default":0, 'possible_values':''}' style="display:none"> -->
 
     <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
     

@@ -18,9 +18,9 @@ $('#makeFileForm').on('submit',function(e){
             }
         },
         error: function(response) {
-            console.log(response);
-            $('.modelNameError').text(response.responseJSON.model_name[0]);
-            $('.methodsError').text(response.responseJSON.method[0]);
+            console.log(response.responseJSON);
+            response.responseJSON.hasOwnProperty('model_name') ? $('.modelNameError').text(response.responseJSON.model_name[0]) : '';
+            response.responseJSON.hasOwnProperty('method') ? $('.methodsError').text(response.responseJSON.method[0]) : '';
         },
     });
 });
@@ -123,7 +123,9 @@ $("body").on("click", ".btn-edit", function(){
 });
 
 $("body").on("click", ".btn-delete", function(){
-    $(this).parents("tr").remove();  
+    $(this).parents("tr").remove();
+    var column_name = $(this).parents("tr").attr('data-column-name');
+    $("input[name='table_fields["+column_name+"]']").remove();
 });
 
 $("#column_type").on('change', function(){

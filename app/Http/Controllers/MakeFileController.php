@@ -188,13 +188,19 @@ class MakeFileController extends Controller
         $this->replace_string_in_file($filename, "table = ''", $table_text);
 
         File::move($filename, storage_path("app/".$generated_files_path."/".$model_name.".php"));
+
+        Storage::disk('local')->makeDirectory($generated_files_path . '/Traits');
+        File::copy(base_path("app/Traits/BaseModel.php"), storage_path("app/".$generated_files_path."/Traits/BaseModel.php"));
+        // File::move(base_path("app/Traits/BaseModel.php"), storage_path("app/".$generated_files_path."/Traits/BaseModel.php"));
     }
 
     public function makeController($model_name, $generated_files_path)
     {
         \Artisan::call("make:controller API/V1/" . $model_name . "Controller --api");
-        Storage::disk('local')->makeDirectory($generated_files_path . '/Controllers/API/V1');
-        File::move(base_path("app/Http/Controllers/API/V1/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Controllers/API/V1/".$model_name."Controller.php"));
+        Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1');
+        File::move(base_path("app/Http/Controllers/API/V1/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Http/Controllers/API/V1/".$model_name."Controller.php"));
+
+        File::deleteDirectory(base_path("app/Http/Controllers/API/V1"));
     }
 
     public function makeMigration($table_name, $replaceable_text, $generated_files_path)
@@ -223,27 +229,31 @@ class MakeFileController extends Controller
         if ($admin_crud == "1") {
             // Make controller and move it to Generated_files
             \Artisan::call("make:controller API/V1/Admin/" . $model_name . "Controller --api");
-            Storage::disk('local')->makeDirectory($generated_files_path . '/Controllers/API/V1/Admin');
-            File::move(base_path("app/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Controllers/API/V1/Admin/".$model_name."Controller.php"));
+            Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1/Admin');
+            File::move(base_path("app/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"));
             
             // Make api-admin-v1.php route file and write content into the file
             Storage::disk('local')->put($generated_files_path . '/api-admin-v1.php', file_get_contents(base_path("stubs/api.admin.v1.routes.stub")));
             $route = "Route::apiResource('" . strtolower($model_name). "s', " . "Admin" . "\\" . ucfirst($model_name) . "Controller::class);";
             Storage::disk('local')->append($generated_files_path . '/api-admin-v1.php', $route, PHP_EOL);
+
+            File::deleteDirectory(base_path("app/Http/Controllers/API/V1/Admin"));
         }
     }
 
     public function makeResourceFiles($model_name, $methods, $generated_files_path)
     {
         \Artisan::call("make:resource " . $model_name);
-        Storage::disk('local')->makeDirectory($generated_files_path . '/Resources/' . $model_name);
-        File::move(base_path("app/Http/Resources/" . $model_name . "/Resource.php"), storage_path("app/" . $generated_files_path . "/Resources/" . $model_name . "/Resource.php"));
+        Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Resources/' . $model_name);
+        File::move(base_path("app/Http/Resources/" . $model_name . "/Resource.php"), storage_path("app/" . $generated_files_path . "/Http/Resources/" . $model_name . "/Resource.php"));
         
         if (in_array('index', $methods)) {
             \Artisan::call("make:collection_resource " . $model_name);
-            File::move(base_path("app/Http/Resources/" . $model_name . "/Collection.php"), storage_path("app/" . $generated_files_path . "/Resources/" . $model_name . "/Collection.php"));
+            File::move(base_path("app/Http/Resources/" . $model_name . "/Collection.php"), storage_path("app/" . $generated_files_path . "/Http/Resources/" . $model_name . "/Collection.php"));
         }
-        rmdir(base_path("app/Http/Resources/" . $model_name));
+        
+        File::deleteDirectory(base_path("app/Http/Resources"));
+        // rmdir(base_path("app/Http/Resources/" . $model_name));
     }
 
     public function makeServiceFile($model_name, $generated_files_path)
@@ -251,16 +261,20 @@ class MakeFileController extends Controller
         \Artisan::call("make:service " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Services');
         File::move(base_path("app/Services/" . $model_name . "Service.php"), storage_path("app/" . $generated_files_path . "/Services/" . $model_name . "Service.php"));
+
+        File::deleteDirectory(base_path("app/Services"));
     }
 
     public function makeRequestFiles($model_name, $replaceable_text, $generated_files_path)
     {
         \Artisan::call("make:request " . $model_name . "Request");
-        Storage::disk('local')->makeDirectory($generated_files_path . '/Requests');
+        Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Requests');
         $request_file_path = base_path("app/Http/Requests/".$model_name."Request.php");
         $string_to_replace="//";
         $replace_with = $replaceable_text;
         $this->replace_string_in_file($request_file_path, $string_to_replace, $replace_with);
-        File::move($request_file_path, storage_path("app/" . $generated_files_path . "/Requests/" . $model_name . "Request.php"));
+        File::move($request_file_path, storage_path("app/" . $generated_files_path . "/Http/Requests/" . $model_name . "Request.php"));
+        
+        File::deleteDirectory(base_path("app/Http/Requests"));
     }
 }

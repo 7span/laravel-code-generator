@@ -12,7 +12,6 @@
                             <select id="column_type" class="form-control" name="column_type">
                                 @include('render.column-type-options')
                             </select>
-                            <span style="color:red" class="columnTypeError"></span><br><br>
                         </div>
                     </div>
                     <div class="form-group">

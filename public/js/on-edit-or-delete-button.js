@@ -7,7 +7,6 @@ $("body").on("click", ".btn-edit", function(){
     $('#edit_column_type').val(column_type).attr('disabled','disabled');
     $('#edit_column_name').val(column_name).attr('disabled','disabled');
     $('#edit_column_validation').val(column_validation);
-    // alert($('#edit_column_name').html());
 
     if (column_type == 'enum') {
         var json_for_possible_values = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
@@ -19,7 +18,9 @@ $("body").on("click", ".btn-edit", function(){
             $('#editFieldForm .edit_clone_one').after('<input name="possible_values[]" class="form-control input-lg cloned_input" type="text" value="' + p_val + '" />')
         });
         
-        $(".edit_possible").css("display", "block");
+        $(".edit_possible").css("display", "block"); // display clone div for enum
+        $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
+        $(".edit_character_div").css("display", "none"); // hide clone div for varchar
     } else if (column_type == 'decimal' || column_type == 'double' || column_type == 'float') {
         var row = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
         var json_to_object = JSON.parse(row);
@@ -29,7 +30,19 @@ $("body").on("click", ".btn-edit", function(){
         $('#editFieldForm .edit_clone_two').after('<input name="decimal_precision" class="form-control input-lg cloned_input" type="text" value="' + decimal_precision + '" />')
         $('#editFieldForm .edit_clone_two').after('<input name="decimal_total_number" class="form-control input-lg cloned_input" type="text" value="' + total_number + '" />')
 
-        $(".edit_decimal_div").css("display", "block");
+        $(".edit_decimal_div").css("display", "block"); // display clone div for decimal/double/float
+        $(".edit_possible").css("display", "none"); // hide clone div for enum
+        $(".edit_character_div").css("display", "none"); // hide clone div for varchar
+    } else if (column_type == 'varchar') {
+        var row = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
+        var json_to_object = JSON.parse(row);
+        var character_limit = json_to_object['character_limit'];
+
+        $('#editFieldForm .edit_clone_three').after('<input name="character_limit" class="form-control input-lg cloned_input" type="text" value="' + character_limit + '" />')
+        
+        $(".edit_character_div").css("display", "block"); // display clone div for varchar
+        $(".edit_possible").css("display", "none"); // hide clone div for enum
+        $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
     }
 
     $("#tr_row_for_edit").remove();

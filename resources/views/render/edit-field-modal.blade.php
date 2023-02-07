@@ -40,7 +40,12 @@
                         <label class="control-label">Total number and Decimal precision</label>
                         <div class="edit_clone_two" style="display:none">
                             <input type="number" class="form-control input-lg" name="" min="1" max="10">
-                            <!-- <input type="text" class="form-control input-lg" name="" pattern="[0-9]+"> -->
+                        </div>
+                    </div>
+                    <div class="form-group edit_character_div" style="display:none">
+                        <label class="control-label">Character limit</label>
+                        <div class="edit_clone_three" style="display:none">
+                            <input type="number" class="form-control input-lg" name="" min="10" max="255">
                         </div>
                     </div>
                     <div class="form-group">

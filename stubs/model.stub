@@ -13,15 +13,25 @@ class {{ class }} extends Model
 
     public $fillable = [];
 
-    protected $dates = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime'
+    ];
 
     protected $hidden = [];
-
-    protected $casts = [];
 
     public $queryable = [
         'id'
     ];
     
     protected $relationship = [];
+
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->created_by = auth()->id();
+        });
+    }
 }

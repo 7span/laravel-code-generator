@@ -22,7 +22,6 @@ class MakeFileController extends Controller
  
         if ($validator->fails()) {
             return response()->json($validator->messages(), 422);
-            // return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $model_name = $this->getModelName($request->get('model_name'));
@@ -241,11 +240,6 @@ class MakeFileController extends Controller
             File::move(base_path("app/Http/Resources/" . $model_name . "/Collection.php"), storage_path("app/" . $generated_files_path . "/Resources/" . $model_name . "/Collection.php"));
         }
         rmdir(base_path("app/Http/Resources/" . $model_name));
-
-        // if (in_array('index', $methods)) {
-        //     \Artisan::call("make:resource " . $model_name . "Collection");
-        //     File::move(base_path("app/Http/Resources/".$model_name."Collection.php"), storage_path("app/" . $generated_files_path . "/Resources/" . $model_name . "Collection.php"));
-        // }
     }
 
     public function makeServiceFile($model_name, $generated_files_path)

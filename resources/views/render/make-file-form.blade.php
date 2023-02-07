@@ -1,4 +1,4 @@
-https://laravel.com/docs/5.6/migrations
+<!-- https://laravel.com/docs/5.6/migrations -->
 <!-- <form method="post" action="{{ url('make-files') }}" id="makeFileForm"> -->
 <form id="makeFileForm">
     @csrf

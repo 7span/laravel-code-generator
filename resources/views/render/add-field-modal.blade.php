@@ -34,19 +34,19 @@
                     <div class="form-group">
                         <label class="control-label possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x add_more" aria-hidden="true"></i></label>
                         <div class="clone_one" style="display:none">
-                            <input type="text" class="form-control input-lg" name="" required="">
+                            <input type="text" class="form-control input-lg" name="">
                         </div>
                     </div>
                     <div class="form-group decimal_div" style="display:none">
                         <label class="control-label">Total number and Decimal precision</label>
                         <div class="clone_two" style="display:none">
-                            <input type="number" class="form-control input-lg" name="" min="1" max="10" required="">
+                            <input type="number" class="form-control input-lg" name="" min="1" max="10">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label character_div" style="display:none">Character limit</label>
                         <div class="clone_three" style="display:none">
-                            <input type="number" class="form-control input-lg" name="" value="10" min="10" max="255" required="">
+                            <input type="number" class="form-control input-lg" name="" value="10" min="10" max="255">
                         </div>
                     </div>
                     <div class="form-group">

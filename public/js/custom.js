@@ -28,11 +28,6 @@ $('#makeFileForm').on('submit',function(e){
 $('#myForm').on('submit', function(e){
     e.preventDefault();
 
-    var values = [];
-    $("input[name='possible_values[]']").each(function() {
-        values.push($(this).val());
-    });
-
     var column_type = $('#column_type').find(":selected").val();
     var column_name = $("input[name='column_name']").val();
     var column_validation = $('#column_validation').find(":selected").val();
@@ -41,10 +36,17 @@ $('#myForm').on('submit', function(e){
     $(".table tbody").append("<tr data-row='"+new_tr_row+"' data-column-type='"+column_type+"' data-column-name='"+column_name+"' data-column-validation='"+column_validation+"'><th scope='row'>"+column_type+"</th><td>"+column_name+"</td><td>"+column_validation+"</td><td><button type='button' class='btn btn-success btn-edit'><i class='fas fa-edit'></i></button></td><td><button type='button' class='btn btn-danger btn-delete'><i class='far fa-trash-alt btn-delete'></i></button></td></tr>");
 
     if (column_type == 'enum') {
+        var values = [];
+        $("input[name='possible_values[]']").each(function() {
+            values.push($(this).val());
+        });
+
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     } else if (column_type == 'decimal') {
-        var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";
+        var total_number = $("input[name='decimal_total_number']").val();
+        var decimal_precision = $("input[name='decimal_precision']").val();
+        var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'', 'total_number':'"+total_number+"', 'decimal_precision':'"+decimal_precision+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     } else {
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':''}";
@@ -61,11 +63,6 @@ $('#myForm').on('submit', function(e){
 $('#myEditForm').on('submit', function(e){
     e.preventDefault();
 
-    var values = [];
-    $("input[name='possible_values[]']").each(function() {
-        values.push($(this).val());
-    });
-
     var column_type = $('#edit_column_type').find(":selected").val();
     var column_name = $("input[name='edit_column_name']").val();
     var column_validation = $('#edit_column_validation').find(":selected").val();
@@ -80,7 +77,21 @@ $('#myEditForm').on('submit', function(e){
 
     if (column_type == 'enum') {
         $("input[name='table_fields["+column_name+"]']").remove();
+
+        var values = [];
+        $("input[name='possible_values[]']").each(function() {
+            values.push($(this).val());
+        });
+
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";
+        $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
+    } else if (column_type == 'decimal') {
+        $("input[name='table_fields["+column_name+"]']").remove();
+
+        var total_number = $("input[name='decimal_total_number']").val();
+        var decimal_precision = $("input[name='decimal_precision']").val();
+
+        var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'', 'total_number':'"+total_number+"', 'decimal_precision':'"+decimal_precision+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     } else {
         $("input[name='table_fields["+column_name+"]']").remove();
@@ -108,15 +119,25 @@ $("body").on("click", ".btn-edit", function(){
 
     if (column_type == 'enum') {
         var json_for_possible_values = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
-        var all_pos_values_to_array = JSON.parse(json_for_possible_values);
-        var pos_values_string = all_pos_values_to_array['possible_values'];
+        var json_to_object = JSON.parse(json_for_possible_values);
+        var pos_values_string = json_to_object['possible_values'];
         var pos_values_array = pos_values_string.split(",");
-
-        pos_values_array.forEach(function(jk) {
-            $('#myEditForm .edit_cloning_div').after('<input name="possible_values[]" class="form-control input-lg intro" type="text" value="' + jk + '" />')
+        
+        pos_values_array.forEach(function(p_val) {
+            $('#myEditForm .edit_cloning_div').after('<input name="possible_values[]" class="form-control input-lg intro" type="text" value="' + p_val + '" />')
         });
-
+        
         $(".edit_possible").css("display", "block");
+    } else if (column_type == 'decimal') {
+        var row = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
+        var json_to_object = JSON.parse(row);
+        var total_number = json_to_object['total_number'];
+        var decimal_precision = json_to_object['decimal_precision'];
+
+        $('#myEditForm .edit_cloning_decimal_div').after('<input name="decimal_precision" class="form-control input-lg intro" type="text" value="' + decimal_precision + '" />')
+        $('#myEditForm .edit_cloning_decimal_div').after('<input name="decimal_total_number" class="form-control input-lg intro" type="text" value="' + total_number + '" />')
+
+        $(".edit_decimal_div").css("display", "block");
     }
 
     $("#tr_row_for_edit").remove();
@@ -140,8 +161,8 @@ $("#column_type").on('change', function(){
     } else if (column_type == 'decimal') {
         $(".intro").remove();
         $(".decimal_div").css("display", "block");
-        $(".cloning_decimal_div").find("input:last").clone().attr('name', 'decimal_min_value[]').addClass("intro").insertAfter(".cloning_decimal_div");
-        $(".cloning_decimal_div").find("input:last").clone().attr('name', 'decimal_max_value[]').addClass("intro").insertAfter(".cloning_decimal_div");
+        $(".cloning_decimal_div").find("input:last").clone().attr('name', 'decimal_precision').addClass("intro").attr('placeholder', 'Decimal precision').insertAfter(".cloning_decimal_div");
+        $(".cloning_decimal_div").find("input:last").clone().attr('name', 'decimal_total_number').addClass("intro").attr('placeholder', 'Total number').insertAfter(".cloning_decimal_div");
     } else {
         $(".possible").css("display", "none");
         $(".intro").remove();
@@ -156,8 +177,9 @@ $("#edit_column_type").on('change', function(){
         $(".edit_cloning_div").find("input:last").clone().attr('name', 'possible_values[]').addClass("intro").insertAfter(".edit_cloning_div");
     } else if (edit_column_type == 'decimal') {
         $(".intro").remove();
-        $(".edit_possible").css("display", "block");
-        $(".edit_cloning_div").find("input:last").clone().attr('name', 'possible_values[]').addClass("intro").insertAfter(".edit_cloning_div");
+        $(".edit_decimal_div").css("display", "block");
+        $(".edit_cloning_decimal_div").find("input:last").clone().attr('name', 'edit_decimal_precision[]').addClass("intro").attr('placeholder', 'Decimal precision').insertAfter(".edit_cloning_decimal_div");
+        $(".edit_cloning_decimal_div").find("input:last").clone().attr('name', 'edit_decimal_total_number[]').addClass("intro").attr('placeholder', 'Total number').insertAfter(".edit_cloning_decimal_div");
     } else {
         $(".edit_possible").css("display", "none");
         $(".intro").remove();

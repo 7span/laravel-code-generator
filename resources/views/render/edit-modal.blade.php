@@ -36,6 +36,13 @@
                             <input type="text" class="form-control input-lg" name="">
                         </div>
                     </div>
+                    <div class="form-group edit_decimal_div" style="display:none">
+                        <label class="control-label">Total number and Decimal precision</label>
+                        <div class="edit_cloning_decimal_div" style="display:none">
+                            <input type="number" class="form-control input-lg" name="" min="1" max="10">
+                            <!-- <input type="text" class="form-control input-lg" name="" pattern="[0-9]+"> -->
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>

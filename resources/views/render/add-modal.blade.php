@@ -37,9 +37,10 @@
                         </div>
                     </div>
                     <div class="form-group decimal_div" style="display:none">
-                        <label class="control-label">Minimum and Maximum values</label>
+                        <label class="control-label">Total number and Decimal precision</label>
                         <div class="cloning_decimal_div" style="display:none">
-                            <input type="text" class="form-control input-lg" name="" pattern="[0-9]+">
+                            <input type="number" class="form-control input-lg" name="" min="1" max="10">
+                            <!-- <input type="text" class="form-control input-lg" name="" pattern="[0-9]+"> -->
                         </div>
                     </div>
                     <div class="form-group">

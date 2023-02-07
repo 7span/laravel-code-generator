@@ -100,7 +100,7 @@ class MakeFileController extends Controller
                 $validation = $val['validation'];
                 $possible_values = $val['possible_values'];
                 
-                if ($field_type == 'radio' || $field_type == 'checkbox') {
+                if ($field_type == 'enum') {
                     $p_val = '';
                     $length = count(explode(",", $possible_values));
         
@@ -109,7 +109,13 @@ class MakeFileController extends Controller
                     }
     
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ENUM(' . $p_val . ')");';
-                } else{
+                } else if ($field_type == 'decimal') {
+                    $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
+                    $total_number = $val['total_number'];
+                    $decimal_precision = $val['decimal_precision'];
+
+                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' decimal(' . $total_number . ',' . $decimal_precision .')");';
+                } else {
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ' . $field_type . ' NOT NULL");';
                 }
                 

@@ -13,6 +13,12 @@
   <!-- Edit field modal -->
   @include('render.edit-modal')
 </div>
-<script src="{!! asset('js/custom.js') !!}"></script>
+<script src="{!! asset('js/make-file.js') !!}"></script>
+<script src="{!! asset('js/add-field.js') !!}"></script>
+<script src="{!! asset('js/add-column-type-change.js') !!}"></script>
+<script src="{!! asset('js/edit-field.js') !!}"></script>
+<script src="{!! asset('js/edit-column-type-change.js') !!}"></script>
+<script src="{!! asset('js/on-edit-or-delete-button.js') !!}"></script>
+<script src="{!! asset('js/add-or-edit-more.js') !!}"></script>
 </body>
 </html>

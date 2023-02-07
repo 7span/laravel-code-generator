@@ -1,4 +1,4 @@
-<div id="myModal" class="modal fade">
+<div id="addFieldModal" class="modal fade">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -32,15 +32,21 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x add_more" aria-hidden="true"></i></label>
-                        <div class="cloning_div" style="display:none">
+                        <div class="clone_one" style="display:none">
                             <input type="text" class="form-control input-lg" name="">
                         </div>
                     </div>
                     <div class="form-group decimal_div" style="display:none">
                         <label class="control-label">Total number and Decimal precision</label>
-                        <div class="cloning_decimal_div" style="display:none">
+                        <div class="clone_two" style="display:none">
                             <input type="number" class="form-control input-lg" name="" min="1" max="10">
                             <!-- <input type="text" class="form-control input-lg" name="" pattern="[0-9]+"> -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label string_div" style="display:none">Character limit</label>
+                        <div class="clone_three" style="display:none">
+                            <input type="number" class="form-control input-lg" name="" min="10" max="255">
                         </div>
                     </div>
                     <div class="form-group">

@@ -1,8 +1,12 @@
+<option value="">Select one</option>
 <option value="string">String</option>
 <option value="text">Text</option>
+<option value="longText">Long text</option>
 <option value="boolean">Boolean</option>
 <option value="integer">Integer</option>
 <option value="decimal">Decimal</option>
+<option value="double">Double</option>
+<option value="float">Float</option>
 <option value="tinyInteger">Tiny Integer</option>
 <option value="enum">Enum</option>
 

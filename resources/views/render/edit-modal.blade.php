@@ -1,4 +1,4 @@
-<div id="myEditModal" class="modal fade">
+<div id="editFieldModal" class="modal fade">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -32,13 +32,13 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label edit_possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x edit_more" aria-hidden="true"></i></label>
-                        <div class="edit_cloning_div" style="display:none">
+                        <div class="edit_clone_one" style="display:none">
                             <input type="text" class="form-control input-lg" name="">
                         </div>
                     </div>
                     <div class="form-group edit_decimal_div" style="display:none">
                         <label class="control-label">Total number and Decimal precision</label>
-                        <div class="edit_cloning_decimal_div" style="display:none">
+                        <div class="edit_clone_two" style="display:none">
                             <input type="number" class="form-control input-lg" name="" min="1" max="10">
                             <!-- <input type="text" class="form-control input-lg" name="" pattern="[0-9]+"> -->
                         </div>

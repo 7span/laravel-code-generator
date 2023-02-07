@@ -103,6 +103,8 @@ class MakeFileController extends Controller
                 $validation = $val['validation'];
                 $possible_values = $val['possible_values'];
                 
+                $null_or_not_null = $validation == 'required' ? ' NOT NULL' : ' NULL';
+                
                 if ($field_type == 'enum') {
                     $p_val = '';
                     $length = count(explode(",", $possible_values));
@@ -112,16 +114,25 @@ class MakeFileController extends Controller
                     }
     
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ENUM(' . $p_val . ')");';
-                } else if ($field_type == 'decimal') {
+                } else if ($field_type == 'decimal' || $field_type == 'double' || $field_type == 'float') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $total_number = $val['total_number'];
                     $decimal_precision = $val['decimal_precision'];
 
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' decimal(' . $total_number . ',' . $decimal_precision .')");';
+                } else if ($field_type == 'tinyInteger') {
+                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' SMALLINT default 0' . ' NOT NULL");';
+                } else if ($field_type == 'string') {
+                    $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
+                    $character_limit = $val['character_limit'];
+
+                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' VARCHAR(' . $character_limit . ')' . $null_or_not_null . '");';
+                } else if ($field_type == 'longText') {
+                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' LONGTEXT' . $null_or_not_null . '");';
                 } else {
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ' . $field_type . ' NOT NULL");';
+                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ' . $field_type . $null_or_not_null . ')");';
                 }
-                
+
                 if($validation == 'required' && array_key_last($table_fields) != $field) {
                     $rule_text .= '"' . $field . '" => "' . $validation . '",';
                 } else if($validation == 'required' && array_key_last($table_fields) == $field) {

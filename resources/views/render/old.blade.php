@@ -1,4 +1,4 @@
-<div id="myModal" class="modal fade" role="dialog">
+<div id="addFieldModal" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -26,7 +26,7 @@
                         </select>
                     </div>
                     <label class="possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x add_more" aria-hidden="true"></i></label>
-                    <div class="cloning_div" style="display:none">
+                    <div class="clone_one" style="display:none">
                         <input type="text" name="" class="form-control clone_input" value="" style="margin:5px;">
                     </div>
                 </div>

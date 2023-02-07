@@ -1,6 +1,7 @@
-<option value="">Select one</option>
-<option value="string">String</option>
+<option value="blank">Select one</option>
+<option value="varchar">Varchar</option>
 <option value="text">Text</option>
+<option value="mediumText">Medium text</option>
 <option value="longText">Long text</option>
 <option value="boolean">Boolean</option>
 <option value="integer">Integer</option>

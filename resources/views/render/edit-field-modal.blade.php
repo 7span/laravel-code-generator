@@ -5,12 +5,12 @@
                 <h1 class="modal-title">Edit field</h1>
             </div>
             <div class="modal-body">
-                <form role="form" id="myEditForm">
+                <form role="form" id="editFieldForm">
                     <div class="form-group">
                         <label class="control-label">Field data type</label>
                         <div>
                             <select id="edit_column_type" class="form-control" name="edit_column_type">
-                                @include('render.select-options')
+                                @include('render.column-type-options')
                             </select>
                         </div>
                     </div>

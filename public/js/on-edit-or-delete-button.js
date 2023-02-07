@@ -16,7 +16,7 @@ $("body").on("click", ".btn-edit", function(){
         var pos_values_array = pos_values_string.split(",");
         
         pos_values_array.forEach(function(p_val) {
-            $('#myEditForm .edit_clone_one').after('<input name="possible_values[]" class="form-control input-lg cloned_input" type="text" value="' + p_val + '" />')
+            $('#editFieldForm .edit_clone_one').after('<input name="possible_values[]" class="form-control input-lg cloned_input" type="text" value="' + p_val + '" />')
         });
         
         $(".edit_possible").css("display", "block");
@@ -26,14 +26,14 @@ $("body").on("click", ".btn-edit", function(){
         var total_number = json_to_object['total_number'];
         var decimal_precision = json_to_object['decimal_precision'];
 
-        $('#myEditForm .edit_clone_two').after('<input name="decimal_precision" class="form-control input-lg cloned_input" type="text" value="' + decimal_precision + '" />')
-        $('#myEditForm .edit_clone_two').after('<input name="decimal_total_number" class="form-control input-lg cloned_input" type="text" value="' + total_number + '" />')
+        $('#editFieldForm .edit_clone_two').after('<input name="decimal_precision" class="form-control input-lg cloned_input" type="text" value="' + decimal_precision + '" />')
+        $('#editFieldForm .edit_clone_two').after('<input name="decimal_total_number" class="form-control input-lg cloned_input" type="text" value="' + total_number + '" />')
 
         $(".edit_decimal_div").css("display", "block");
     }
 
     $("#tr_row_for_edit").remove();
-    $('#myEditForm #edit_column_type').before('<input name="tr_row_for_edit" id="tr_row_for_edit" type="hidden" data-row="'+$(this).parents('tr').attr('data-row')+'" style="display:none" />')
+    $('#editFieldForm #edit_column_type').before('<input name="tr_row_for_edit" id="tr_row_for_edit" type="hidden" data-row="'+$(this).parents('tr').attr('data-row')+'" style="display:none" />')
 
     $('#editFieldModal').modal('toggle');
 });

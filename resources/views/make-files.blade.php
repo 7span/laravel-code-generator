@@ -8,10 +8,10 @@
   @include('render.make-file-form')
   
   <!-- Add field modal -->
-  @include('render.add-modal')
+  @include('render.add-field-modal')
   
   <!-- Edit field modal -->
-  @include('render.edit-modal')
+  @include('render.edit-field-modal')
 </div>
 <script src="{!! asset('js/make-file.js') !!}"></script>
 <script src="{!! asset('js/add-field.js') !!}"></script>

@@ -66,9 +66,6 @@ class MakeFileController extends Controller
         File::deleteDirectory(storage_path("app/" . $generated_files_path));
 
         return response()->json(['file_path' => $generated_files_path . '.zip']);
-        // return response()->json(['file_path' => public_path($generated_files_path . '.zip')]);
-        // return response()->download(public_path($generated_files_path . '.zip'));
-        // return storage_path("app/".$generated_files_path."/".$model_name.".php");
     }
 
     public function replace_string_in_file($filename, $string_to_replace, $replace_with){
@@ -122,11 +119,13 @@ class MakeFileController extends Controller
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' decimal(' . $total_number . ',' . $decimal_precision .')");';
                 } else if ($field_type == 'tinyInteger') {
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' SMALLINT default 0' . ' NOT NULL");';
-                } else if ($field_type == 'string') {
+                } else if ($field_type == 'varchar') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $character_limit = $val['character_limit'];
 
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' VARCHAR(' . $character_limit . ')' . $null_or_not_null . '");';
+                } else if ($field_type == 'mediumText') {
+                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' MEDIUMTEXT' . $null_or_not_null . '");';
                 } else if ($field_type == 'longText') {
                     $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' LONGTEXT' . $null_or_not_null . '");';
                 } else {

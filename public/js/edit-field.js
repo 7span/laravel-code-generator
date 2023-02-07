@@ -1,4 +1,4 @@
-$('#myEditForm').on('submit', function(e){
+$('#editFieldForm').on('submit', function(e){
     e.preventDefault();
 
     var column_type = $('#edit_column_type').find(":selected").val();
@@ -31,7 +31,7 @@ $('#myEditForm').on('submit', function(e){
 
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'', 'total_number':'"+total_number+"', 'decimal_precision':'"+decimal_precision+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
-    } else if (column_type == 'string') {
+    } else if (column_type == 'varchar') {
         $("input[name='table_fields["+column_name+"]']").remove();
 
         var character_limit = $("input[name='character_limit']").val();
@@ -44,9 +44,13 @@ $('#myEditForm').on('submit', function(e){
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
     }
 
-    $('#editFieldModal').modal('toggle');
-    $('#myEditForm').trigger('reset');
-    
-    $(".edit_possible").css("display", "none");
-    $(".cloned_input").remove();
+    if (column_type == "blank") {
+        $('.columnTypeError').text('Please select any one data type.')
+    } else {
+        $('#editFieldModal').modal('toggle');
+        $('#editFieldForm').trigger('reset');
+        
+        $(".edit_possible").css("display", "none");
+        $(".cloned_input").remove();
+    }
 });

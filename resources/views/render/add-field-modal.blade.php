@@ -5,13 +5,14 @@
                 <h1 class="modal-title">Add new field</h1>
             </div>
             <div class="modal-body">
-                <form role="form" id="myForm">
+                <form role="form" id="addFieldForm">
                     <div class="form-group">
                         <label class="control-label">Field data type</label>
                         <div>
                             <select id="column_type" class="form-control" name="column_type">
-                                @include('render.select-options')
+                                @include('render.column-type-options')
                             </select>
+                            <span style="color:red" class="columnTypeError"></span><br><br>
                         </div>
                     </div>
                     <div class="form-group">
@@ -33,20 +34,19 @@
                     <div class="form-group">
                         <label class="control-label possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x add_more" aria-hidden="true"></i></label>
                         <div class="clone_one" style="display:none">
-                            <input type="text" class="form-control input-lg" name="">
+                            <input type="text" class="form-control input-lg" name="" required="">
                         </div>
                     </div>
                     <div class="form-group decimal_div" style="display:none">
                         <label class="control-label">Total number and Decimal precision</label>
                         <div class="clone_two" style="display:none">
-                            <input type="number" class="form-control input-lg" name="" min="1" max="10">
-                            <!-- <input type="text" class="form-control input-lg" name="" pattern="[0-9]+"> -->
+                            <input type="number" class="form-control input-lg" name="" min="1" max="10" required="">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label string_div" style="display:none">Character limit</label>
+                        <label class="control-label character_div" style="display:none">Character limit</label>
                         <div class="clone_three" style="display:none">
-                            <input type="number" class="form-control input-lg" name="" min="10" max="255">
+                            <input type="number" class="form-control input-lg" name="" value="10" min="10" max="255" required="">
                         </div>
                     </div>
                     <div class="form-group">

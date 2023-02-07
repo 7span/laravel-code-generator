@@ -12,7 +12,11 @@ class {{ class }} extends Model
 
     protected $table = '';
 
-    public $fillable = [];
+    public $fillable = [
+        'created_by',
+        'updated_by',
+        'deleted_by'
+    ];
 
     protected $casts = [
         'created_at' => 'datetime',
@@ -20,19 +24,11 @@ class {{ class }} extends Model
         'deleted_at' => 'datetime'
     ];
 
-    protected $hidden = [];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public $queryable = [
         'id'
     ];
     
     protected $relationship = [];
-
-    public static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->created_by = auth()->id();
-        });
-    }
 }

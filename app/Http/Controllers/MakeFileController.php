@@ -37,7 +37,7 @@ class MakeFileController extends Controller
         $replaceable_text = $this->getReplaceableText($request->get('table_fields'), $table_name);
 
         // Make model and move it to Generated_files
-        $this->makeModel($model_name, $replaceable_text[2], $generated_files_path);
+        $this->makeModel($model_name, $table_name, $replaceable_text[2], $generated_files_path);
         
         // Make controller and move it to Generated_files
         $this->makeController($model_name, $generated_files_path);
@@ -176,13 +176,17 @@ class MakeFileController extends Controller
         $zip->close();
     }
 
-    public function makeModel($model_name, $replaceable_text, $generated_files_path)
+    public function makeModel($model_name, $table_name, $replaceable_text, $generated_files_path)
     {
         \Artisan::call("make:model " . $model_name);
         $filename = base_path("app/Models/".$model_name.".php");
         $string_to_replace="fillable = [];";
         $replace_with = "fillable = [" . $replaceable_text . "];";
         $this->replace_string_in_file($filename, $string_to_replace, $replace_with);
+
+        $table_text = "table = '" . $table_name . "'";
+        $this->replace_string_in_file($filename, "table = ''", $table_text);
+
         File::move($filename, storage_path("app/".$generated_files_path."/".$model_name.".php"));
     }
 

@@ -11,7 +11,7 @@
     <!-- <input type="text" name="table_fields[kajal]" value="{'type':'enum', 'validation':'optional', 'possible_values':'jenish,kajal'}" style="display:none"> -->
     <!-- <input type="text" name="table_fields[first_name]" value='{"type":"text","validation":"required", 'possible_values':''}' style="display:none">
     <input type="text" name="table_fields[mobile]" value='{"type":"integer","validation":"required","default":0, 'possible_values':''}' style="display:none"> -->
-    <input type="text" name="table_fields[qaz]" value="{'type':'decimal', 'validation':'optional', 'possible_values':'', 'total_number':'4', 'decimal_precision':'2'}" style="display:none">
+    <!-- <input type="text" name="table_fields[qaz]" value="{'type':'decimal', 'validation':'optional', 'possible_values':'', 'total_number':'4', 'decimal_precision':'2'}" style="display:none"> -->
     
     <input type="hidden" name="soft_delete" value="0" checked="checked">
     <input type="checkbox" id="soft_delete" name="soft_delete" value="1" @checked(old('soft_delete') ?? 'checked')><label class="light" for="development">Want to include soft delete?</label><br>
@@ -23,8 +23,8 @@
     <input type="checkbox" id="migration_fields" name="migration_fields" value="1" @checked(old('migration_fields'))><label class="light" for="development">Want to add more fields in the table?</label><br><br>
 
     <!-- Trigger the modal with a button -->
-    <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" style="display:none" data-toggle="modal" data-target="#myModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
-    <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#myModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
+    <button type="button" class="btn btn-info btn-sm" id="hidden" style="display:none" data-toggle="modal" data-target="#myModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
+    <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#myModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
     <div class="row">
       <div class="col-12">
@@ -81,12 +81,12 @@
               <td><button type="button" class="btn btn-success btn-edit"><i class="fas fa-edit"></i></button></td>
               <td><button type="button" class="btn btn-danger btn-delete"><i class="far fa-trash-alt btn-delete"></i></button></td>
             </tr> -->
-            <tr data-row="8" data-column-type="decimal" data-column-name="qaz" data-column-validation="optional">
+            <!-- <tr data-row="8" data-column-type="decimal" data-column-name="qaz" data-column-validation="optional">
               <th scope="row">decimal</th>
               <td>qaz</td>
               <td>optional</td>
               <td><button type="button" class="btn btn-success btn-edit"><i class="fas fa-edit"></i></button></td><td><button type="button" class="btn btn-danger btn-delete"><i class="far fa-trash-alt btn-delete"></i></button></td>
-            </tr>
+            </tr> -->
           </tbody>
         </table>
       </div>

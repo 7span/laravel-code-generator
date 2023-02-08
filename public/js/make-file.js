@@ -6,7 +6,7 @@ document.getElementById("migration_fields").addEventListener('click', function()
 $('#makeFileForm').on('submit',function(e){
     e.preventDefault();
 
-    $('#loading-image').show();
+    $('.loading').show();
 
     $.ajax({
         url: "/make-files",
@@ -20,7 +20,7 @@ $('#makeFileForm').on('submit',function(e){
             }
         },
         complete: function(){
-            $('#loading-image').hide();
+            $('.loading').hide();
         },
         error: function(response) {
             console.log(response.responseJSON);

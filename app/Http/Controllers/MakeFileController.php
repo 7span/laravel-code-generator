@@ -113,26 +113,19 @@ class MakeFileController extends Controller
                         }
                         $p_val .= $length == $key + 1 ? "'" . $v . "'" : "'" . $v . "',";
                     }
-    
-                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ENUM(' . $p_val . ')");';
                     $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '" , [' . $p_val . '])->default("' . $first . '");';
                 } else if ($field_type == 'decimal' || $field_type == 'double' || $field_type == 'float') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $total_number = $val['total_number'];
                     $decimal_precision = $val['decimal_precision'];
-
-                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' decimal(' . $total_number . ',' . $decimal_precision .')");';
                     $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '", ' . $total_number . ', ' . $decimal_precision . ');';
                 } else if ($field_type == 'tinyInteger') {
-                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' SMALLINT default 0' . ' NOT NULL");';
                     $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '")->default("0");';
                 } else if ($field_type == 'string') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $character_limit = $val['character_limit'];
-                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' VARCHAR(' . $character_limit . ')' . $null_or_not_null . '");';
                     $migration_text .= PHP_EOL . self::INDENT . '$table->string("' . $field . ', ' . $character_limit . '");';
                 } else {
-                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' MEDIUMTEXT' . $null_or_not_null . '");';
                     $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '");';
                 }
 

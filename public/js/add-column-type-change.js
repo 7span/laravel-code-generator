@@ -1,7 +1,7 @@
 $("#column_type").on('change', function(){
     var column_type = $('#column_type').find(":selected").val();
 
-    column_type == 'blank' ? $('.column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>") : $('.columnTypeError').remove();
+    column_type == 'blank' ? $('#column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>") : $('.columnTypeError').remove();
     
     if (column_type == 'enum') {
         $(".cloned_input").remove();

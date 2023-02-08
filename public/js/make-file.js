@@ -6,6 +6,8 @@ document.getElementById("migration_fields").addEventListener('click', function()
 $('#makeFileForm').on('submit',function(e){
     e.preventDefault();
 
+    $('#loading-image').show();
+
     $.ajax({
         url: "/make-files",
         type: "POST",
@@ -16,6 +18,9 @@ $('#makeFileForm').on('submit',function(e){
                 // window.location.href = "file://" + response.file_path;
                 window.location.href = response.file_path;
             }
+        },
+        complete: function(){
+            $('#loading-image').hide();
         },
         error: function(response) {
             console.log(response.responseJSON);

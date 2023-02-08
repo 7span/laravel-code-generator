@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
-    const INDENT = '            ';
+    const MIGRATION_INDENT = '            ';
+    const MODEL_INDENT = '        ';
 
     public function makeFiles(Request $request)
     {
@@ -113,32 +114,32 @@ class MakeFileController extends Controller
                         }
                         $p_val .= $length == $key + 1 ? "'" . $v . "'" : "'" . $v . "',";
                     }
-                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '" , [' . $p_val . '])->default("' . $first . '");';
+                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '" , [' . $p_val . '])->default("' . $first . '");';
                 } else if ($field_type == 'decimal' || $field_type == 'double' || $field_type == 'float') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $total_number = $val['total_number'];
                     $decimal_precision = $val['decimal_precision'];
-                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '", ' . $total_number . ', ' . $decimal_precision . ');';
+                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '", ' . $total_number . ', ' . $decimal_precision . ');';
                 } else if ($field_type == 'tinyInteger') {
-                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '")->default("0");';
+                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '")->default("0");';
                 } else if ($field_type == 'string') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $character_limit = $val['character_limit'];
-                    $migration_text .= PHP_EOL . self::INDENT . '$table->string("' . $field . ', ' . $character_limit . '");';
+                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->string("' . $field . ', ' . $character_limit . ');';
                 } else {
-                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '");';
+                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '");';
                 }
 
                 if($validation == 'required' && array_key_last($table_fields) != $field) {
-                    $rule_text .= '"' . $field . '" => "' . $validation . '",';
+                    $rule_text .= PHP_EOL . self::MODEL_INDENT . '"' . $field . '" => "' . $validation . '",';
                 } else if($validation == 'required' && array_key_last($table_fields) == $field) {
-                    $rule_text .= '"' . $field . '" => "' . $validation . '"';
+                    $rule_text .= PHP_EOL . self::MODEL_INDENT . '"' . $field . '" => "' . $validation . '"';
                 }
                 
-                $fillable_text .= "'" . $field . "',";
+                $fillable_text .= self::MODEL_INDENT . "'" . $field . "'," . PHP_EOL;
             }
         }
-
+        // dd($fillable_text);
         return [$migration_text, $rule_text, $fillable_text];
     }
 
@@ -178,8 +179,8 @@ class MakeFileController extends Controller
     {
         \Artisan::call("make:model " . $model_name);
         $filename = base_path("app/Models/".$model_name.".php");
-        $string_to_replace="fillable = [];";
-        $replace_with = "fillable = [" . $replaceable_text . "];";
+        $string_to_replace="fillable = [";
+        $replace_with = "fillable = [" . $replaceable_text;
         $this->replace_string_in_file($filename, $string_to_replace, $replace_with);
 
         $table_text = "table = '" . $table_name . "'";
@@ -204,12 +205,14 @@ class MakeFileController extends Controller
     public function makeMigration($table_name, $replaceable_text, $generated_files_path)
     {
         \Artisan::call("make:migration create_" . $table_name . "_table");
+       
         $files = scandir(base_path("database/migrations"), SCANDIR_SORT_DESCENDING);
         $newest_file = $files[0];
         $filename = base_path("database/migrations/" . $newest_file);
         $string_to_replace="table->id();";
         $replace_with = "table->id();" . $replaceable_text;
         $this->replace_string_in_file($filename, $string_to_replace, str_replace('"', "'", $replace_with));
+        
         File::move(base_path("database/migrations/" . $newest_file), storage_path("app/".$generated_files_path . "/" . $newest_file));
     }
 
@@ -258,6 +261,7 @@ class MakeFileController extends Controller
     {
         \Artisan::call("make:service " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Services');
+        
         File::move(base_path("app/Services/" . $model_name . "Service.php"), storage_path("app/" . $generated_files_path . "/Services/" . $model_name . "Service.php"));
 
         File::deleteDirectory(base_path("app/Services"));
@@ -267,10 +271,12 @@ class MakeFileController extends Controller
     {
         \Artisan::call("make:request " . $model_name . "Request");
         Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Requests');
+        
         $request_file_path = base_path("app/Http/Requests/".$model_name."Request.php");
         $string_to_replace="//";
         $replace_with = $replaceable_text;
         $this->replace_string_in_file($request_file_path, $string_to_replace, $replace_with);
+
         File::move($request_file_path, storage_path("app/" . $generated_files_path . "/Http/Requests/" . $model_name . "Request.php"));
         
         File::deleteDirectory(base_path("app/Http/Requests"));

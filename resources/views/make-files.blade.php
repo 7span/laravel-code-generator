@@ -5,6 +5,11 @@
 
 <div class="container">
   <h2>Generate files</h2>
+
+  <div id='loading-image' style='display: none;'>
+    <img src="{!! asset('images/loader.gif') !!}" width="32px" height="32px">
+  </div>
+
   @include('render.make-file-form')
   
   <!-- Add field modal -->

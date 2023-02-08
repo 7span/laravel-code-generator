@@ -33,7 +33,7 @@ $("body").on("click", ".btn-edit", function(){
         $(".edit_decimal_div").css("display", "block"); // display clone div for decimal/double/float
         $(".edit_possible").css("display", "none"); // hide clone div for enum
         $(".edit_character_div").css("display", "none"); // hide clone div for varchar
-    } else if (column_type == 'varchar') {
+    } else if (column_type == 'string') {
         var row = $("input[name='table_fields[" + column_name +"]']").attr('value').replace(/'/g, '"');
         var json_to_object = JSON.parse(row);
         var character_limit = json_to_object['character_limit'];

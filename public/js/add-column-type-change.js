@@ -20,7 +20,7 @@ $("#column_type").on('change', function(){
 
         $(".clone_two").find("input:last").clone().attr('name', 'decimal_precision').addClass("cloned_input").attr('placeholder', 'Decimal precision').attr("required", true).insertAfter(".clone_two");
         $(".clone_two").find("input:last").clone().attr('name', 'decimal_total_number').addClass("cloned_input").attr('placeholder', 'Total number').attr("required", true).insertAfter(".clone_two");
-    } else if (column_type == 'varchar') {
+    } else if (column_type == 'string') {
         $(".cloned_input").remove();
 
         $(".character_div").css("display", "block"); // display clone div for varchar

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
+    const INDENT = '            ';
+
     public function makeFiles(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -106,29 +108,32 @@ class MakeFileController extends Controller
                     $length = count(explode(",", $possible_values));
         
                     foreach (explode(",", $possible_values) as $key => $v) {
+                        if ($key == 0) {
+                            $first = $v;
+                        }
                         $p_val .= $length == $key + 1 ? "'" . $v . "'" : "'" . $v . "',";
                     }
     
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ENUM(' . $p_val . ')");';
+                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ENUM(' . $p_val . ')");';
+                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '" , [' . $p_val . '])->default("' . $first . '");';
                 } else if ($field_type == 'decimal' || $field_type == 'double' || $field_type == 'float') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $total_number = $val['total_number'];
                     $decimal_precision = $val['decimal_precision'];
 
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' decimal(' . $total_number . ',' . $decimal_precision .')");';
+                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' decimal(' . $total_number . ',' . $decimal_precision .')");';
+                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '", ' . $total_number . ', ' . $decimal_precision . ');';
                 } else if ($field_type == 'tinyInteger') {
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' SMALLINT default 0' . ' NOT NULL");';
-                } else if ($field_type == 'varchar') {
+                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' SMALLINT default 0' . ' NOT NULL");';
+                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '")->default("0");';
+                } else if ($field_type == 'string') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $character_limit = $val['character_limit'];
-
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' VARCHAR(' . $character_limit . ')' . $null_or_not_null . '");';
-                } else if ($field_type == 'mediumText') {
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' MEDIUMTEXT' . $null_or_not_null . '");';
-                } else if ($field_type == 'longText') {
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' LONGTEXT' . $null_or_not_null . '");';
+                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' VARCHAR(' . $character_limit . ')' . $null_or_not_null . '");';
+                    $migration_text .= PHP_EOL . self::INDENT . '$table->string("' . $field . ', ' . $character_limit . '");';
                 } else {
-                    $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' ' . $field_type . $null_or_not_null . ')");';
+                    // $migration_text .= 'DB::statement("ALTER TABLE ' . $table_name . ' ADD COLUMN ' . $field . ' MEDIUMTEXT' . $null_or_not_null . '");';
+                    $migration_text .= PHP_EOL . self::INDENT . '$table->' . $field_type . '("' . $field . '");';
                 }
 
                 if($validation == 'required' && array_key_last($table_fields) != $field) {
@@ -209,9 +214,9 @@ class MakeFileController extends Controller
         $files = scandir(base_path("database/migrations"), SCANDIR_SORT_DESCENDING);
         $newest_file = $files[0];
         $filename = base_path("database/migrations/" . $newest_file);
-        $string_to_replace="});";
-        $replace_with = "});" . $replaceable_text;
-        $this->replace_string_in_file($filename, $string_to_replace, $replace_with);
+        $string_to_replace="table->id();";
+        $replace_with = "table->id();" . $replaceable_text;
+        $this->replace_string_in_file($filename, $string_to_replace, str_replace('"', "'", $replace_with));
         File::move(base_path("database/migrations/" . $newest_file), storage_path("app/".$generated_files_path . "/" . $newest_file));
     }
 

@@ -31,7 +31,7 @@ $('#editFieldForm').on('submit', function(e){
 
         var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'', 'total_number':'"+total_number+"', 'decimal_precision':'"+decimal_precision+"'}";
         $('#makeFileForm #model_name').after('<input type="text" name="table_fields['+column_name+']" value="'+value+'" style="display:none" />')
-    } else if (column_type == 'varchar') {
+    } else if (column_type == 'string') {
         $("input[name='table_fields["+column_name+"]']").remove();
 
         var character_limit = $("input[name='character_limit']").val();

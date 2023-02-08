@@ -2,7 +2,7 @@ $('#addFieldForm').on('submit', function(e){
     e.preventDefault();
         
     var column_type = $('#column_type').find(":selected").val();
-    var column_name = $("input[name='column_name']").val();
+    var column_name = $("input[name='column_name']").val().replace(/[^\w\s]/gi, "");
     var column_validation = $('#column_validation').find(":selected").val();
 
     if (column_type == "blank") {
@@ -14,7 +14,7 @@ $('#addFieldForm').on('submit', function(e){
         if (column_type == 'enum') {
             var values = [];
             $("input[name='possible_values[]']").each(function() {
-                values.push($(this).val());
+                values.push($(this).val().replace(/[^\w\s]/gi, ""));
             });
 
             var value = "{'type':'"+column_type+"', 'validation':'"+column_validation+"', 'possible_values':'"+values+"'}";

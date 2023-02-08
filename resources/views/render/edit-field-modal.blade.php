@@ -15,7 +15,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label">Database column name</label>
+                        <label class="control-label">Database column name</label><p style="color:blue">Add without special characters</p>
                         <div>
                             <input type="text" class="form-control input-lg" name="edit_column_name" id="edit_column_name" required="">
                         </div>
@@ -31,7 +31,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label edit_possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x edit_more" aria-hidden="true"></i></label>
+                        <label class="control-label edit_possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x edit_more" aria-hidden="true"></i><p style="color:blue; margin-top:5px;">Add without special characters</p></label>
                         <div class="edit_clone_one" style="display:none">
                             <input type="text" class="form-control input-lg" name="">
                         </div>

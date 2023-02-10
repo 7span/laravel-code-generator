@@ -80,13 +80,14 @@ class MakeServiceCommand extends Command
     */
     public function getStubVariables()
     {
-        $use = "App\Models" . "\\" . $this->argument('name');
+        // $use = "App\Models" . "\\" . $this->argument('name');
         
         return [
             'NAMESPACE'         => 'App\\Services',
             'CLASS_NAME'        => $this->getSingularClassName($this->argument('name')),
-            'USE'               => $use,
-            'VARIABLE'          => "$" . Str::singular(strtolower($this->argument('name'))),
+            // 'USE'               => $use,
+            'SINGULAR_VARIABLE'          => Str::singular(strtolower($this->argument('name'))),
+            'PLURAL_VARIABLE'          => Str::plural(strtolower($this->argument('name'))),
         ];
     }
 

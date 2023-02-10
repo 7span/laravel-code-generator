@@ -191,7 +191,6 @@ class MakeFileController extends Controller
 
         Storage::disk('local')->makeDirectory($generated_files_path . '/Traits');
         File::copy(base_path("app/Traits/BaseModel.php"), storage_path("app/".$generated_files_path."/Traits/BaseModel.php"));
-        // File::move(base_path("app/Traits/BaseModel.php"), storage_path("app/".$generated_files_path."/Traits/BaseModel.php"));
     }
 
     public function makeController($model_name, $generated_files_path)
@@ -245,6 +244,8 @@ class MakeFileController extends Controller
 
     public function makeResourceFiles($model_name, $methods, $generated_files_path)
     {
+        File::copy(base_path("app/Traits/ResourceFilterable.php"), storage_path("app/".$generated_files_path."/Traits/ResourceFilterable.php"));
+
         \Artisan::call("make:resource " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Resources/' . $model_name);
         File::move(base_path("app/Http/Resources/" . $model_name . "/Resource.php"), storage_path("app/" . $generated_files_path . "/Http/Resources/" . $model_name . "/Resource.php"));
@@ -260,6 +261,11 @@ class MakeFileController extends Controller
 
     public function makeServiceFile($model_name, $generated_files_path)
     {
+        File::copy(base_path("app/Traits/PaginationTrait.php"), storage_path("app/".$generated_files_path."/Traits/PaginationTrait.php"));
+
+        Storage::disk('local')->makeDirectory($generated_files_path . '/lang/en');
+        File::copy(base_path("lang/en/entity.php"), storage_path("app/".$generated_files_path."/lang/en/entity.php"));
+
         \Artisan::call("make:service " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Services');
         

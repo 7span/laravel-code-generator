@@ -2,7 +2,7 @@
 
 namespace $NAMESPACE$;
 
-$USE$;
+use $USE$;
 
 class $CLASS_NAME$Service
 {

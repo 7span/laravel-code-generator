@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
-    const MIGRATION_INDENT = '            ';
-    const MODEL_INDENT = '        ';
+    const INDENT_0 = '    ';
+    // const INDENT_1 = '        ';
+    // const INDENT_2 = '            ';
 
     public function makeFiles(Request $request)
     {
@@ -114,29 +115,29 @@ class MakeFileController extends Controller
                         }
                         $p_val .= $length == $key + 1 ? "'" . $v . "'" : "'" . $v . "',";
                     }
-                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '" , [' . $p_val . '])->default("' . $first . '");';
+                    $migration_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '$table->' . $field_type . '("' . $field . '" , [' . $p_val . '])->default("' . $first . '");';
                 } else if ($field_type == 'decimal' || $field_type == 'double' || $field_type == 'float') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $total_number = $val['total_number'];
                     $decimal_precision = $val['decimal_precision'];
-                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '", ' . $total_number . ', ' . $decimal_precision . ');';
+                    $migration_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '$table->' . $field_type . '("' . $field . '", ' . $total_number . ', ' . $decimal_precision . ');';
                 } else if ($field_type == 'tinyInteger') {
-                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '")->default("0");';
+                    $migration_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '$table->' . $field_type . '("' . $field . '")->default("0");';
                 } else if ($field_type == 'string') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $character_limit = $val['character_limit'];
-                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->string("' . $field . ', ' . $character_limit . ');';
+                    $migration_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '$table->string("' . $field . ', ' . $character_limit . ');';
                 } else {
-                    $migration_text .= PHP_EOL . self::MIGRATION_INDENT . '$table->' . $field_type . '("' . $field . '");';
+                    $migration_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '$table->' . $field_type . '("' . $field . '");';
                 }
 
                 if($validation == 'required' && array_key_last($table_fields) != $field) {
-                    $rule_text .= PHP_EOL . self::MODEL_INDENT . '"' . $field . '" => "' . $validation . '",';
+                    $rule_text .= '"' . $field . '" => "' . $validation . '",';
                 } else if($validation == 'required' && array_key_last($table_fields) == $field) {
-                    $rule_text .= PHP_EOL . self::MODEL_INDENT . '"' . $field . '" => "' . $validation . '"';
+                    $rule_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '"' . $field . '" => "' . $validation . '"';
                 }
                 
-                $fillable_text .= self::MODEL_INDENT . "'" . $field . "'," . PHP_EOL;
+                $fillable_text .= self::INDENT_0 . self::INDENT_0 . "'" . $field . "'," . PHP_EOL;
             }
         }
         // dd($fillable_text);
@@ -271,11 +272,13 @@ class MakeFileController extends Controller
     {
         \Artisan::call("make:request " . $model_name . "Request");
         Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Requests');
-        
+
         $request_file_path = base_path("app/Http/Requests/".$model_name."Request.php");
-        $string_to_replace="//";
-        $replace_with = $replaceable_text;
-        $this->replace_string_in_file($request_file_path, $string_to_replace, $replace_with);
+        if ($replaceable_text != "") {
+            $string_to_replace="//";
+            $replace_with = $replaceable_text;
+            $this->replace_string_in_file($request_file_path, $string_to_replace, $replace_with);
+        }
 
         File::move($request_file_path, storage_path("app/" . $generated_files_path . "/Http/Requests/" . $model_name . "Request.php"));
         

@@ -5,7 +5,8 @@ $("body").on("click", ".btn-edit", function(){
     var column_validation = $(this).parents("tr").attr('data-column-validation');
 
     $('#edit_column_type').val(column_type).attr('disabled','disabled');
-    $('#edit_column_name').val(column_name).attr('disabled','disabled');
+    // $('#edit_column_name').val(column_name).attr('disabled','disabled');
+    $('#edit_column_name').val(column_name);
     $('#edit_column_validation').val(column_validation);
 
     if (column_type == 'enum') {

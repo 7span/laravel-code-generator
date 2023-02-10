@@ -7,21 +7,21 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
 
-class MakeServiceCommand extends Command
+class MakeControllerCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:service {name}';
+    protected $signature = 'make:controller API/V1/{name}Controller';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Make service file';
+    protected $description = 'Make api controller file';
 
     /**
      * Filesystem instance
@@ -68,7 +68,7 @@ class MakeServiceCommand extends Command
      */
     public function getStubPath()
     {
-        return __DIR__ . '/../../../stubs/service.stub';
+        return __DIR__ . '/../../../stubs/controller.stub';
     }
 
     /**
@@ -83,7 +83,7 @@ class MakeServiceCommand extends Command
         // $use = "App\Models" . "\\" . $this->argument('name');
         
         return [
-            'NAMESPACE'         => 'App\\Services',
+            'NAMESPACE'         => 'App\\Http\\Controllers\\Api\\V1',
             'CLASS_NAME'        => $this->getSingularClassName($this->argument('name')),
             // 'USE'               => $use,
             'SINGULAR_VARIABLE'          => Str::singular(strtolower($this->argument('name'))),
@@ -129,7 +129,7 @@ class MakeServiceCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/Services') .'/' .$this->getSingularClassName($this->argument('name')) . 'Service.php';
+        return base_path('app/Http/Controllers/API/V1') .'/' .$this->getSingularClassName($this->argument('name')) . 'Controller.php';
     }
 
     /**

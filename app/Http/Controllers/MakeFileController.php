@@ -32,6 +32,8 @@ class MakeFileController extends Controller
         $generated_files_path = 'Generated_files_' . date("Y_m_d_His", time());
         $methods = $request->get('method');
         $storage = Storage::disk('local')->exists($generated_files_path);
+
+        $admin_crud = $request->get('admin_crud');
         
         if ($storage == false) {
             Storage::disk('local')->makeDirectory($generated_files_path);
@@ -44,13 +46,13 @@ class MakeFileController extends Controller
         $this->makeModel($model_name, $table_name, $replaceable_text[2], $generated_files_path);
         
         // Make controller and move it to Generated_files
-        $this->makeController($model_name, $generated_files_path);
+        $this->makeController($model_name, $generated_files_path, $admin_crud);
         
         // Make migration and move it to Generated_files
         $this->makeMigration($table_name, $replaceable_text[0], $generated_files_path);
         
         // Make api-v1.php route file and write content into the file
-        $this->makeRouteFiles($model_name, $methods, $generated_files_path, $request->get('admin_crud'));
+        $this->makeRouteFiles($model_name, $methods, $generated_files_path, $admin_crud);
         
         // Make service file and move it to Generated_files
         $this->makeServiceFile($model_name, $generated_files_path);
@@ -193,13 +195,23 @@ class MakeFileController extends Controller
         File::copy(base_path("app/Traits/BaseModel.php"), storage_path("app/".$generated_files_path."/Traits/BaseModel.php"));
     }
 
-    public function makeController($model_name, $generated_files_path)
+    public function makeController($model_name, $generated_files_path, $admin_crud)
     {
-        \Artisan::call("make:controller API/V1/" . $model_name . "Controller --api");
+        File::copy(base_path("app/Traits/ApiResponser.php"), storage_path("app/".$generated_files_path."/Traits/ApiResponser.php"));
+
+        \Artisan::call("make:controller " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1');
-        File::move(base_path("app/Http/Controllers/API/V1/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Http/Controllers/API/V1/".$model_name."Controller.php"));
+        File::move(base_path("app/Http/Controllers/API/V1/".$model_name."Controller.php"), storage_path("app/".$generated_files_path . "/Http/Controllers/API/V1/" . $model_name."Controller.php"));
+
+        if ($admin_crud == "1") {
+            // Make controller and move it to Generated_files
+            \Artisan::call("make:admin-controller " . $model_name);
+            Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1/Admin');
+            File::move(base_path("app/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"));
+        }
 
         File::deleteDirectory(base_path("app/Http/Controllers/API/V1"));
+        File::deleteDirectory(base_path("app/Http/Controllers/API/V1/Admin"));
     }
 
     public function makeMigration($table_name, $replaceable_text, $generated_files_path)
@@ -228,17 +240,10 @@ class MakeFileController extends Controller
         Storage::disk('local')->append($generated_files_path . '/api-v1.php', $route, PHP_EOL);
         
         if ($admin_crud == "1") {
-            // Make controller and move it to Generated_files
-            \Artisan::call("make:controller API/V1/Admin/" . $model_name . "Controller --api");
-            Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1/Admin');
-            File::move(base_path("app/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"));
-            
             // Make api-admin-v1.php route file and write content into the file
             Storage::disk('local')->put($generated_files_path . '/api-admin-v1.php', file_get_contents(base_path("stubs/api.admin.v1.routes.stub")));
             $route = "Route::apiResource('" . strtolower($model_name). "s', " . "Admin" . "\\" . ucfirst($model_name) . "Controller::class);";
             Storage::disk('local')->append($generated_files_path . '/api-admin-v1.php', $route, PHP_EOL);
-
-            File::deleteDirectory(base_path("app/Http/Controllers/API/V1/Admin"));
         }
     }
 

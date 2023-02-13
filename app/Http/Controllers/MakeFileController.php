@@ -207,7 +207,7 @@ class MakeFileController extends Controller
 
         if ($admin_crud == "1") {
             // Make controller and move it to Generated_files
-            \Artisan::call("make:admin-controller " . $model_name);
+            \Artisan::call("make:admin-controller " . $model_name . " --methods='" . $methods . "'");
             Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1/Admin');
             File::move(base_path("app/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"), storage_path("app/".$generated_files_path."/Http/Controllers/API/V1/Admin/".$model_name."Controller.php"));
         }

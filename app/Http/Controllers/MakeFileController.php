@@ -23,7 +23,7 @@ class MakeFileController extends Controller
             'model_name.required' => 'Please enter your model name.',
             'method.required' => 'Please select atleast one method.'
         ]);
- 
+
         if ($validator->fails()) {
             return response()->json($validator->messages(), 422);
         }
@@ -32,9 +32,7 @@ class MakeFileController extends Controller
         $generated_files_path = 'Generated_files_' . date("Y_m_d_His", time());
         $methods = $request->get('method');
         $storage = Storage::disk('local')->exists($generated_files_path);
-
         $admin_crud = $request->get('admin_crud');
-        
         if ($storage == false) {
             Storage::disk('local')->makeDirectory($generated_files_path);
         }
@@ -44,25 +42,24 @@ class MakeFileController extends Controller
 
         // Make model and move it to Generated_files
         $this->makeModel($model_name, $table_name, $replaceable_text[2], $generated_files_path);
-        
+
         // Make controller and move it to Generated_files
         $this->makeController($model_name, $generated_files_path, $admin_crud);
-        
         // Make migration and move it to Generated_files
         $this->makeMigration($table_name, $replaceable_text[0], $generated_files_path);
-        
+
         // Make api-v1.php route file and write content into the file
         $this->makeRouteFiles($model_name, $methods, $generated_files_path, $admin_crud);
-        
+
         // Make service file and move it to Generated_files
         $this->makeServiceFile($model_name, $generated_files_path);
-        
+
         // Make resource files and move it to Generated_files
         $this->makeResourceFiles($model_name, $methods, $generated_files_path);
-        
+
         // Make request file and move it to Generated_files
         $this->makeRequestFiles($model_name, $replaceable_text[1], $generated_files_path);
-        
+
         // $filePath = $generated_files_path . '.zip';
         // Get real path for our folder
         $this->makeZip($generated_files_path);
@@ -93,7 +90,7 @@ class MakeFileController extends Controller
     }
 
     public function getReplaceableText($table_fields, $table_name)
-    {   
+    {
         $migration_text = '';
         $rule_text = '';
         $fillable_text = '';
@@ -104,13 +101,13 @@ class MakeFileController extends Controller
                 $field_type = $val['type'];
                 $validation = $val['validation'];
                 $possible_values = $val['possible_values'];
-                
+
                 $null_or_not_null = $validation == 'required' ? ' NOT NULL' : ' NULL';
-                
+
                 if ($field_type == 'enum') {
                     $p_val = '';
                     $length = count(explode(",", $possible_values));
-        
+
                     foreach (explode(",", $possible_values) as $key => $v) {
                         if ($key == 0) {
                             $first = $v;
@@ -138,8 +135,8 @@ class MakeFileController extends Controller
                 } else if($validation == 'required' && array_key_last($table_fields) == $field) {
                     $rule_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '"' . $field . '" => "' . $validation . '"';
                 }
-                
-                $fillable_text .= self::INDENT_0 . self::INDENT_0 . "'" . $field . "'," . PHP_EOL;
+
+                $fillable_text .= PHP_EOL.self::INDENT_0 . self::INDENT_0 . "'" . $field . "'," ;
             }
         }
         // dd($fillable_text);
@@ -149,17 +146,17 @@ class MakeFileController extends Controller
     public function makeZip($generated_files_path)
     {
         $rootPath = storage_path("app/" . $generated_files_path);
-        
+
         // Initialize archive object
         $zip = new \ZipArchive();
         $zip->open($generated_files_path . '.zip', \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-        
+
         // Create recursive directory iterator
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($rootPath),
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
-        
+
         foreach ($files as $name => $file)
         {
             // Skip directories (they would be added automatically)
@@ -168,7 +165,7 @@ class MakeFileController extends Controller
                 // Get real and relative path for current file
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($rootPath) + 1);
-                
+
                 // Add current file to archive
                 $zip->addFile($filePath, $relativePath);
             }
@@ -217,28 +214,28 @@ class MakeFileController extends Controller
     public function makeMigration($table_name, $replaceable_text, $generated_files_path)
     {
         \Artisan::call("make:migration create_" . $table_name . "_table");
-       
+
         $files = scandir(base_path("database/migrations"), SCANDIR_SORT_DESCENDING);
         $newest_file = $files[0];
         $filename = base_path("database/migrations/" . $newest_file);
         $string_to_replace="table->id();";
         $replace_with = "table->id();" . $replaceable_text;
         $this->replace_string_in_file($filename, $string_to_replace, str_replace('"', "'", $replace_with));
-        
+
         File::move(base_path("database/migrations/" . $newest_file), storage_path("app/".$generated_files_path . "/" . $newest_file));
     }
 
     public function makeRouteFiles($model_name, $methods, $generated_files_path, $admin_crud)
     {
         Storage::disk('local')->put($generated_files_path . '/api-v1.php', file_get_contents(base_path("stubs/api.v1.routes.stub")));
-        
+
         if (count($methods) == 5) {
             $route = "Route::apiResource('" . strtolower($model_name). "s', " . ucfirst($model_name) . "Controller::class);";
         } else {
             $route = "Route::apiResource('" . strtolower($model_name). "s', " . ucfirst($model_name) . "Controller::class)->only(['" . implode("', '", $methods) . "']);";
         }
         Storage::disk('local')->append($generated_files_path . '/api-v1.php', $route, PHP_EOL);
-        
+
         if ($admin_crud == "1") {
             // Make api-admin-v1.php route file and write content into the file
             Storage::disk('local')->put($generated_files_path . '/api-admin-v1.php', file_get_contents(base_path("stubs/api.admin.v1.routes.stub")));
@@ -254,12 +251,12 @@ class MakeFileController extends Controller
         \Artisan::call("make:resource " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Resources/' . $model_name);
         File::move(base_path("app/Http/Resources/" . $model_name . "/Resource.php"), storage_path("app/" . $generated_files_path . "/Http/Resources/" . $model_name . "/Resource.php"));
-        
+
         if (in_array('index', $methods)) {
             \Artisan::call("make:collection_resource " . $model_name);
             File::move(base_path("app/Http/Resources/" . $model_name . "/Collection.php"), storage_path("app/" . $generated_files_path . "/Http/Resources/" . $model_name . "/Collection.php"));
         }
-        
+
         File::deleteDirectory(base_path("app/Http/Resources"));
         // rmdir(base_path("app/Http/Resources/" . $model_name));
     }
@@ -273,7 +270,7 @@ class MakeFileController extends Controller
 
         \Artisan::call("make:service " . $model_name);
         Storage::disk('local')->makeDirectory($generated_files_path . '/Services');
-        
+
         File::move(base_path("app/Services/" . $model_name . "Service.php"), storage_path("app/" . $generated_files_path . "/Services/" . $model_name . "Service.php"));
 
         File::deleteDirectory(base_path("app/Services"));
@@ -292,7 +289,7 @@ class MakeFileController extends Controller
         }
 
         File::move($request_file_path, storage_path("app/" . $generated_files_path . "/Http/Requests/" . $model_name . "Request.php"));
-        
+
         File::deleteDirectory(base_path("app/Http/Requests"));
     }
 }

@@ -3,12 +3,13 @@
 namespace {{ namespace }};
 
 use App\Traits\BaseModel;
+use App\Traits\BootModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class {{ class }} extends Model
 {
-    use BaseModel, HasFactory;
+    use BaseModel, BootModel, HasFactory;
 
     protected $table = '';
 
@@ -31,4 +32,13 @@ class {{ class }} extends Model
     ];
     
     protected $relationship = [];
+
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->created_by = auth()->id();
+            $model->updated_by = auth()->id();
+        });
+    }
 }

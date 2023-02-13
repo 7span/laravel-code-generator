@@ -182,14 +182,15 @@ class MakeFileController extends Controller
         $string_to_replace="fillable = [";
         $replace_with = "fillable = [" . $replaceable_text;
         $this->replace_string_in_file($filename, $string_to_replace, $replace_with);
-
+        
         $table_text = "table = '" . $table_name . "'";
         $this->replace_string_in_file($filename, "table = ''", $table_text);
-
+        
         File::move($filename, storage_path("app/".$generated_files_path."/".$model_name.".php"));
-
+        
         Storage::disk('local')->makeDirectory($generated_files_path . '/Traits');
         File::copy(base_path("app/Traits/BaseModel.php"), storage_path("app/".$generated_files_path."/Traits/BaseModel.php"));
+        File::copy(base_path("app/Traits/BootModel.php"), storage_path("app/".$generated_files_path."/Traits/BootModel.php"));
     }
 
     public function makeController($model_name, $generated_files_path, $admin_crud)

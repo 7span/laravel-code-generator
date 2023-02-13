@@ -9,7 +9,7 @@ $('#addFieldForm').on('submit', function(e){
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>")
     } else {
         var new_tr_row = parseInt($('.table tbody tr:last').attr('data-row')) + 1;
-        $(".table tbody").append("<tr data-row='"+new_tr_row+"' data-column-type='"+column_type+"' data-column-name='"+column_name+"' data-column-validation='"+column_validation+"'><th scope='row'>"+column_type+"</th><td>"+column_name+"</td><td>"+column_validation+"</td><td><button type='button' class='btn btn-success btn-edit'><i class='fas fa-edit'></i></button></td><td><button type='button' class='btn btn-danger btn-delete'><i class='far fa-trash-alt btn-delete'></i></button></td></tr>");
+        $(".table tbody").append("<tr data-row='"+new_tr_row+"' data-column-type='"+column_type+"' data-column-name='"+column_name+"' data-column-validation='"+column_validation+"'><th scope='row'>"+column_type+"</th><td>"+column_name+"</td><td>"+column_validation+"</td><td><button type='button' class='btn btn-primary btn-edit'><i class='fas fa-edit'></i></button></td><td><button type='button' class='btn btn-danger btn-delete'><i class='far fa-trash-alt btn-delete'></i></button></td></tr>");
 
         if (column_type == 'enum') {
             var values = [];

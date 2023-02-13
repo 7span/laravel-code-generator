@@ -50,7 +50,7 @@
       <input type="checkbox" id="migration_fields" name="migration_fields" value="1" @checked(old('migration_fields'))><label class="light" for="migration_fields">Want to add more fields in the table?</label><br><br>
 
       <!-- Trigger the modal with a button -->
-      <button type="button" class="btn btn-info btn-sm" id="hidden" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
+      <button type="button" class="btn btn-warning" id="hidden" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
       <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
       <div class="row">
@@ -119,5 +119,5 @@
         </div>
       </div>
     </fieldset>
-    <button type="submit" class="btn btn-info btn-lg">Generate files</button>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate code files</i></button>
 </form>

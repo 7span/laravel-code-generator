@@ -3,6 +3,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">Add new field</h1>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form role="form" id="addFieldForm">
@@ -51,6 +54,7 @@
                     <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>
+                            <button type="button" class="btn btn-danger"  data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </form>

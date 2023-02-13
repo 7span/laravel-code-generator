@@ -33,18 +33,21 @@ class MakeFileController extends Controller
         $methods = $request->get('method');
         $storage = Storage::disk('local')->exists($generated_files_path);
         $admin_crud = $request->get('admin_crud');
+
         if ($storage == false) {
             Storage::disk('local')->makeDirectory($generated_files_path);
         }
 
+        $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
+
         $table_name = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $model_name)));
-        $replaceable_text = $this->getReplaceableText($request->get('table_fields'), $table_name);
+        $replaceable_text = $this->getReplaceableText($fields, $table_name);
 
         // Make model and move it to Generated_files
         $this->makeModel($model_name, $table_name, $replaceable_text[2], $generated_files_path);
 
         // Make controller and move it to Generated_files
-        $this->makeController($model_name, $generated_files_path, $admin_crud);
+        $this->makeController($model_name, $generated_files_path, $admin_crud, implode(",", $methods));
         // Make migration and move it to Generated_files
         $this->makeMigration($table_name, $replaceable_text[0], $generated_files_path);
 
@@ -131,9 +134,9 @@ class MakeFileController extends Controller
                 }
 
                 if($validation == 'required' && array_key_last($table_fields) != $field) {
-                    $rule_text .= '"' . $field . '" => "' . $validation . '",';
+                    $rule_text .= '"' . $field . '" => "' . $validation . '",' . PHP_EOL ;
                 } else if($validation == 'required' && array_key_last($table_fields) == $field) {
-                    $rule_text .= PHP_EOL . self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '"' . $field . '" => "' . $validation . '"';
+                    $rule_text .= self::INDENT_0 . self::INDENT_0 . self::INDENT_0 . '"' . $field . '" => "' . $validation . '"';
                 }
 
                 $fillable_text .= PHP_EOL.self::INDENT_0 . self::INDENT_0 . "'" . $field . "'," ;
@@ -193,11 +196,12 @@ class MakeFileController extends Controller
         File::copy(base_path("app/Traits/BootModel.php"), storage_path("app/".$generated_files_path."/Traits/BootModel.php"));
     }
 
-    public function makeController($model_name, $generated_files_path, $admin_crud)
+    public function makeController($model_name, $generated_files_path, $admin_crud, $methods)
     {
         File::copy(base_path("app/Traits/ApiResponser.php"), storage_path("app/".$generated_files_path."/Traits/ApiResponser.php"));
 
-        \Artisan::call("make:controller " . $model_name);
+        \Artisan::call("make:controller " . $model_name . " --methods='" . $methods . "'");
+        // \Artisan::call('make:controller ' . $model_name)  . ' --methods=' . $methods;
         Storage::disk('local')->makeDirectory($generated_files_path . '/Http/Controllers/API/V1');
         File::move(base_path("app/Http/Controllers/API/V1/".$model_name."Controller.php"), storage_path("app/".$generated_files_path . "/Http/Controllers/API/V1/" . $model_name."Controller.php"));
 

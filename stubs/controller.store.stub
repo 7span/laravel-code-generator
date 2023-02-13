@@ -1,0 +1,6 @@
+    public function store($CLASS_NAME$Request $request)
+    {
+        $$SINGULAR_VARIABLE$Obj = $this->$SINGULAR_VARIABLE$Service->store($request->validated());
+
+        return isset($$SINGULAR_VARIABLE$Obj['errors']) ? $this->error($$SINGULAR_VARIABLE$Obj) : $this->success($$SINGULAR_VARIABLE$Obj);
+    }

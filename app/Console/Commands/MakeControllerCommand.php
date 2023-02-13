@@ -14,7 +14,7 @@ class MakeControllerCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:controller API/V1/{name}Controller';
+    protected $signature = 'make:controller API/V1/{name}Controller {--methods=}';
 
     /**
      * The console command description.
@@ -111,14 +111,60 @@ class MakeControllerCommand extends Command
      */
     public function getStubContents($stub , $stubVariables = [])
     {
-        $contents = file_get_contents($stub);
+        // $contents = file_get_contents($stub);
+        
+        // foreach ($stubVariables as $search => $replace)
+        // {
+        //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
+        // }
 
+        // $stub = base_path('stubs/controller.stub');
+        $main_stub = __DIR__ . '/../../../stubs/controller.stub';
+
+        $upperContents = file_get_contents($main_stub);
+        \Log::info('Main stub found');
+        
         foreach ($stubVariables as $search => $replace)
         {
-            $contents = str_replace('$'.$search.'$' , $replace, $contents);
+            $upperContents = str_replace('$'.$search.'$' , $replace, $upperContents);
+        }
+        
+        \Log::info('methods--' . $this->option('methods'));
+        $methods = explode(",",$this->option('methods'));
+
+        $methodContents = '';
+        
+        foreach($methods as $method) {
+            \Log::info('method--' . $method);
+            if($method == "show") {
+                $className = $stubVariables['CLASS_NAME'];
+                $string_to_replace = 'use App\Http\Controllers\Controller;';
+                $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Resource as ' . $className . 'Resource;';
+                $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
+            } else if($method == "index") {
+                $className = $stubVariables['CLASS_NAME'];
+                $string_to_replace = $className . 'Request;';
+                $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Collection as ' . $className . 'Collection;';
+                $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
+            }
+            
+            // $stub = base_path('stubs/controller.' . $method . '.stub');
+            $stub = __DIR__ . '/../../../stubs/controller.' . $method . '.stub';
+            \Log::info($method . '-- stub found');
+
+            $stubVariables = $this->getStubVariables();
+            $contents = file_get_contents($stub);
+            
+            foreach ($stubVariables as $search => $replace)
+            {
+                $contents = str_replace('$'.$search.'$' , $replace, $contents);
+            }
+            
+            $methodContents .= PHP_EOL . $contents;
         }
 
-        return $contents;
+        $fullContents = $upperContents . $methodContents . '}' . PHP_EOL;
+        return $fullContents;
 
     }
 
@@ -129,6 +175,8 @@ class MakeControllerCommand extends Command
      */
     public function getSourceFilePath()
     {
+        \Log::info('File bne 6e');
+        \Log::info(base_path('app/Http/Controllers/API/V1') .'/' .$this->getSingularClassName($this->argument('name')) . 'Controller.php');
         return base_path('app/Http/Controllers/API/V1') .'/' .$this->getSingularClassName($this->argument('name')) . 'Controller.php';
     }
 
@@ -156,6 +204,13 @@ class MakeControllerCommand extends Command
         }
 
         return $path;
+    }
+
+    public function replace_string_in_file($filename, $string_to_replace, $replace_with){
+        $content=file_get_contents($filename);
+        $content_chunks=explode($string_to_replace, $content);
+        $content=implode($replace_with, $content_chunks);
+        file_put_contents($filename, $content);
     }
 
 }

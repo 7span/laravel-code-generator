@@ -32,18 +32,18 @@
       <input type="checkbox" id="request" name="request" value="1" @checked(old('request') ?? 'checked')><label class="light" for="request">Do you want request file?</label><br><br>
 
       <label for="name">Which method do you want to include?</label>
-      <input type="checkbox" id="create" name="method[]" value="create" @if(is_array(old('method')) && in_array('create', old('method'))) checked @endif><label class="light" for="create">Create</label>
-      <!-- <input type="checkbox" id="create" name="method[]" value="create" checked>Create -->
-
-      <input type="checkbox" id="update" name="method[]" value="update" @if(is_array(old('method')) && in_array('update', old('method'))) checked @endif><label class="light" for="update">Update</label>
-
-      <input type="checkbox" id="destroy" name="method[]" value="destroy" @if(is_array(old('method')) && in_array('destroy', old('method'))) checked @endif><label class="light" for="destroy">Destroy</label>
-
-
+      
+      <input type="checkbox" id="index" name="method[]" value="index" @if(is_array(old('method')) && in_array('index', old('method'))) checked @endif><label class="light" for="index">Index</label>
+      
+      <input type="checkbox" id="store" name="method[]" value="store" @if(is_array(old('method')) && in_array('store', old('method'))) checked @endif><label class="light" for="store">Store</label>
+      <!-- <input type="checkbox" id="store" name="method[]" value="store" checked>Create -->
+      
       <input type="checkbox" id="show" name="method[]" value="show" @if(is_array(old('method')) && in_array('show', old('method'))) checked @endif><label class="light" for="show">Show</label>
-
-      <input type="checkbox" id="index" name="method[]" value="index" @if(is_array(old('method')) && in_array('index', old('method'))) checked @endif><label class="light" for="index">Index</label><br>
-
+      
+      <input type="checkbox" id="update" name="method[]" value="update" @if(is_array(old('method')) && in_array('update', old('method'))) checked @endif><label class="light" for="update">Update</label>
+      
+      <input type="checkbox" id="destroy" name="method[]" value="destroy" @if(is_array(old('method')) && in_array('destroy', old('method'))) checked @endif><label class="light" for="destroy">Destroy</label><br>
+      
       <span style="color:red" class="methodsError"></span><br><br>
 
       <input type="hidden" name="migration_fields" value="0" checked="checked">

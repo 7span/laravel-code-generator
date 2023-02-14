@@ -5,11 +5,12 @@ namespace {{ namespace }};
 use App\Traits\BaseModel;
 use App\Traits\BootModel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class {{ class }} extends Model
 {
-    use BaseModel, BootModel, HasFactory;
+    use BaseModel, BootModel, HasFactory, SoftDeletes;
 
     protected $table = '';
 

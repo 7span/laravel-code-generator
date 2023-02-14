@@ -66,7 +66,7 @@ class MakeFileController extends Controller
         $this->makeRouteFiles($model_name, $methods, $generated_files_path, $admin_crud);
 
         // Make service file and move it to Generated_files
-        $this->makeServiceFile($model_name, $generated_files_path);
+        $this->makeServiceFile($model_name, $generated_files_path, implode(",", $methods));
 
         // Make resource files and move it to Generated_files
         $this->makeResourceFiles($model_name, $methods, $generated_files_path);
@@ -293,7 +293,7 @@ class MakeFileController extends Controller
         File::deleteDirectory(base_path("app/Http/Resources"));
     }
 
-    public function makeServiceFile($model_name, $generated_files_path)
+    public function makeServiceFile($model_name, $generated_files_path, $methods)
     {
         // Copy traits files into Generated_files
         File::copy(base_path("app/Traits/PaginationTrait.php"), storage_path("app/".$generated_files_path."/Traits/PaginationTrait.php"));

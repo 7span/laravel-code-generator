@@ -119,7 +119,7 @@ class MakeAdminControllerCommand extends Command
         // }
 
         // $stub = base_path('stubs/controller.stub');
-        $main_stub = __DIR__ . '/../../../stubs/controller.stub';
+        $main_stub = __DIR__ . '/../../../stubs/admin-controller.stub';
 
         $upperContents = file_get_contents($main_stub);
         \Log::info('Main stub found');

@@ -6,8 +6,8 @@
     @csrf
     <fieldset>
       <label for="name">Model name:</label>
-      <input type="text" id="model_name" name="model_name" value="{!! old('model_name') !!}">
-      <!-- <input type="text" id="model_name" name="model_name" value="Project" required=""> -->
+      <!-- <input type="text" id="model_name" name="model_name" value="{!! old('model_name') !!}"> -->
+      <input type="text" id="model_name" name="model_name" value="Project" required="">
       <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
       <span style="color:red" class="modelNameError"></span><br><br>
 
@@ -21,6 +21,7 @@
 
       <input type="hidden" name="admin_crud" value="0" checked="checked">
       <input type="checkbox" id="admin_crud" name="admin_crud" value="1" @checked(old('admin_crud'))><label class="light" for="admin_crud">Want to include admin CRUD?</label><br>
+      <!-- <input type="checkbox" id="admin_crud" name="admin_crud" value="1" checked><label class="light" for="admin_crud">Want to include admin CRUD?</label><br> -->
 
       <input type="hidden" name="service" value="0" checked="checked">
       <input type="checkbox" id="service" name="service" value="1" @checked(old('service') ?? 'checked')><label class="light" for="service">Do you want service file?</label><br>

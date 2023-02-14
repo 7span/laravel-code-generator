@@ -40,7 +40,6 @@ class MakeFileController extends Controller
         
         // Is scope defined for model
         $scope = $request->get('scope');
-        dd($scope);
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generated_files_path);
@@ -211,8 +210,11 @@ class MakeFileController extends Controller
         $this->replace_string_in_file($filename, "table = ''", $table_text);
 
         // Replace the content table name of file as per our need
-        if ($scope == '1') {
-            $scope_text = "table = '" . $table_name . "'";
+        if ($scope != "") {
+            // $scope_text = "scopedFilters = [" . $table_name . "]";
+            $string_to_replace="scopedFilters = [";
+            $replace_with = "scopedFilters = [" . $table_name . PHP_EOL;
+            $this->replace_string_in_file($filename, $string_to_replace, $replace_with);
         }
         
         // Move the file to Generated_files

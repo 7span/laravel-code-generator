@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form role="form" id="addFieldForm">
+                <form role="form" id="addScopeFieldForm">
                     <div class="form-group">
                         <label class="control-label">Field data type</label>
                         <div id="scope_fields_select_div">

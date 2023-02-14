@@ -4,8 +4,8 @@
     @csrf
     <fieldset>
       <label for="name">Model name:</label>
-      <!-- <input type="text" id="model_name" name="model_name" value="{!! old('model_name') !!}"> -->
-      <input type="text" id="model_name" name="model_name" value="Project" required="">
+      <input type="text" id="model_name" name="model_name" value="{!! old('model_name') !!}">
+      <!-- <input type="text" id="model_name" name="model_name" value="Project" required=""> -->
       <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
       <span style="color:red" class="modelNameError"></span><br><br>
 

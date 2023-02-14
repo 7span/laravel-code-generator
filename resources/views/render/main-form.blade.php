@@ -1,5 +1,3 @@
-<!-- https://laravel.com/docs/5.6/migrations -->
-<!-- <form method="post" action="{{ url('make-files') }}" id="makeFileForm"> -->
 <form id="makeFileForm">
 <h2>Generate files</h2>
   <span style="color:red">To use this CRUD generator you first need to install <a href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we are using it in our BaseModel.php file.</span><br><br>
@@ -11,17 +9,11 @@
       <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
       <span style="color:red" class="modelNameError"></span><br><br>
 
-      <!-- <input type="text" name="table_fields[kajal]" value="{'type':'enum', 'validation':'optional', 'possible_values':'jenish,kajal'}" style="display:none"> -->
-      <!-- <input type="text" name="table_fields[first_name]" value='{"type":"text","validation":"required", 'possible_values':''}' style="display:none">
-      <input type="text" name="table_fields[mobile]" value='{"type":"integer","validation":"required","default":0, 'possible_values':''}' style="display:none"> -->
-      <!-- <input type="text" name="table_fields[qaz]" value="{'type':'decimal', 'validation':'optional', 'possible_values':'', 'total_number':'4', 'decimal_precision':'2'}" style="display:none"> -->
-
       <input type="hidden" name="soft_delete" value="0" checked="checked">
       <input type="checkbox" id="soft_delete" name="soft_delete" value="1" @checked(old('soft_delete') ?? 'checked')><label class="light" for="soft_delete">Want to include soft delete?</label><br>
 
       <input type="hidden" name="admin_crud" value="0" checked="checked">
       <input type="checkbox" id="admin_crud" name="admin_crud" value="1" @checked(old('admin_crud'))><label class="light" for="admin_crud">Want to include admin CRUD?</label><br>
-      <!-- <input type="checkbox" id="admin_crud" name="admin_crud" value="1" checked><label class="light" for="admin_crud">Want to include admin CRUD?</label><br> -->
 
       <input type="hidden" name="service" value="0" checked="checked">
       <input type="checkbox" id="service" name="service" value="1" @checked(old('service') ?? 'checked')><label class="light" for="service">Do you want service file?</label><br>
@@ -37,7 +29,6 @@
       <input type="checkbox" id="index" name="method[]" value="index" @if(is_array(old('method')) && in_array('index', old('method'))) checked @endif><label class="light" for="index">Index</label>
       
       <input type="checkbox" id="store" name="method[]" value="store" @if(is_array(old('method')) && in_array('store', old('method'))) checked @endif><label class="light" for="store">Store</label>
-      <!-- <input type="checkbox" id="store" name="method[]" value="store" checked>Create -->
       
       <input type="checkbox" id="show" name="method[]" value="show" @if(is_array(old('method')) && in_array('show', old('method'))) checked @endif><label class="light" for="show">Show</label>
       
@@ -50,7 +41,6 @@
       <input type="hidden" name="migration_fields" value="0" checked="checked">
       <input type="checkbox" id="migration_fields" name="migration_fields" value="1" @checked(old('migration_fields'))><label class="light" for="migration_fields">Want to add more fields in the table?</label><br><br>
 
-      <!-- Trigger the modal with a button -->
       <button type="button" class="btn btn-warning" id="hidden" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
       <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
@@ -102,19 +92,6 @@
                 <td>deleted_by</td>
                 <td>optional</td>
               </tr>
-              <!-- <tr data-row="8" data-column-type="enum" data-column-name="kajal" data-column-validation="optional">
-                <th scope="row">enum</th>
-                <td>kajal</td>
-                <td>optional</td>
-                <td><button type="button" class="btn btn-success btn-edit"><i class="fas fa-edit"></i></button></td>
-                <td><button type="button" class="btn btn-danger btn-delete"><i class="far fa-trash-alt btn-delete"></i></button></td>
-              </tr> -->
-              <!-- <tr data-row="8" data-column-type="decimal" data-column-name="qaz" data-column-validation="optional">
-                <th scope="row">decimal</th>
-                <td>qaz</td>
-                <td>optional</td>
-                <td><button type="button" class="btn btn-success btn-edit"><i class="fas fa-edit"></i></button></td><td><button type="button" class="btn btn-danger btn-delete"><i class="far fa-trash-alt btn-delete"></i></button></td>
-              </tr> -->
             </tbody>
           </table>
         </div>

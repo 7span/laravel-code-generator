@@ -142,7 +142,7 @@ class MakeFileController extends Controller
                 } else if ($field_type == 'string') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $character_limit = $val['character_limit'];
-                    $migration_text .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->string("' . $field . ', ' . $character_limit . ');';
+                    $migration_text .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->string("' . $field . '", ' . $character_limit . ');';
                 } else {
                     $migration_text .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->' . $field_type . '("' . $field . '");';
                 }

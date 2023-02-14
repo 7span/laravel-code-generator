@@ -1,0 +1,6 @@
+    public function collection(array $inputs)
+    {
+        $$PLURAL_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->getQB();
+
+        return (isset($inputs['limit']) && $inputs['limit'] == '-1') ? $$PLURAL_VARIABLE$->get() : $$PLURAL_VARIABLE$->paginate();
+    }

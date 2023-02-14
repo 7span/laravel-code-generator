@@ -303,7 +303,7 @@ class MakeFileController extends Controller
         File::copy(base_path("lang/en/entity.php"), storage_path("app/".$generated_files_path."/lang/en/entity.php"));
 
         // Make service file using command and move it to Generated_files
-        \Artisan::call("make:service " . $model_name);
+        \Artisan::call("make:service " . $model_name . " --methods='" . $methods . "'");
         Storage::disk('local')->makeDirectory($generated_files_path . '/Services');
         File::move(base_path("app/Services/" . $model_name . "Service.php"), storage_path("app/" . $generated_files_path . "/Services/" . $model_name . "Service.php"));
 

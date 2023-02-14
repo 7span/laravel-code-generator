@@ -118,7 +118,6 @@ class MakeControllerCommand extends Command
         //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
         // }
 
-        // $stub = base_path('stubs/controller.stub');
         $main_stub = __DIR__ . '/../../../stubs/controller.stub';
 
         $upperContents = file_get_contents($main_stub);
@@ -165,7 +164,6 @@ class MakeControllerCommand extends Command
 
         $fullContents = $upperContents . $methodContents . '}' . PHP_EOL;
         return $fullContents;
-
     }
 
     /**

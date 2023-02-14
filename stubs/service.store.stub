@@ -1,0 +1,6 @@
+    public function store(array $inputs)
+    {
+        $this->$SINGULAR_VARIABLE$Obj->create($inputs);
+        $data['message'] = __('entity.entityCreated', ['entity' => '$CLASS_NAME$']);
+        return $data;
+    }

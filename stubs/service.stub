@@ -16,39 +16,3 @@ class $CLASS_NAME$Service
     {
         $this->$SINGULAR_VARIABLE$Obj = new $CLASS_NAME$;
     }
-
-    public function collection(array $inputs)
-    {
-        $$PLURAL_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->getQB();
-
-        return (isset($inputs['limit']) && $inputs['limit'] == '-1') ? $$PLURAL_VARIABLE$->get() : $$PLURAL_VARIABLE$->paginate();
-    }
-
-    public function store(array $inputs)
-    {
-        $this->$SINGULAR_VARIABLE$Obj->create($inputs);
-        $data['message'] = __('entity.entityCreated', ['entity' => '$CLASS_NAME$']);
-        return $data;
-    }
-
-    public function resource($id)
-    {
-        $$SINGULAR_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->getQB()->findOrFail($id);
-
-        return $$SINGULAR_VARIABLE$;
-    }
-
-    public function update($CLASS_NAME$ $$SINGULAR_VARIABLE$, array $inputs)
-    {
-        $$SINGULAR_VARIABLE$->update($inputs);
-        $data['message'] = __('entity.entityUpdated', ['entity' => '$CLASS_NAME$']);
-        return $data;
-    }
-
-    public function destroy(int $id)
-    {
-        $this->resource($id)->delete();
-        $data['message'] = __('entity.entityDeleted', ['entity' => '$CLASS_NAME$']);
-        return $data;
-    }
-}

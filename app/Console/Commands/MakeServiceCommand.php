@@ -14,7 +14,7 @@ class MakeServiceCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:service {name}';
+    protected $signature = 'make:service {name} {--methods=}';
 
     /**
      * The console command description.
@@ -111,15 +111,47 @@ class MakeServiceCommand extends Command
      */
     public function getStubContents($stub , $stubVariables = [])
     {
-        $contents = file_get_contents($stub);
+        // $contents = file_get_contents($stub);
+
+        // foreach ($stubVariables as $search => $replace)
+        // {
+        //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
+        // }
+
+        $main_stub = __DIR__ . '/../../../stubs/service.stub';
+
+        $upperContents = file_get_contents($main_stub);
+        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace)
         {
-            $contents = str_replace('$'.$search.'$' , $replace, $contents);
+            $upperContents = str_replace('$'.$search.'$' , $replace, $upperContents);
+        }
+        
+        \Log::info('methods--' . $this->option('methods'));
+        $methods = explode(",",$this->option('methods'));
+
+        $methodContents = '';
+        
+        foreach($methods as $method) {
+            \Log::info('method--' . $method);
+            
+            $stub = __DIR__ . '/../../../stubs/service.' . $method . '.stub';
+            \Log::info($method . '-- stub found');
+
+            $stubVariables = $this->getStubVariables();
+            $contents = file_get_contents($stub);
+            
+            foreach ($stubVariables as $search => $replace)
+            {
+                $contents = str_replace('$'.$search.'$' , $replace, $contents);
+            }
+            
+            $methodContents .= PHP_EOL . $contents;
         }
 
-        return $contents;
-
+        $fullContents = $upperContents . $methodContents . '}' . PHP_EOL;
+        return $fullContents;
     }
 
     /**

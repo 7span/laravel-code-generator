@@ -1,0 +1,6 @@
+    public function update($CLASS_NAME$ $$SINGULAR_VARIABLE$, array $inputs)
+    {
+        $$SINGULAR_VARIABLE$->update($inputs);
+        $data['message'] = __('entity.entityUpdated', ['entity' => '$CLASS_NAME$']);
+        return $data;
+    }

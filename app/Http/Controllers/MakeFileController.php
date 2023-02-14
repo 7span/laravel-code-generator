@@ -37,6 +37,10 @@ class MakeFileController extends Controller
 
         // Is admin CRUD checked or not
         $admin_crud = $request->get('admin_crud');
+        
+        // Is scope defined for model
+        $scope = $request->get('scope');
+        dd($scope);
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generated_files_path);
@@ -54,7 +58,7 @@ class MakeFileController extends Controller
         $replaceable_text = $this->getReplaceableText($fields, $table_name);
 
         // Make model and move it to Generated_files
-        $this->makeModel($model_name, $table_name, $replaceable_text[2], $generated_files_path);
+        $this->makeModel($model_name, $table_name, $replaceable_text[2], $generated_files_path, $scope);
 
         // Make controller and move it to Generated_files
         $this->makeController($model_name, $generated_files_path, $admin_crud, implode(",", $methods));
@@ -191,7 +195,7 @@ class MakeFileController extends Controller
         $zip->close();
     }
 
-    public function makeModel($model_name, $table_name, $fillable_text, $generated_files_path)
+    public function makeModel($model_name, $table_name, $fillable_text, $generated_files_path, $scope)
     {
         // Make model using command
         \Artisan::call("make:model " . $model_name);
@@ -202,9 +206,14 @@ class MakeFileController extends Controller
         $replace_with = "fillable = [" . $fillable_text;
         $this->replace_string_in_file($filename, $string_to_replace, $replace_with);
         
-        // Replace the content of file as per our need
+        // Replace the content table name of file as per our need
         $table_text = "table = '" . $table_name . "'";
         $this->replace_string_in_file($filename, "table = ''", $table_text);
+
+        // Replace the content table name of file as per our need
+        if ($scope == '1') {
+            $scope_text = "table = '" . $table_name . "'";
+        }
         
         // Move the file to Generated_files
         File::move($filename, storage_path("app/".$generated_files_path."/".$model_name.".php"));

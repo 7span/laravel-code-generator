@@ -9,6 +9,11 @@
       <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
       <span style="color:red" class="modelNameError"></span><br><br>
 
+      <input type="lineString" name="table_fields[one]" value="{'type':'lineString', 'validation':'required', 'possible_values':''}" class="kajal" style="display:none">
+      <input type="lineString" name="table_fields[two]" value="{'type':'lineString', 'validation':'required', 'possible_values':''}" class="kajal" style="display:none">
+      <input type="lineString" name="table_fields[three]" value="{'type':'lineString', 'validation':'required', 'possible_values':''}" class="kajal" style="display:none">
+      <input type="lineString" name="table_fields[four]" value="{'type':'lineString', 'validation':'required', 'possible_values':''}" class="kajal" style="display:none">
+
       <input type="hidden" name="soft_delete" value="0" checked="checked">
       <input type="checkbox" id="soft_delete" name="soft_delete" value="1" @checked(old('soft_delete') ?? 'checked')><label class="light" for="soft_delete">Want to include soft delete?</label><br>
 
@@ -38,10 +43,27 @@
       
       <span style="color:red" class="methodsError"></span><br><br>
 
+      <input type="hidden" name="scope_fields" value="0" checked="checked">
+      <input type="checkbox" id="scope_fields" name="scope_fields" @checked(old('scope'))><label class="light" for="scope_fields">Want to add scope in the model file?</label><br><br>
+      
+      <button type="button" class="btn btn-warning" id="addScopeButton" style="display:none" data-toggle="modal" data-target="#addScopeFieldModal"><i class="fas fa-plus"> Add new scope field</i></button><br><br>
+
+      <!-- <div class="form-group">
+        <label class="control-label scope_div" style="display:none">Scope values<i class="fa fa-plus-circle fa-3x add_more_scope_field" aria-hidden="true"></i><p style="color:blue; margin-top:5px;">Add without special characters</p></label>
+        <div class="clone_four" style="display:none">
+            <input type="text" class="form-control input-lg" name="">
+        </div>
+      </div> -->
+
+      <!-- <input type="text" class="form-control input-lg cloned_input" name="possible_scope_values[]" placeholder="Possible scope value" required="required" value="1111">
+      <input type="text" class="form-control input-lg cloned_input" name="possible_scope_values[]" placeholder="Possible scope value" required="required" value="2222">
+      <input type="text" class="form-control input-lg cloned_input" name="possible_scope_values[]" placeholder="Possible scope value" required="required" value="3333">
+      <input type="text" class="form-control input-lg cloned_input" name="possible_scope_values[]" placeholder="Possible scope value" required="required" value="4444"> -->
+
       <input type="hidden" name="migration_fields" value="0" checked="checked">
       <input type="checkbox" id="migration_fields" name="migration_fields" value="1" @checked(old('migration_fields'))><label class="light" for="migration_fields">Want to add more fields in the table?</label><br><br>
 
-      <button type="button" class="btn btn-warning" id="hidden" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
+      <button type="button" class="btn btn-warning" id="addFieldButton" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
       <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
       <div class="row">

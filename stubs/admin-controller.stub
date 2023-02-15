@@ -13,9 +13,7 @@ class $CLASS_NAME$Controller extends Controller
 {
     use ApiResponser;
 
-    private $$SINGULAR_VARIABLE$Service;
-
     public function __construct()
     {
-        $this->$SINGULAR_VARIABLE$Service = new $CLASS_NAME$Service;
+        private $this->$SINGULAR_VARIABLE$Service = new $CLASS_NAME$Service;
     }

@@ -10,9 +10,7 @@ class $CLASS_NAME$Service
 {
     use BaseModel, PaginationTrait;
 
-    private $$SINGULAR_VARIABLE$Obj;
-
     public function __construct()
     {
-        $this->$SINGULAR_VARIABLE$Obj = new $CLASS_NAME$;
+        private $this->$SINGULAR_VARIABLE$Obj = new $CLASS_NAME$;
     }

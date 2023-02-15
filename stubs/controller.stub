@@ -8,9 +8,7 @@ use App\Http\Requests\$CLASS_NAME$\Request as $CLASS_NAME$Request;
 
 class $CLASS_NAME$Controller extends Controller
 {
-    private $$SINGULAR_VARIABLE$Service;
-
     public function __construct()
     {
-        $this->$SINGULAR_VARIABLE$Service = new $CLASS_NAME$Service;
+        private $this->$SINGULAR_VARIABLE$Service = new $CLASS_NAME$Service;
     }

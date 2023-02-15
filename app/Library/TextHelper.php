@@ -4,6 +4,8 @@ namespace App\Library;
 
 class TextHelper
 {
+    const INDENT = '    ';
+    
     // A function to make replaceable text
     public static function getReplaceableText($tableFields, $tableName)
     {

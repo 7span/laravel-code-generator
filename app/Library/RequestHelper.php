@@ -2,6 +2,7 @@
 
 namespace App\Library;
 
+use File;
 use App\Library\TextHelper;
 use Illuminate\Support\Facades\Storage;
 

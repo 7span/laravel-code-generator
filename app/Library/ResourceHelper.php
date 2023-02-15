@@ -2,6 +2,7 @@
 
 namespace App\Library;
 
+use File;
 use Illuminate\Support\Facades\Storage;
 
 class ResourceHelper

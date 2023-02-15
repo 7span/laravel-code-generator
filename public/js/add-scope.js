@@ -1,33 +1,18 @@
-// $('#is_scope').on('change', function() {
-//     if($(this).is(":checked")) {
-//         $(".scope_div").css("display", "block");
-//         $(".clone_four").find("input:last").clone().attr('name', 'possible_scope_values[]').addClass("scope_input").attr('placeholder', 'Scope field').attr("required", true).insertAfter(".clone_four");
-//     } else {
-//         $(".scope_input").remove();
-//     }
-// });
-
-// $(".add_more_scope_field").on('click', function(){
-//     $(".clone_four").find("input:last").clone().attr('name', 'possible_scope_values[]').addClass("scope_input").attr('placeholder', 'Scope field').attr("required", true).insertAfter(".clone_four");
-// });
-
 var addScopeButton = document.getElementById("addScopeButton");
 document.getElementById("scope_fields").addEventListener('click', function() {        
     addScopeButton.style.display = (this.checked)? "block" : "none";
 });
 
-var scopeArray = [];
-var input = document.getElementsByClassName('kajal');
-
-for (var i = 0; i < input.length; i++) {
-    var a = input[i];
-    scopeArray.push(a.name.replace("table_fields[", "").replace("]", ""));
-}
-console.log(scopeArray);
-
-var scope_input_name = $('#scope_input').val();
-
 $('#addScopeFieldModal').on('shown.bs.modal', function () {
+    var scopeArray = [];
+    var input = document.getElementsByClassName('added_input');
+    
+    for (var i = 0; i < input.length; i++) {
+        var a = input[i];
+        scopeArray.push(a.name.replace("table_fields[", "").replace("]", ""));
+    }
+    console.log(scopeArray);
+
     $.each(scopeArray, function(key, value) {   
         $('#scope_fields_select')
         .append($("<option>jk</option>")
@@ -39,4 +24,7 @@ $('#addScopeFieldModal').on('shown.bs.modal', function () {
 $('#addScopeFieldForm').on('submit', function(e){
     e.preventDefault();
     $('#makeFileForm #model_name').after('<input type="text" name="scope" value="'+$('#scope_fields_select').val()+'" style="display:none" />')
+
+    $('#addScopeFieldModal').modal('toggle');
+    $('#addScopeFieldForm').trigger('reset');
 });

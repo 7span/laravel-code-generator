@@ -1,20 +1,24 @@
 <?php
 
-namespace {{ namespace }};
+namespace App\Models;
 
 use App\Traits\BaseModel;
 use App\Traits\BootModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class {{ class }} extends Model
+class Qqq extends Model
 {
     use BaseModel, BootModel, HasFactory, SoftDeletes;
 
-    protected $table = '';
+    protected $table = 'qqqs';
 
     public $fillable = [
+        'four',
+        'three',
+        'two',
+        'one',
         'created_by',
         'updated_by',
         'deleted_by'
@@ -35,8 +39,6 @@ class {{ class }} extends Model
     protected $relationship = [];
 
     protected $scopedFilters = [];
-
-    {{ scopes }}
 
     public static function boot()
     {

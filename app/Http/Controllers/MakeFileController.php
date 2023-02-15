@@ -146,6 +146,11 @@ class MakeFileController extends Controller
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $characterLimit = $val['character_limit'];
                     $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->string("' . $field . '", ' . $characterLimit . ');';
+                } else if ($fieldType == 'foreignKey') {
+                    $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
+                    $foreignKeyTableName = $val['table_name'];
+                    $isIndex = $val['is_index'];
+                    $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->foreign("' . $field . '")->references("id")->on("' . $foreignKeyTableName . '")->onDelete("CASCADE");' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->index("' . $field . '");';
                 } else {
                     $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->' . $fieldType . '("' . $field . '");';
                 }

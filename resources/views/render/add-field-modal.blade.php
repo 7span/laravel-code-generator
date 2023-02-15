@@ -52,6 +52,16 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="control-label table_name_div" style="display:none">Table name</label>
+                        <div class="clone_five" style="display:none">
+                            <input type="text" class="form-control input-lg" name="">
+                        </div>
+                        <div class="is_index_div" style="display:none">
+                            <input type="hidden" name="is_index" value="0" checked="checked">
+                            <input type="checkbox" id="is_index" name="is_index" value="1" @checked(old('is_index') ?? 'checked')><label class="light" for="is_index">Is this index?</label><br>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>
                             <button type="button" class="btn btn-danger"  data-dismiss="modal">Close</button>

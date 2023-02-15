@@ -29,7 +29,7 @@
                             <select id="column_validation" class="form-control" name="column_validation">
                                 <option value="optional">Optional</option>
                                 <option value="required">Required</option>
-                                <option value="unique">Required | Unique</option>
+                                <!-- <option value="unique">Required | Unique</option> -->
                             </select>
                         </div>
                     </div>

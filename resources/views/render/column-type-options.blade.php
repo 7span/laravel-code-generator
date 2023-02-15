@@ -1,8 +1,6 @@
 <option value="blank">Select one</option>
 
 <optgroup label="String fields">
-    <option value="foreignKey">Foreign Key</option>
-    <option value="index">Index</option>
     <option value="lineString">Line String</option>
     <option value="multiLineString">Multi Line String</option>
     <option value="string">String</option>
@@ -39,4 +37,5 @@
     <option value="enum">Enum</option>
     <option value="uuid">UUID</option>
     <option value="date">Date</option>
+    <option value="foreignKey">Foreign Key</option>
 </optgroup>

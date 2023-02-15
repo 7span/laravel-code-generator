@@ -82,6 +82,14 @@ $("body").on("click", ".btn-edit", function () {
             '" style="display:none" />'
     );
 
+    if ($(".added_input").length == 0) {
+        $('#scope_fields').hide();
+        $('#label_scope_fields').hide();
+    } else {
+        $('#scope_fields').show();
+        $('#label_scope_fields').show();
+    }
+
     $("#editFieldModal").modal("toggle");
 });
 
@@ -89,4 +97,13 @@ $("body").on("click", ".btn-delete", function () {
     $(this).parents("tr").remove();
     var column_name = $(this).parents("tr").attr("data-column-name");
     $("input[name='table_fields[" + column_name + "]']").remove();
+
+    if ($(".added_input").length == 0) {
+        $('#scope_fields').hide();
+        $('#label_scope_fields').hide();
+        $('#addScopeButton').hide();
+    } else {
+        $('#scope_fields').show();
+        $('#label_scope_fields').show();
+    }
 });

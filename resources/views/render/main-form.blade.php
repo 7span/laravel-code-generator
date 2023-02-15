@@ -46,7 +46,7 @@
       <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
       
       <input type="hidden" name="scope_fields" value="0" checked="checked">
-      <input type="checkbox" id="scope_fields" name="scope_fields" @checked(old('scope'))><label class="light" for="scope_fields">Want to add scope in the model file?</label><br><br>
+      <input type="checkbox" id="scope_fields" name="scope_fields" @checked(old('scope'))><label class="light" for="scope_fields" id="label_scope_fields">Want to add scope in the model file?</label><br><br>
       
       <button type="button" class="btn btn-warning" id="addScopeButton" style="display:none" data-toggle="modal" data-target="#addScopeFieldModal"><i class="fas fa-plus"> Add new scope field</i></button><br><br>
 

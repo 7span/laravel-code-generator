@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
-    const INDENT = '    ';
-
     public function makeFiles(Request $request)
     {
         $validator = Validator::make($request->all(), [

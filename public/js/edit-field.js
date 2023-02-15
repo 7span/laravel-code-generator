@@ -47,6 +47,15 @@ $('#editFieldForm').on('submit', function(e){
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         }
 
+        if ($(".added_input").length == 0) {
+            $('#scope_fields').hide();
+            $('#label_scope_fields').hide();
+            $('#addScopeButton').hide();
+        } else {
+            $('#scope_fields').show();
+            $('#label_scope_fields').show();
+        }
+
         $('#editFieldModal').modal('toggle');
         $('#editFieldForm').trigger('reset');
         

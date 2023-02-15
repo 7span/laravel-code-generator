@@ -3,6 +3,15 @@ document.getElementById("migration_fields").addEventListener('click', function()
     addFieldButton.style.display = (this.checked)? "block" : "none";
 });
 
+if ($(".added_input").length == 0) {
+    $('#scope_fields').hide();
+    $('#label_scope_fields').hide();
+    $('#addScopeButton').hide();
+} else {
+    $('#scope_fields').show();
+    $('#label_scope_fields').show();
+}
+
 $('#makeFileForm').on('submit',function(e){
     e.preventDefault();
 

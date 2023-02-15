@@ -21,7 +21,7 @@ class TextHelper
                 $validation = $val['validation'];
                 $possibleValues = $val['possible_values'];
 
-                $null_or_not_null = $validation == 'required' ? ' NOT NULL' : ' NULL';
+                $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
 
                 if ($fieldType == 'enum') {
                     $pVal = '';
@@ -44,14 +44,14 @@ class TextHelper
                 } elseif ($fieldType == 'string') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $characterLimit = $val['character_limit'];
-                    $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->string("' . $field . '", ' . $characterLimit . ');';
+                    $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->string("' . $field . '", ' . $characterLimit . ')' . $null_or_not_null . ';';
                 } elseif ($fieldType == 'foreignKey') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $foreignKeyTableName = $val['table_name'];
                     $isIndex = $val['is_index'];
                     $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->foreign("' . $field . '")->references("id")->on("' . $foreignKeyTableName . '")->onDelete("CASCADE");' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->index("' . $field . '");';
                 } else {
-                    $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->' . $fieldType . '("' . $field . '");';
+                    $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->' . $fieldType . '("' . $field . '")' . $null_or_not_null . ';';
                 }
 
                 if ($validation == 'required' && array_key_last($tableFields) != $field) {

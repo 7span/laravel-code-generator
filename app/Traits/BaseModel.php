@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
-use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 
 trait BaseModel
 {
@@ -32,17 +32,18 @@ trait BaseModel
     public function getQueryFieldsWithRelationship()
     {
         $fields = $this->getQueryFields();
-        $relationships  = $this->getRelationship();
+        $relationships = $this->getRelationship();
 
-        foreach ($relationships as $relationshipName =>  $relationship) {
-            $relationshipObj  = new $relationship['model']();
+        foreach ($relationships as $relationshipName => $relationship) {
+            $relationshipObj = new $relationship['model']();
             foreach ($relationshipObj->getFillable() as $field) {
-                $fields[] =   $relationshipName . '.' . $field;
+                $fields[] = $relationshipName . '.' . $field;
             }
             foreach ($relationshipObj->queryable as $field) {
                 $fields[] = $relationshipName . '.' . $field;
             }
         }
+
         return $fields;
     }
 
@@ -57,7 +58,7 @@ trait BaseModel
     }
 
     public function getQB()
-    { 
+    {
         $queryBuilder = QueryBuilder::for(self::class)
             ->allowedFields($this->getQueryFieldsWithRelationship())
             ->allowedIncludes($this->getIncludes());
@@ -73,6 +74,7 @@ trait BaseModel
             }
         }
         $queryBuilder->allowedFilters($filters);
+
         return $queryBuilder;
     }
 }

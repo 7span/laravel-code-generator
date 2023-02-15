@@ -1,0 +1,58 @@
+{
+    "preset": "laravel",
+    "exclude": [
+        "node_modules",
+        "retool",
+        "storage",
+        "vendor"
+    ],
+    "notName": [
+        "server.php"
+    ],
+    "notPath": [
+        "app/AssetUploader.php"
+    ],
+    "rules": {
+        "array_syntax": {
+            "syntax": "short"
+        },
+        "binary_operator_spaces": {
+            "default": "single_space"
+        },
+        "braces": {
+            "position_after_functions_and_oop_constructs": "same"
+        },
+        "constant_case": true,
+        "concat_space": {
+            "spacing": "one"
+        },
+        "declare_equal_normalize": {
+            "space": "single"
+        },
+        "elseif": true,
+        "fully_qualified_strict_types": true,
+        "function_declaration": true,
+        "indentation_type": true,
+        "linebreak_after_opening_tag": true,
+        "method_argument_space": true,
+        "no_blank_lines_after_class_opening": true,
+        "no_empty_statement": true,
+        "no_extra_blank_lines": {
+            "tokens": ["extra"]
+        },
+        "no_unused_imports": true,
+        "ordered_imports": {
+            "sort_algorithm": "length"
+        },
+        "single_blank_line_before_namespace": true,
+        "single_quote": {
+            "strings_containing_single_quote_chars": false
+        },
+        "ternary_operator_spaces": true,
+        "trailing_comma_in_multiline": true,
+        "trim_array_spaces": true,
+        "visibility_required": {
+            "elements": ["method", "property"]
+        }
+    }
+}

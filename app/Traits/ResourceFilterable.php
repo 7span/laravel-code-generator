@@ -6,8 +6,6 @@ trait ResourceFilterable
 {
     /**
      * Filter null inputs.
-     *
-     * @return array
      */
     protected function fields(): array
     {

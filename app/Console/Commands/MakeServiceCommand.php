@@ -25,13 +25,13 @@ class MakeServiceCommand extends Command
 
     /**
      * Filesystem instance
+     *
      * @var Filesystem
      */
     protected $files;
 
     /**
      * Create a new command instance.
-     * @param Filesystem $files
      */
     public function __construct(Filesystem $files)
     {
@@ -53,7 +53,7 @@ class MakeServiceCommand extends Command
 
         $contents = $this->getSourceFile();
 
-        if (!$this->files->exists($path)) {
+        if (! $this->files->exists($path)) {
             $this->files->put($path, $contents);
             $this->info("File : {$path} created");
         } else {
@@ -63,8 +63,8 @@ class MakeServiceCommand extends Command
 
     /**
      * Return the stub file path
-     * @return string
      *
+     * @return string
      */
     public function getStubPath()
     {
@@ -72,22 +72,21 @@ class MakeServiceCommand extends Command
     }
 
     /**
-    **
-    * Map the stub variables present in stub to its value
-    *
-    * @return array
-    *
-    */
+     **
+     * Map the stub variables present in stub to its value
+     *
+     * @return array
+     */
     public function getStubVariables()
     {
         // $use = "App\Models" . "\\" . $this->argument('name');
-        
+
         return [
-            'NAMESPACE'         => 'App\\Services',
-            'CLASS_NAME'        => $this->getSingularClassName($this->argument('name')),
+            'NAMESPACE' => 'App\\Services',
+            'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
             // 'USE'               => $use,
-            'SINGULAR_VARIABLE'          => Str::singular(strtolower($this->argument('name'))),
-            'PLURAL_VARIABLE'          => Str::plural(strtolower($this->argument('name'))),
+            'SINGULAR_VARIABLE' => Str::singular(strtolower($this->argument('name'))),
+            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
         ];
     }
 
@@ -95,7 +94,6 @@ class MakeServiceCommand extends Command
      * Get the stub path and the stub variables
      *
      * @return bool|mixed|string
-     *
      */
     public function getSourceFile()
     {
@@ -105,11 +103,10 @@ class MakeServiceCommand extends Command
     /**
      * Replace the stub variables(key) with the desire value
      *
-     * @param $stub
-     * @param array $stubVariables
+     * @param  array  $stubVariables
      * @return bool|mixed|string
      */
-    public function getStubContents($stub , $stubVariables = [])
+    public function getStubContents($stub, $stubVariables = [])
     {
         // $contents = file_get_contents($stub);
 
@@ -123,34 +120,33 @@ class MakeServiceCommand extends Command
         $upperContents = file_get_contents($main_stub);
         \Log::info('Main stub found');
 
-        foreach ($stubVariables as $search => $replace)
-        {
-            $upperContents = str_replace('$'.$search.'$' , $replace, $upperContents);
+        foreach ($stubVariables as $search => $replace) {
+            $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
-        
+
         \Log::info('methods--' . $this->option('methods'));
-        $methods = explode(",",$this->option('methods'));
+        $methods = explode(',', $this->option('methods'));
 
         $methodContents = '';
-        
-        foreach($methods as $method) {
+
+        foreach ($methods as $method) {
             \Log::info('method--' . $method);
-            
+
             $stub = __DIR__ . '/../../../stubs/service.' . $method . '.stub';
             \Log::info($method . '-- stub found');
 
             $stubVariables = $this->getStubVariables();
             $contents = file_get_contents($stub);
-            
-            foreach ($stubVariables as $search => $replace)
-            {
-                $contents = str_replace('$'.$search.'$' , $replace, $contents);
+
+            foreach ($stubVariables as $search => $replace) {
+                $contents = str_replace('$' . $search . '$', $replace, $contents);
             }
-            
+
             $methodContents .= PHP_EOL . $contents;
         }
 
         $fullContents = $upperContents . $methodContents . '}' . PHP_EOL;
+
         return $fullContents;
     }
 
@@ -161,19 +157,18 @@ class MakeServiceCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/Services') .'/' .$this->getSingularClassName($this->argument('name')) . 'Service.php';
+        return base_path('app/Services') . '/' . $this->getSingularClassName($this->argument('name')) . 'Service.php';
     }
 
     /**
      * Return the Singular Capitalize Name
-     * @param $name
+     *
      * @return string
-     */   
+     */
     public function getSingularClassName($name)
     {
         return ucwords(Pluralizer::singular($name));
-    }            
-
+    }
 
     /**
      * Build the directory for the class if necessary.
@@ -189,5 +184,4 @@ class MakeServiceCommand extends Command
 
         return $path;
     }
-
 }

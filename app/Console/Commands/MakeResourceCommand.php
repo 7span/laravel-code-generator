@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
@@ -25,13 +24,13 @@ class MakeResourceCommand extends Command
 
     /**
      * Filesystem instance
+     *
      * @var Filesystem
      */
     protected $files;
 
     /**
      * Create a new command instance.
-     * @param Filesystem $files
      */
     public function __construct(Filesystem $files)
     {
@@ -53,7 +52,7 @@ class MakeResourceCommand extends Command
 
         $contents = $this->getSourceFile();
 
-        if (!$this->files->exists($path)) {
+        if (! $this->files->exists($path)) {
             $this->files->put($path, $contents);
             $this->info("File : {$path} created");
         } else {
@@ -63,8 +62,8 @@ class MakeResourceCommand extends Command
 
     /**
      * Return the stub file path
-     * @return string
      *
+     * @return string
      */
     public function getStubPath()
     {
@@ -72,17 +71,16 @@ class MakeResourceCommand extends Command
     }
 
     /**
-    **
-    * Map the stub variables present in stub to its value
-    *
-    * @return array
-    *
-    */
+     **
+     * Map the stub variables present in stub to its value
+     *
+     * @return array
+     */
     public function getStubVariables()
     {
         return [
-            'NAMESPACE'         => 'App\\Http\\Resources' . '\\' . $this->argument('name'),
-            'CLASS_NAME'        => $this->getSingularClassName($this->argument('name')),
+            'NAMESPACE' => 'App\\Http\\Resources' . '\\' . $this->argument('name'),
+            'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
         ];
     }
 
@@ -90,7 +88,6 @@ class MakeResourceCommand extends Command
      * Get the stub path and the stub variables
      *
      * @return bool|mixed|string
-     *
      */
     public function getSourceFile()
     {
@@ -100,21 +97,18 @@ class MakeResourceCommand extends Command
     /**
      * Replace the stub variables(key) with the desire value
      *
-     * @param $stub
-     * @param array $stubVariables
+     * @param  array  $stubVariables
      * @return bool|mixed|string
      */
-    public function getStubContents($stub , $stubVariables = [])
+    public function getStubContents($stub, $stubVariables = [])
     {
         $contents = file_get_contents($stub);
 
-        foreach ($stubVariables as $search => $replace)
-        {
-            $contents = str_replace('$'.$search.'$' , $replace, $contents);
+        foreach ($stubVariables as $search => $replace) {
+            $contents = str_replace('$' . $search . '$', $replace, $contents);
         }
 
         return $contents;
-
     }
 
     /**
@@ -124,19 +118,18 @@ class MakeResourceCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/Http/Resources') .'/' .$this->getSingularClassName($this->argument('name')) . '/Resource.php';
+        return base_path('app/Http/Resources') . '/' . $this->getSingularClassName($this->argument('name')) . '/Resource.php';
     }
 
     /**
      * Return the Singular Capitalize Name
-     * @param $name
+     *
      * @return string
-     */   
+     */
     public function getSingularClassName($name)
     {
         return ucwords(Pluralizer::singular($name));
-    }            
-
+    }
 
     /**
      * Build the directory for the class if necessary.
@@ -152,5 +145,4 @@ class MakeResourceCommand extends Command
 
         return $path;
     }
-
 }

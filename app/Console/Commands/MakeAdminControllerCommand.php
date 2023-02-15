@@ -25,13 +25,13 @@ class MakeAdminControllerCommand extends Command
 
     /**
      * Filesystem instance
+     *
      * @var Filesystem
      */
     protected $files;
 
     /**
      * Create a new command instance.
-     * @param Filesystem $files
      */
     public function __construct(Filesystem $files)
     {
@@ -53,7 +53,7 @@ class MakeAdminControllerCommand extends Command
 
         $contents = $this->getSourceFile();
 
-        if (!$this->files->exists($path)) {
+        if (! $this->files->exists($path)) {
             $this->files->put($path, $contents);
             $this->info("File : {$path} created");
         } else {
@@ -63,8 +63,8 @@ class MakeAdminControllerCommand extends Command
 
     /**
      * Return the stub file path
-     * @return string
      *
+     * @return string
      */
     public function getStubPath()
     {
@@ -72,22 +72,21 @@ class MakeAdminControllerCommand extends Command
     }
 
     /**
-    **
-    * Map the stub variables present in stub to its value
-    *
-    * @return array
-    *
-    */
+     **
+     * Map the stub variables present in stub to its value
+     *
+     * @return array
+     */
     public function getStubVariables()
     {
         // $use = "App\Models" . "\\" . $this->argument('name');
-        
+
         return [
-            'NAMESPACE'         => 'App\\Http\\Controllers\\Api\\V1\\Admin',
-            'CLASS_NAME'        => $this->getSingularClassName($this->argument('name')),
+            'NAMESPACE' => 'App\\Http\\Controllers\\Api\\V1\\Admin',
+            'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
             // 'USE'               => $use,
-            'SINGULAR_VARIABLE'          => Str::singular(strtolower($this->argument('name'))),
-            'PLURAL_VARIABLE'          => Str::plural(strtolower($this->argument('name'))),
+            'SINGULAR_VARIABLE' => Str::singular(strtolower($this->argument('name'))),
+            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
         ];
     }
 
@@ -95,7 +94,6 @@ class MakeAdminControllerCommand extends Command
      * Get the stub path and the stub variables
      *
      * @return bool|mixed|string
-     *
      */
     public function getSourceFile()
     {
@@ -105,14 +103,13 @@ class MakeAdminControllerCommand extends Command
     /**
      * Replace the stub variables(key) with the desire value
      *
-     * @param $stub
-     * @param array $stubVariables
+     * @param  array  $stubVariables
      * @return bool|mixed|string
      */
-    public function getStubContents($stub , $stubVariables = [])
+    public function getStubContents($stub, $stubVariables = [])
     {
         // $contents = file_get_contents($stub);
-        
+
         // foreach ($stubVariables as $search => $replace)
         // {
         //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
@@ -123,49 +120,47 @@ class MakeAdminControllerCommand extends Command
 
         $upperContents = file_get_contents($main_stub);
         \Log::info('Main stub found');
-        
-        foreach ($stubVariables as $search => $replace)
-        {
-            $upperContents = str_replace('$'.$search.'$' , $replace, $upperContents);
+
+        foreach ($stubVariables as $search => $replace) {
+            $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
-        
+
         \Log::info('methods--' . $this->option('methods'));
-        $methods = explode(",",$this->option('methods'));
+        $methods = explode(',', $this->option('methods'));
 
         $methodContents = '';
-        
-        foreach($methods as $method) {
+
+        foreach ($methods as $method) {
             \Log::info('method--' . $method);
-            if($method == "show") {
+            if ($method == 'show') {
                 $className = $stubVariables['CLASS_NAME'];
                 $string_to_replace = 'use App\Http\Controllers\Controller;';
                 $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Resource as ' . $className . 'Resource;';
                 $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
-            } else if($method == "index") {
+            } elseif ($method == 'index') {
                 $className = $stubVariables['CLASS_NAME'];
                 $string_to_replace = $className . 'Request;';
                 $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Collection as ' . $className . 'Collection;';
                 $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
             }
-            
+
             // $stub = base_path('stubs/controller.' . $method . '.stub');
             $stub = __DIR__ . '/../../../stubs/controller.' . $method . '.stub';
             \Log::info($method . '-- stub found');
 
             $stubVariables = $this->getStubVariables();
             $contents = file_get_contents($stub);
-            
-            foreach ($stubVariables as $search => $replace)
-            {
-                $contents = str_replace('$'.$search.'$' , $replace, $contents);
+
+            foreach ($stubVariables as $search => $replace) {
+                $contents = str_replace('$' . $search . '$', $replace, $contents);
             }
-            
+
             $methodContents .= PHP_EOL . $contents;
         }
 
         $fullContents = $upperContents . $methodContents . '}' . PHP_EOL;
-        return $fullContents;
 
+        return $fullContents;
     }
 
     /**
@@ -176,20 +171,20 @@ class MakeAdminControllerCommand extends Command
     public function getSourceFilePath()
     {
         \Log::info('File bne 6e');
-        \Log::info(base_path('app/Http/Controllers/API/V1/Admin') .'/' .$this->getSingularClassName($this->argument('name')) . 'Controller.php');
-        return base_path('app/Http/Controllers/API/V1/Admin') .'/' .$this->getSingularClassName($this->argument('name')) . 'Controller.php';
+        \Log::info(base_path('app/Http/Controllers/API/V1/Admin') . '/' . $this->getSingularClassName($this->argument('name')) . 'Controller.php');
+
+        return base_path('app/Http/Controllers/API/V1/Admin') . '/' . $this->getSingularClassName($this->argument('name')) . 'Controller.php';
     }
 
     /**
      * Return the Singular Capitalize Name
-     * @param $name
+     *
      * @return string
-     */   
+     */
     public function getSingularClassName($name)
     {
         return ucwords(Pluralizer::singular($name));
-    }            
-
+    }
 
     /**
      * Build the directory for the class if necessary.
@@ -206,11 +201,11 @@ class MakeAdminControllerCommand extends Command
         return $path;
     }
 
-    public function replace_string_in_file($filename, $string_to_replace, $replace_with){
-        $content=file_get_contents($filename);
-        $content_chunks=explode($string_to_replace, $content);
-        $content=implode($replace_with, $content_chunks);
+    public function replace_string_in_file($filename, $string_to_replace, $replace_with)
+    {
+        $content = file_get_contents($filename);
+        $content_chunks = explode($string_to_replace, $content);
+        $content = implode($replace_with, $content_chunks);
         file_put_contents($filename, $content);
     }
-
 }

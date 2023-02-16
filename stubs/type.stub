@@ -1,0 +1,21 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use GraphQL;
+use GraphQL\Type\Definition\Type;
+use Rebing\GraphQL\Support\Type as GraphQLType;
+
+class $TYPENAME$ extends GraphQLType
+{
+    protected $attributes = [
+        'name'          => '$CLASSNAME$',
+        'description'   => '$CLASSNAME$',
+        'model'         =>  $CLASSNAME$::class,
+    ];
+
+    public function fields(): array
+    {
+        return [];
+    }
+}

@@ -2,8 +2,8 @@
     @csrf
     <div class="form-group">
         <label for="name">Type name:</label>
-        <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}">
-        <!-- <input type="text" id="type_name" name="type_name" value="Project" required=""> -->
+        <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
+        <input type="text" id="type_name" name="type_name" value="ProjectType" required="">
         <span style="color:blue">If possible please enter your type name like, ProjectType OR ProjectCategoryType.</span>
         <span style="color:red" class="typeNameError"></span><br>
     </div>
@@ -11,6 +11,7 @@
     <div class="form-group">
         <label for="typeText">Enter type text</label>
         <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
+        <!-- <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button> -->
     </div>
 
     <div class="form-check">
@@ -44,20 +45,18 @@
 <script type='text/javascript'>
 
     $('#makeTypeFileForm').on('submit',function(e){
+        // alert('hi');
         e.preventDefault();
 
         $('.loading').show();
         
         $.ajax({
-            url: "/make-type",
+            url: "/get-fields-and-datatypes",
             type: "POST",
             data: $('#makeTypeFileForm').serialize(),
             success:function(response){
-                if(response.file_path) {
-                    // alert(response.file_path);
-                    // window.location.href = "file://" + response.file_path;
-                    window.location.href = response.file_path;
-                }
+                console.log(response['fields']);
+                console.log(response['dataTypes']);
             },
             complete: function(){
                 $('.loading').hide();
@@ -69,4 +68,20 @@
             },
         });
     });
+
+    // function handleFixTypeButtonClick(){
+    //     btn = document.getElementById('fixTypeButton');
+    //     btn.innerHTML = '<i class = "fa fa-spinner fa-spin"></i> Fixing the type ...';
+        
+    //     // Set this type fields ad type inputs
+    //     setTimeout(function(){
+    //         var type_text = $("#typeText").val();
+
+            
+
+    //         // alert('Hi');
+    //         // When the work is done, reset the button to original state
+    //         btn.innerHTML = 'Again fix the type';
+    //     }, 3000); 
+    // }
 </script>

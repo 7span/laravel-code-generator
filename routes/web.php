@@ -22,6 +22,7 @@ Route::get('/', function () {
 });
 
 Route::post('make-files', [MakeFileController::class, 'store']);
+Route::post('get-fields-and-datatypes', [MakeTypeController::class, 'getFieldsAndDatatypes']);
 Route::post('make-type', [MakeTypeController::class, 'store']);
 Route::post('make-query', [MakeQueryController::class, 'store']);
 Route::post('make-mutation', [MakeMutationController::class, 'store']);

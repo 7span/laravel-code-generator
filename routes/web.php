@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MakeFileController;
+use App\Http\Controllers\MakeTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,4 +19,5 @@ Route::get('/', function () {
     return view('make-files');
 });
 
-Route::post('make-files', [MakeFileController::class, 'makeFiles']);
+Route::post('make-files', [MakeFileController::class, 'store']);
+Route::post('make-type', [MakeTypeController::class, 'store']);

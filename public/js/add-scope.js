@@ -13,6 +13,8 @@ $('#addScopeFieldModal').on('shown.bs.modal', function () {
     }
     console.log(scopeArray);
 
+    $('#scope_fields_select').find("option").remove().end();
+
     $.each(scopeArray, function(key, value) {   
         $('#scope_fields_select')
         .append($("<option>jk</option>")

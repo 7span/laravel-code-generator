@@ -35,9 +35,8 @@ $('#addFieldForm').on('submit', function(e){
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else if (column_type == 'foreignKey') {
             var table_name = $("input[name='table_name']").val();
-            var is_index = $('#is_index').is(':checked');
             
-            var value = "{'type':'" + column_type + "', 'validation':'optional', 'possible_values':'', 'table_name':'" + table_name + "', 'is_index':'" + is_index + "'}";
+            var value = "{'type':'" + column_type + "', 'validation':'optional', 'possible_values':'', 'table_name':'" + table_name + "'}";
             
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else {
@@ -60,7 +59,6 @@ $('#addFieldForm').on('submit', function(e){
     
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".table_name_div").css("display", "none"); // display clone div for table name
-        $(".is_index_div").css("display", "none"); // display index div
         $(".character_div").css("display", "none"); // hide clone div for varchar
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ModelHelper
 {
+    const INDENT = '    ';
+    
     public static function getModelName($string)
     {
         $string = ucwords($string);

@@ -11,11 +11,7 @@ $("body").on("click", ".btn-edit", function () {
     $("#edit_column_validation").val(column_validation);
 
     if (column_type == "enum") {
-        var json_for_possible_values = $(
-            "input[name='table_fields[" + column_name + "]']"
-        )
-            .attr("value")
-            .replace(/'/g, '"');
+        var json_for_possible_values = $("input[name='table_fields[" + column_name + "]']").attr("value").replace(/'/g, '"');
         var json_to_object = JSON.parse(json_for_possible_values);
         var pos_values_string = json_to_object["possible_values"];
         var pos_values_array = pos_values_string.split(",");
@@ -31,14 +27,9 @@ $("body").on("click", ".btn-edit", function () {
         $(".edit_possible").css("display", "block"); // display clone div for enum
         $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         $(".edit_character_div").css("display", "none"); // hide clone div for varchar
-    } else if (
-        column_type == "decimal" ||
-        column_type == "double" ||
-        column_type == "float"
-    ) {
-        var row = $("input[name='table_fields[" + column_name + "]']")
-            .attr("value")
-            .replace(/'/g, '"');
+        $(".edit_table_name_div").css("display", "none"); // display clone div for table name
+    } else if (column_type == "decimal" || column_type == "double" || column_type == "float") {
+        var row = $("input[name='table_fields[" + column_name + "]']").attr("value").replace(/'/g, '"');
         var json_to_object = JSON.parse(row);
         var total_number = json_to_object["total_number"];
         var decimal_precision = json_to_object["decimal_precision"];
@@ -57,10 +48,9 @@ $("body").on("click", ".btn-edit", function () {
         $(".edit_decimal_div").css("display", "block"); // display clone div for decimal/double/float
         $(".edit_possible").css("display", "none"); // hide clone div for enum
         $(".edit_character_div").css("display", "none"); // hide clone div for varchar
+        $(".edit_table_name_div").css("display", "none"); // display clone div for table name
     } else if (column_type == "string") {
-        var row = $("input[name='table_fields[" + column_name + "]']")
-            .attr("value")
-            .replace(/'/g, '"');
+        var row = $("input[name='table_fields[" + column_name + "]']").attr("value").replace(/'/g, '"');
         var json_to_object = JSON.parse(row);
         var character_limit = json_to_object["character_limit"];
 
@@ -71,6 +61,22 @@ $("body").on("click", ".btn-edit", function () {
         );
 
         $(".edit_character_div").css("display", "block"); // display clone div for varchar
+        $(".edit_possible").css("display", "none"); // hide clone div for enum
+        $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
+        $(".edit_table_name_div").css("display", "none"); // display clone div for table name
+    } else if (column_type == "foreignKey") {
+        var row = $("input[name='table_fields[" + column_name + "]']").attr("value").replace(/'/g, '"');
+        var json_to_object = JSON.parse(row);
+        var table_name = json_to_object["table_name"];
+
+        $("#editFieldForm .edit_clone_five").after(
+            '<input name="table_name" class="form-control input-lg cloned_input" type="text" value="' +
+                table_name +
+                '" />'
+        );
+
+        $(".edit_table_name_div").css("display", "block"); // display clone div for varchar
+        $(".edit_character_div").css("display", "none"); // hide clone div for varchar
         $(".edit_possible").css("display", "none"); // hide clone div for enum
         $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
     }

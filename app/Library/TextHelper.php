@@ -48,7 +48,6 @@ class TextHelper
                 } elseif ($fieldType == 'foreignKey') {
                     $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                     $foreignKeyTableName = $val['table_name'];
-                    $isIndex = $val['is_index'];
                     $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->foreign("' . $field . '")->references("id")->on("' . $foreignKeyTableName . '")->onDelete("CASCADE");' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->index("' . $field . '");';
                 } else {
                     $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->' . $fieldType . '("' . $field . '")' . $null_or_not_null . ';';

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MakeFileController;
 use App\Http\Controllers\MakeTypeController;
+use App\Http\Controllers\MakeQueryController;
+use App\Http\Controllers\MakeMutationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +23,5 @@ Route::get('/', function () {
 
 Route::post('make-files', [MakeFileController::class, 'store']);
 Route::post('make-type', [MakeTypeController::class, 'store']);
+Route::post('make-query', [MakeQueryController::class, 'store']);
+Route::post('make-mutation', [MakeMutationController::class, 'store']);

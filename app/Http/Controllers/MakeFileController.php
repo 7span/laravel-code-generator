@@ -45,6 +45,9 @@ class MakeFileController extends Controller
         // Is admin CRUD checked or not
         $adminCrud = $request->get('admin_crud');
 
+        // Is soft delete checked or not
+        $softDelete = $request->get('soft_delete');
+
         // Is scope defined for model
         $scope = $request->get('scope');
 
@@ -64,13 +67,13 @@ class MakeFileController extends Controller
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
 
         // Make model and move it to Generated_files
-        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope);
+        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete);
 
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods));
 
         // Make migration and move it to Generated_files
-        MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath);
+        MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete);
 
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);

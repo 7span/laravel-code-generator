@@ -7,7 +7,9 @@ use App\Library\TextHelper;
 
 class MigrationHelper
 {
-    public static function makeMigration($tableName, $migrationText, $generatedFilesPath)
+    const INDENT = '    ';
+
+    public static function makeMigration($tableName, $migrationText, $generatedFilesPath, $softDelete)
     {
         // Make migration file using command
         \Artisan::call('make:migration create_' . $tableName . '_table');
@@ -19,6 +21,10 @@ class MigrationHelper
         $stringToReplace = 'table->id();';
         $replaceWith = 'table->id();' . $migrationText;
         TextHelper::replaceStringInFile($filename, $stringToReplace, str_replace('"', "'", $replaceWith));
+        
+        $stringToReplace = '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();';
+        $replaceWith = $softDelete == "1" ? '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();' : '$table->timestamps();';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Move migration file to Generated_files
         File::move(base_path('database/migrations/' . $newest_file), storage_path('app/' . $generatedFilesPath . '/' . $newest_file));

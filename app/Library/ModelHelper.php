@@ -23,20 +23,30 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope)
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete)
     {
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
-        // Replace the content of file as per our need
         $filename = base_path('app/Models/' . $modelName . '.php');
-        $stringToReplace = 'fillable = [';
-        $replaceWith = 'fillable = [' . $fillableText;
-        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
+
+        // Replace the content of file as per our need
+        $stringToReplace = 'fillable = [';
+        $replaceWith = 'fillable = [' . $fillableText;
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
+
+        // Replace the content on based on soft delete checkbox
+        $stringToReplace = "," . PHP_EOL . self::INDENT . self::INDENT . "'deleted_at' => 'datetime'";
+        $replaceWith = $softDelete == "1" ? "," . PHP_EOL . self::INDENT . self::INDENT . "'deleted_at' => 'datetime'" : '';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
+
+        $stringToReplace = ", 'deleted_at'];";
+        $replaceWith = $softDelete == "1" ? ", 'deleted_at'];" : '];';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Replace the content scopedFilters of file as per our need
         $scopedFiltersText = '';

@@ -15,6 +15,33 @@ class MakeTypeController extends Controller
     public function getFieldsAndDatatypes(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'type_text' => 'required|max:255',
+        ], [
+            'type_text.required' => 'Please enter type text.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
+        $typeTexts = explode(',', $typeTexts);
+        
+        $fields = [];
+        $dataTypes = [];
+        
+        foreach ($typeTexts as $typeText) {
+            $splitTypeText = explode(': ', $typeText);
+            array_push($fields, $splitTypeText[0]);
+            array_push($dataTypes, $splitTypeText[1]);
+        }
+
+        return response()->json(['fields' => $fields, 'dataTypes' => $dataTypes]);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'type_name' => 'required|max:255',
             'type_text' => 'required|max:255',
         ], [
@@ -38,23 +65,6 @@ class MakeTypeController extends Controller
         // Get model name
         $typeName = TypeHelper::getTypeName($request->get('type_name'));
 
-        $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
-        $typeTexts = explode(',', $typeTexts);
-        
-        $fields = [];
-        $dataTypes = [];
-        
-        foreach ($typeTexts as $typeText) {
-            $splitTypeText = explode(': ', $typeText);
-            array_push($fields, $splitTypeText[0]);
-            array_push($dataTypes, $splitTypeText[1]);
-        }
-
-        return response()->json(['fields' => $fields, 'dataTypes' => $dataTypes]);
-    }
-
-    public function store(Request $request)
-    {
         // Get replaceable text
         TypeHelper::makeType($fields, $tableName);
         dd($request->all());

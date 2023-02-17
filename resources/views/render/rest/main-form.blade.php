@@ -101,5 +101,5 @@
         </div>
       </div>
     </fieldset>
-    <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate code files</i></button>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate REST API files</i></button>
 </form>

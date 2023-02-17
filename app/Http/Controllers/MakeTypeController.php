@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeTypeController extends Controller
 {
-    public function getFieldsAndDatatypes(Request $request)
+    public function fieldsAndDatatypes(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'type_text' => 'required|max:255',
@@ -41,17 +41,17 @@ class MakeTypeController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'type_name' => 'required|max:255',
-            'type_text' => 'required|max:255',
-        ], [
-            'type_name.required' => 'Please enter your type name.',
-            'type_text.required' => 'Please enter type text.',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'type_name' => 'required|max:255',
+        //     'type_text' => 'required|max:255',
+        // ], [
+        //     'type_name.required' => 'Please enter your type name.',
+        //     'type_text.required' => 'Please enter type text.',
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->messages(), 422);
-        }
+        // if ($validator->fails()) {
+        //     return response()->json($validator->messages(), 422);
+        // }
 
         // Path for generated files
         $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
@@ -64,10 +64,20 @@ class MakeTypeController extends Controller
 
         // Get model name
         $typeName = TypeHelper::getTypeName($request->get('type_name'));
+        $fields = $request->get('type_fields');
+
+        $type_name = "KajalType";
+        $fields =  [
+            "name" => "{'field':name', 'alias':name', 'type':'String', 'description':'name of xyz'}",
+            "id" => "{'field':id', 'alias':id', 'type':'int', 'description':'id of xyz'}"
+        ];
+
+        dd($fields);
+
+
 
         // Get replaceable text
-        TypeHelper::makeType($fields, $tableName);
-        dd($request->all());
+        TypeHelper::makeType($typeName, $fields);
         
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

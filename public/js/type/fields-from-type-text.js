@@ -12,7 +12,7 @@ function handleFixTypeButtonClick(){
         var type_text = $("#typeText").val();
 
         $.ajax({
-            url: "/get-fields-and-datatypes",
+            url: "/type-fields-and-datatypes",
             type: "POST",
             data: $('#makeTypeFileForm').serialize(),
             success:function(response){

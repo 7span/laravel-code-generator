@@ -14,7 +14,7 @@ class MakeTypeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:type {name} {--typeText=}';
+    protected $signature = 'make:type {name} {--fields=}';
 
     /**
      * The console command description.
@@ -119,18 +119,17 @@ class MakeTypeCommand extends Command
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
-
-        \Log::info('type text--' . $this->option('typeText'));
-        // $typeText = $this->option('typeText');
-        $typeTexts = explode(',', $this->option('typeText'));
-
+        
+        // $typeTexts = explode(',', $this->option('fields'));
+        
         $methodContents = '';
         
-        foreach ($typeTexts as $typeText) {
+        dd('Hi');
+        foreach ($fields as $field) {
+            dd($field);
             $splitTypeText = explode(': ', $typeText);
             $field = $splitTypeText[0];
             $type = $splitTypeText[1];
-            dd($splitTypeText);
 
             \Log::info('method--' . $method);
 

@@ -7,42 +7,42 @@ use Illuminate\Support\Str;
 use App\Library\TextHelper;
 use Illuminate\Support\Facades\Storage;
 
-class TypeHelper
+class QueryHelper
 {
     const INDENT = '    ';
     
-    public static function getTypeName($string)
+    public static function getQueryName($string)
     {
         $string = ucwords($string);
         $string = str_replace(' ', '', $string);
         $string = str_replace('-', '', $string);
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string);
         $string = Str::singular($string);
-        $typeName = ucfirst($string);
+        $queryName = ucfirst($string);
 
-        return $typeName;
+        return $queryName;
     }
 
-    public static function makeType($typeName, $fields)
+    public static function makeQuery($queryName, $fields)
     {
         // Make model using command
-        \Artisan::call('make:type ' . $typeName . '--fields=ok');
+        \Artisan::call('make:query ' . $queryName . '--fields=ok');
 
-        $filename = base_path('app/GraphQL/Type/' . $typeName . '.php');
+        $filename = base_path('app/GraphQL/Query/' . $queryName . '.php');
 
         dd($fields);
 
         // Replace the content table name of file as per our need
-        $typeText = '';
+        $queryText = '';
         if ($scope != '') {
             $scopeFields = explode(',', $scope);
 
             foreach ($scopeFields as $key => $scopeField) {
                 $newScopeField = str_replace(' ', '', ucwords(str_replace('_', ' ', $scopeField)));
                 if ($key == 0) {
-                    $typeText .= 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value)' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
+                    $queryText .= 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value)' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
                 } else {
-                    $typeText .= self::INDENT . 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value)' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
+                    $queryText .= self::INDENT . 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value)' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
                 }
 
                 if (array_key_last($scopeFields) != $key) {
@@ -53,11 +53,11 @@ class TypeHelper
             }
 
             $stringToReplace = 'return [];';
-            TextHelper::replaceStringInFile($filename, $stringToReplace, $typeText);
+            TextHelper::replaceStringInFile($filename, $stringToReplace, $queryText);
         }
 
         // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $typeName . '.php'));
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $queryName . '.php'));
 
         // Make folder in Generated_files and copy traits files into it
         Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');

@@ -22,6 +22,10 @@ $('#editTypeFieldForm').on('submit', function(e){
     var value = "{'field':" + field + "', 'alias':" + alias + "', 'type':'" + datatype + "', 'description':'" + description + " of xyz'}";
     $('#makeTypeFileForm #type_name').after('<input type="' + datatype + '" name="type_fields[' + field + ']" value="' + value + '" class="added_type_input" style="display:none" />')
 
-    $('#editTypeFieldModal').modal('toggle');
+    $('.modal').modal('hide');
     $('#editTypeFieldForm').trigger('reset');
+});
+
+$('.edit_type_field_close').on('click', function(e){
+    $('.modal').modal('hide');
 });

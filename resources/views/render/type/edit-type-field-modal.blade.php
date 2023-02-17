@@ -2,8 +2,8 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title">Edit type field and it's property</h1>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h3 class="modal-title">Edit type field and it's property</h3>
+                <button type="button" class="close edit_type_field_close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -37,7 +37,7 @@
                     <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>
-                            <button type="button" class="btn btn-danger"  data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-danger edit_type_field_close"  data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </form>

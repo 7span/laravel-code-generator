@@ -2,18 +2,20 @@
     @csrf
     <div class="form-group">
         <label for="name">Type name:</label>
-        <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}">
-        <!-- <input type="text" id="type_name" name="type_name" value="ProjectType" required=""> -->
+        <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
+        <input type="text" id="type_name" name="type_name" value="ProjectType" required="">
         <span style="color:blue">If possible please enter your type name like, ProjectType OR ProjectCategoryType.</span>
         <span style="color:red" class="typeNameError"></span><br>
     </div>
 
     <div class="form-group">
         <label for="typeText">Enter type text</label>
-        <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
-        <!-- <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)">id: int,name: String</textarea> -->
+        <!-- <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea> -->
+        <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)">id: int,name: String</textarea>
         <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button>
     </div>
+
+    <!-- <button type="button" class="btn btn-warning" id="editTypeFieldModal" data-toggle="modal" data-target="#editTypeFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
     <div class="form-check">
         <input type="hidden" name="pre_process" value="0" checked="checked">

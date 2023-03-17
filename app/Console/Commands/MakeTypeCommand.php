@@ -6,6 +6,7 @@ use Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
+use App\Library\TextHelper;
 
 class MakeTypeCommand extends Command
 {
@@ -14,14 +15,14 @@ class MakeTypeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:type {name} {--fields=}';
+    protected $signature = 'make:type {name} {--fields=} {--types=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Make service file';
+    protected $description = 'Make type file';
 
     /**
      * Filesystem instance
@@ -81,8 +82,8 @@ class MakeTypeCommand extends Command
     {
         return [
             'NAMESPACE' => 'App\\GraphQL\\Type',
-            'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
-            'TYPENAME' => 'TYPENAME',
+            'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
+            'TYPENAME' => $this->getSingularClassName($this->argument('name')),
         ];
     }
 
@@ -104,12 +105,6 @@ class MakeTypeCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-        // $contents = file_get_contents($stub);
-
-        // foreach ($stubVariables as $search => $replace)
-        // {
-        //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
-        // }
 
         $main_stub = __DIR__ . '/../../../stubs/type.stub';
 
@@ -119,36 +114,30 @@ class MakeTypeCommand extends Command
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
-        
-        // $typeTexts = explode(',', $this->option('fields'));
-        
-        $methodContents = '';
-        
-        dd('Hi');
-        foreach ($fields as $field) {
-            dd($field);
-            $splitTypeText = explode(': ', $typeText);
-            $field = $splitTypeText[0];
-            $type = $splitTypeText[1];
 
-            \Log::info('method--' . $method);
+        $fields = explode(',',$this->option('fields'));
+        $dataTypes = explode(',',$this->option('types'));
 
-            $stub = __DIR__ . '/../../../stubs/service.' . $method . '.stub';
-            \Log::info($method . '-- stub found');
+        $fieldsArr = [];
+        $fieldCount = count($fields);
+        $modelName = str_replace('Type','',$this->getSingularClassName($this->argument('name')));
 
-            $stubVariables = $this->getStubVariables();
-            $contents = file_get_contents($stub);
-
-            foreach ($stubVariables as $search => $replace) {
-                $contents = str_replace('$' . $search . '$', $replace, $contents);
-            }
-
-            $methodContents .= PHP_EOL . $contents;
+        $temp = 'return [';
+        for($i = 0 ; $i < $fieldCount ; $i++){
+            $temp .= "'".$fields[$i]."' => [
+                    'type' => Type::".$dataTypes[$i]."(),
+                    'description' => '".$fields[$i]."'
+                ],";
+            //$fieldsArr[$fields[$i]] = ['type' => 'Type::'.$dataTypes[$i]."()",'description' => $fields[$i]];
         }
 
-        $fullContents = $upperContents . $methodContents . '}' . PHP_EOL;
+        $search = 'return [';
+        $upperContents = str_replace($search, $temp, $upperContents);
+        $fullContents = $upperContents;
 
         return $fullContents;
+
+
     }
 
     /**
@@ -158,7 +147,7 @@ class MakeTypeCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/Services') . '/' . $this->getSingularClassName($this->argument('name')) . 'Service.php';
+        return base_path('app/GraphQL/Type') . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
     }
 
     /**

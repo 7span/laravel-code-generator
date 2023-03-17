@@ -26,10 +26,10 @@ class MakeTypeController extends Controller
 
         $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
         $typeTexts = explode(',', $typeTexts);
-        
+
         $fields = [];
         $dataTypes = [];
-        
+
         foreach ($typeTexts as $typeText) {
             $splitTypeText = explode(': ', $typeText);
             array_push($fields, $splitTypeText[0]);
@@ -55,7 +55,7 @@ class MakeTypeController extends Controller
 
         // Path for generated files
         $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
-        
+
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
         if ($storage == false) {
@@ -64,27 +64,31 @@ class MakeTypeController extends Controller
 
         // Get model name
         $typeName = TypeHelper::getTypeName($request->get('type_name'));
-        $fields = $request->get('type_fields');
 
-        $type_name = "KajalType";
-        $fields =  [
-            "name" => "{'field':name', 'alias':name', 'type':'String', 'description':'name of xyz'}",
-            "id" => "{'field':id', 'alias':id', 'type':'int', 'description':'id of xyz'}"
-        ];
+        $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
+        $typeTexts = explode(',', $typeTexts);
 
-        dd($fields);
+        $fields = [];
+        $dataTypes = [];
 
+        foreach ($typeTexts as $typeText) {
+            $splitTypeText = explode(': ', $typeText);
+            array_push($fields, $splitTypeText[0]);
+            array_push($dataTypes, $splitTypeText[1]);
+        }
 
 
         // Get replaceable text
-        TypeHelper::makeType($typeName, $fields);
-        
+        $filename = TypeHelper::makeType($typeName, implode(',',$fields),implode(',',$dataTypes));
+        // Move the file to Generated_files
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $typeName . '.php'));
+
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);
-        
+
         // Delete the generated folder from the storage
         File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
-        
+
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);
     }
 }

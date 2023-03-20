@@ -32,4 +32,23 @@ class TypeHelper
 
         return $filename;
     }
+
+    public static function makeQuery($queryName, $fields, $dataTypes)
+    {
+        // Make model using command
+        \Artisan::call('make:query ' . $queryName . ' --fields='.$fields.' --types='.$dataTypes);
+        $filename = base_path('app/GraphQL/Query/' .str_replace('Query','',$queryName));
+
+        return $filename;
+    }
+
+    public static function makeQueryCollection($queryName, $fields, $dataTypes)
+    {
+        $fields = str_replace(' ,',',',$fields);
+        // Make model using command
+        \Artisan::call('make:query-collection ' . $queryName . ' --fields='.$fields.' --types='.$dataTypes);
+        $filename = base_path('app/GraphQL/Query/' .str_replace('CollectionQuery','',$queryName));
+
+        return $filename;
+    }
 }

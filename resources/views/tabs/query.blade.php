@@ -3,7 +3,7 @@
     <div class="form-group">
         <label for="name">Query name:</label>
         <input type="text" id="query_name" name="query_name" value="{!! old('query_name') !!}">
-        <span style="color:blue">If possible please enter your type name like, ProjectQuery OR ProjectCategoryQuery.</span>
+        <span style="color:blue">If possible please enter your query name like, ProjectQuery OR ProjectCategoryQuery. If you select collection query then please entry query name like ProjectCollectionQuery,CategoryCollectionQuery.</span>
         <span style="color:red" class="queryNameError"></span><br>
     </div>
 
@@ -15,6 +15,17 @@
     <div class="form-check">
         <input type="hidden" name="pre_process" value="0" checked="checked">
         <input type="checkbox" id="pre_process" name="pre_process" value="1" @checked(old('pre_process') != null ?? 'checked')><label class="light" for="pre_process">Want to include pre-processed description?</label><br><br>
+    </div>
+
+    <div class="form-check">
+        <label class="form-check-label" for="flexRadioDefault2">
+            Query Resource <input class="form-check-input" type="radio" name="query_type" id="flexRadioDefault2" value="0" checked></label>
+
+    </div>
+
+    <div class="form-check">
+        <label class="form-check-label" for="flexRadioDefault2">
+            Query Collection <input class="form-check-input" type="radio" name="query_type" id="flexRadioDefault2" value="1" ></label>
     </div>
 
     <div class="row table-responsive type_table" style="display:none">

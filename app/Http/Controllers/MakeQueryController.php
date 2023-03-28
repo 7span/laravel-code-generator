@@ -52,7 +52,7 @@ class MakeQueryController extends Controller
         }else{
             // Get replaceable text
             $filename = TypeHelper::makeQuery($queryName, implode(',',$fields),implode(',',$dataTypes));
-             // Move the file to Generated_files
+            // Move the file to Generated_files
             File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('Query','',$queryName)));
         }
 

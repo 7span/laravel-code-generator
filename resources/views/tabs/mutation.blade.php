@@ -49,6 +49,17 @@
                 </div>
             </div>
 
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="control-label">Is Required</label>
+                        <select id="column_type" class="form-control" name="input_is_required[]">
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                </div>
+            </div>
+
+
         </div>
     </div>
     <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate code files</i></button>

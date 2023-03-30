@@ -27,11 +27,25 @@ class MakeQueryController extends Controller
             Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
 
-        // Get model name
-        $queryName = TypeHelper::getTypeName($request->get('query_name'));
-
-        $queryTexts = trim(preg_replace('/\s\s+/', '', $request->get('query_text')));
+        $queryObj = $request->get('query_obj');
+        if(!empty($queryObj)){
+            $queryObj = explode('{',$queryObj);
+            $queryKeyword = ucfirst(trim($queryObj[0]));    // if future validate syntax
+            $queryObjData = explode('(',$queryObj[1]);
+           
+            $queryName = trim(preg_replace('/\s\s+/', '', $queryObjData[0]));
+            if($queryType == 1){
+                $queryKeyword = "Collection".ucfirst($queryKeyword);
+            }
+            $queryName = $queryName."".$queryKeyword;
+            $queryTexts = TypeHelper::getQueryFields($queryObjData[1]);
+        } else {
+            // Get model name
+            $queryName = TypeHelper::getTypeName($request->get('query_name'));
+            $queryTexts = trim(preg_replace('/\s\s+/', '', $request->get('query_text')));
+        }
         $queryTexts = explode(',', $queryTexts);
+
 
         $fields = [];
         $dataTypes = [];

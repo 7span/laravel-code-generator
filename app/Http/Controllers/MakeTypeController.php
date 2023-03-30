@@ -61,11 +61,18 @@ class MakeTypeController extends Controller
         if ($storage == false) {
             Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
+        $typeobj = $request->get('type_obj');
+        if(!empty($typeobj)){
+            $typeobj = explode('{',$typeobj);
+            $typeName = trim(str_replace('type','', $typeobj[0]));
+            $typeName = ucfirst($typeName);
+            $typeTexts = TypeHelper::getTypeFields($typeobj[1]);
+        } else {
+            // Get model name
+            $typeName = TypeHelper::getTypeName($request->get('type_name'));
+            $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
+        }
 
-        // Get model name
-        $typeName = TypeHelper::getTypeName($request->get('type_name'));
-
-        $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
         $typeTexts = explode(',', $typeTexts);
 
         $fields = [];
@@ -76,7 +83,6 @@ class MakeTypeController extends Controller
             array_push($fields, $splitTypeText[0]);
             array_push($dataTypes, $splitTypeText[1]);
         }
-
 
         // Get replaceable text
         $filename = TypeHelper::makeType($typeName, implode(',',$fields),implode(',',$dataTypes));

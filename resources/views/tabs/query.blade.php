@@ -1,5 +1,12 @@
 <form id="makeQueryFileForm">
     @csrf
+
+    <div class="form-group">
+        <label for="name">Query Obj:</label>
+        <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
+        <textarea class="form-control container" id="query_obj" name="query_obj" rows="3"  cols="50"></textarea>
+        
+    </div>
     <div class="form-group">
         <label for="name">Query name:</label>
         <input type="text" id="query_name" name="query_name" value="{!! old('query_name') !!}">

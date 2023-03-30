@@ -14,7 +14,7 @@ class MakeMutationCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:mutation {name} {--fields=}';
+    protected $signature = 'make:mutation {name} {--fields=} {--types=} {--required=} {--alias=}';
 
     /**
      * The console command description.
@@ -46,5 +46,156 @@ class MakeMutationCommand extends Command
      * @return int
      */
     public function handle()
-    {}
+    {
+        $path = $this->getSourceFilePath();
+
+        $this->makeDirectory(dirname($path));
+
+        $contents = $this->getSourceFile();
+
+        if (! $this->files->exists($path)) {
+            $this->files->put($path, $contents);
+            $this->info("File : {$path} created");
+        } else {
+            $this->info("File : {$path} already exits");
+        }
+    }
+
+    /**
+     * Return the stub file path
+     *
+     * @return string
+     */
+    public function getStubPath()
+    {
+        return __DIR__ . '/../../../stubs/mutation.stub';
+    }
+
+    /**
+     **
+     * Map the stub variables present in stub to its value
+     *
+     * @return array
+     */
+    public function getStubVariables()
+    {
+        return [
+            'NAMESPACE' => 'App\\GraphQL\\Mutation',
+            'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
+            'SERVICE_CLASSNAME' => $this->getSingularName($this->argument('name')),
+            'SERVICE_CLASSNAME_VARIABLE' => $this->getSingularName($this->argument('name'),true),
+        ];
+    }
+
+    /**
+     * Get the stub path and the stub variables
+     *
+     * @return bool|mixed|string
+     */
+    public function getSourceFile()
+    {
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables());
+    }
+
+    /**
+     * Replace the stub variables(key) with the desire value
+     *
+     * @param  array  $stubVariables
+     * @return bool|mixed|string
+     */
+    public function getStubContents($stub, $stubVariables = [])
+    {
+
+        $main_stub = __DIR__ . '/../../../stubs/mutation.stub';
+
+        $upperContents = file_get_contents($main_stub);
+        \Log::info('Main stub found');
+
+        foreach ($stubVariables as $search => $replace) {
+            $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
+        }
+
+        $fields = explode(',',$this->option('fields'));
+        $dataTypes = explode(',',$this->option('types'));
+        $requiredData = explode(',',$this->option('required'));
+        $alias = explode(',',$this->option('alias'));
+        
+        $fieldCount = count($fields);
+        
+        $temp = 'return [';
+        for($i = 0 ; $i < $fieldCount ; $i++){
+            $rule = '';
+            $aliasData = '';
+            if($requiredData[$i] == '1'){
+                $rule = "'rules' => ['required']";
+            }
+            if(!empty($alias[$i])){
+                $aliasData = "'alias' => '".$alias[$i]."',";
+            }
+            $temp .= 
+                "'".$fields[$i]."' => [
+                    $aliasData
+                    'name' => '".$fields[$i]."',
+                    'type' => Type::".$dataTypes[$i]."(),
+                    $rule
+                ],";
+        }
+
+        $search = 'return [';
+        $upperContents = str_replace($search, $temp, $upperContents);
+        $fullContents = $upperContents;
+        return $fullContents;
+
+
+    }
+
+    /**
+     * Get the full path of generate class
+     *
+     * @return string
+     */
+    public function getSourceFilePath()
+    {
+        return base_path('app/GraphQL/Mutation') . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
+    }
+
+    /**
+     * Return the Singular Capitalize Name
+     *
+     * @return string
+     */
+    public function getSingularClassName($name)
+    {
+        return ucwords(Pluralizer::singular($name));
+    }
+
+    /**
+     * Return the Singular Name
+     *
+     * @return string
+     */
+    public function getSingularName($name,$is_lower = false)
+    {
+        $name = str_replace('upsert','', $name);
+        $name = str_replace('Upsert','', $name);
+        if($is_lower){
+            return lcfirst(Pluralizer::singular($name));
+        }
+        return $this->getSingularClassName($name);
+    }
+
+    /**
+     * Build the directory for the class if necessary.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    protected function makeDirectory($path)
+    {
+        if (! $this->files->isDirectory($path)) {
+            $this->files->makeDirectory($path, 0777, true, true);
+        }
+
+        return $path;
+    }
 }

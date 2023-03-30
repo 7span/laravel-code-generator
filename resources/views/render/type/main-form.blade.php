@@ -1,6 +1,13 @@
 <form id="makeTypeFileForm">
     @csrf
     <div class="form-group">
+        <label for="name">Type Obj:</label>
+        <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
+        <textarea class="form-control container" id="type_obj" name="type_obj" rows="3"  cols="50"></textarea>
+        
+    </div>
+
+    <div class="form-group">
         <label for="name">Type name:</label>
         <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
         <input type="text" id="type_name" name="type_name" value="ProjectType" required="">

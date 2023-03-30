@@ -1,7 +1,7 @@
 <form id="makeTypeFileForm">
     @csrf
     <div class="form-group">
-        <label for="name">Type Obj:</label>
+        <label for="name">Type Object:</label>
         <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
         <textarea class="form-control container" id="type_obj" name="type_obj" rows="3"  cols="50"></textarea>
 
@@ -36,7 +36,7 @@
         <label for="name">Type name:</label>
         <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
         <input type="text" id="type_name" name="type_name" value="ProjectType" required="">
-        <span style="color:blue">If possible please enter your type name like, ProjectType OR ProjectCategoryType.</span>
+        <span style="color:blue">If possible please enter your type name like  Project,Category.</span>
         <span style="color:red" class="typeNameError"></span><br>
     </div>
 
@@ -52,10 +52,10 @@
 
     <!-- <button type="button" class="btn btn-warning" id="editTypeFieldModal" data-toggle="modal" data-target="#editTypeFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
-    <div class="form-check">
+    {{-- <div class="form-check">
         <input type="hidden" name="pre_process" value="0" checked="checked">
         <input type="checkbox" id="pre_process" name="pre_process" value="1" @checked(old('pre_process') != null ?? 'checked')><label class="light" for="pre_process">Want to include pre-processed description?</label><br><br>
-    </div>
+    </div> --}}
 
     <div class="row table-responsive type_table" style="display:none">
         <table class="table table-bordered type_table_table" id="myTable">

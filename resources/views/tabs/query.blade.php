@@ -2,15 +2,30 @@
     @csrf
 
     <div class="form-group">
-        <label for="name">Query Obj:</label>
-        <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
-        <textarea class="form-control container" id="query_obj" name="query_obj" rows="3"  cols="50"></textarea>
-        
+        <label for="name">Query Object:</label>
+        <textarea class="form-control container" id="query_obj" name="query_obj" rows="3"  cols="50">{!! old('type_name') !!}</textarea>
     </div>
+
+    <div class="form-group">
+        <label for="name">Query Object Snippet:</label>
+        <textarea class="form-control container"  rows="7"  cols="50" disabled>
+            query {
+                Project(
+                    perPage: Int
+                    page: Int
+                    workspaceId: Int
+                    campaignId: Int
+                    formId: Int
+                    search: String
+                ): FormFields
+            }
+        </textarea>
+    </div>
+
     <div class="form-group">
         <label for="name">Query name:</label>
         <input type="text" id="query_name" name="query_name" value="{!! old('query_name') !!}">
-        <span style="color:blue">If possible please enter your query name like, ProjectQuery OR ProjectCategoryQuery. If you select collection query then please entry query name like ProjectCollectionQuery,CategoryCollectionQuery.</span>
+        <span style="color:blue">If possible please enter your query name like Project,Category.</span>
         <span style="color:red" class="queryNameError"></span><br>
     </div>
 
@@ -19,21 +34,11 @@
         <textarea class="form-control container" id="queryText" name="query_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
     </div>
 
-    <div class="form-check">
+    {{-- <div class="form-check">
         <input type="hidden" name="pre_process" value="0" checked="checked">
         <input type="checkbox" id="pre_process" name="pre_process" value="1" @checked(old('pre_process') != null ?? 'checked')><label class="light" for="pre_process">Want to include pre-processed description?</label><br><br>
-    </div>
+    </div> --}}
 
-    <div class="form-check">
-        <label class="form-check-label" for="flexRadioDefault2">
-            Query Resource <input class="form-check-input" type="radio" name="query_type" id="flexRadioDefault2" value="0" checked></label>
-
-    </div>
-
-    <div class="form-check">
-        <label class="form-check-label" for="flexRadioDefault2">
-            Query Collection <input class="form-check-input" type="radio" name="query_type" id="flexRadioDefault2" value="1" ></label>
-    </div>
 
     <div class="row table-responsive type_table" style="display:none">
         <table class="table table-bordered" id="myTable">

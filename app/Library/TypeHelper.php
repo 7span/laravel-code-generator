@@ -81,7 +81,7 @@ class TypeHelper
     {
         // Make model using command
         \Artisan::call('make:query ' . $queryName . ' --fields='.$fields.' --types='.$dataTypes);
-        $filename = base_path('app/GraphQL/Query/' .str_replace('Query','',$queryName));
+        $filename = base_path('app/GraphQL/Query/' .str_replace('ResourceQuery','',$queryName).'/'.$queryName.'.php');
 
         return $filename;
     }

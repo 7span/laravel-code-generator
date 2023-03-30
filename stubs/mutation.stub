@@ -12,7 +12,7 @@ use Rebing\GraphQL\Support\Mutation;
 class $CLASSNAME$ extends Mutation
 {
     protected $attributes = [
-        'name' => '$SERVICE_CLASSNAME$ Mutation',
+        'name' => '$SERVICE_CLASSNAME$ $CLASSNAME$',
     ];
 
     public function __construct(private $SERVICE_CLASSNAME$Service $$SERVICE_CLASSNAME_VARIABLE$Service)

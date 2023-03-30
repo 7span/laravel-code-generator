@@ -73,6 +73,10 @@ class MakeTypeController extends Controller
             $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
         }
 
+        if(!str_contains($typeName,'Input')){
+            $typeName = $typeName.'Type';
+        }
+
         $typeTexts = explode(',', $typeTexts);
 
         $fields = [];
@@ -86,8 +90,9 @@ class MakeTypeController extends Controller
 
         // Get replaceable text
         $filename = TypeHelper::makeType($typeName, implode(',',$fields),implode(',',$dataTypes));
+
         // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $typeName . '.php'));
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('Type','',str_replace('Input','',$typeName))));
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

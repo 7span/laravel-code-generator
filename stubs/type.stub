@@ -11,7 +11,7 @@ class $TYPENAME$ extends GraphQLType
     protected $attributes = [
         'name'          => '$CLASSNAME$',
         'description'   => '$CLASSNAME$',
-        'model'         =>  $CLASSNAME$::class,
+        'model'         =>  $MODELNAME$::class,
     ];
 
     public function fields(): array

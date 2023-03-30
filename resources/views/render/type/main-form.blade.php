@@ -4,7 +4,32 @@
         <label for="name">Type Obj:</label>
         <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
         <textarea class="form-control container" id="type_obj" name="type_obj" rows="3"  cols="50"></textarea>
-        
+
+    </div>
+
+    <div class="form-group col-lg-6">
+        <label for="name">Type Object Snippet :</label>
+        <textarea class="form-control container"  rows="7"  cols="50" disabled>
+            type FormField {
+                id: Int
+                name: String
+                type: String
+                validations: String
+                createdAt: String
+            }
+        </textarea>
+    </div>
+
+    <div class="form-group col-lg-6">
+        <label for="name">Type Input Object Snippet :</label>
+        <textarea class="form-control container" rows="6"  cols="50" disabled>
+            type FormFieldInput {
+                id: Int
+                name: String
+                type: String
+                validations: String
+             }
+        </textarea>
     </div>
 
     <div class="form-group">

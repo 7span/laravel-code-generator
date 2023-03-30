@@ -35,7 +35,7 @@ class TypeHelper
     public static function getQueryFields($string)
     {
         $string = trim(preg_replace('/\s\s+/', ',', $string));
-        
+
         $string = ltrim($string, ',');
         $string = rtrim($string, ',}');
         $string = explode(',)',$string);
@@ -58,7 +58,7 @@ class TypeHelper
 
     public static function getMutationFields($string){
         $string = trim(preg_replace('/\s\s+/', ',', $string));
-        
+
         $string = ltrim($string, ',');
         $string = rtrim($string, ',}');
         $string = explode(',)',$string);
@@ -72,7 +72,7 @@ class TypeHelper
         // Make model using command
         \Artisan::call('make:type ' . $typeName . ' --fields='.$fields.' --types='.$dataTypes);
 
-        $filename = base_path('app/GraphQL/Type/' . $typeName . '.php');
+        $filename = base_path('app/GraphQL/Type/' .str_replace('Type','',str_replace('Input','',$typeName)));
 
         return $filename;
     }

@@ -49,7 +49,6 @@ class MakeTypeCommand extends Command
     public function handle()
     {
         $path = $this->getSourceFilePath();
-
         $this->makeDirectory(dirname($path));
 
         $contents = $this->getSourceFile();
@@ -81,9 +80,10 @@ class MakeTypeCommand extends Command
     public function getStubVariables()
     {
         return [
-            'NAMESPACE' => 'App\\GraphQL\\Type',
+            'NAMESPACE' => 'App\\GraphQL\\Type\\'.str_replace('Type','',str_replace('Input','',$this->getSingularClassName($this->argument('name')))),
             'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
             'TYPENAME' => $this->getSingularClassName($this->argument('name')),
+            'MODELNAME' => str_replace('Type','',str_replace('Input','',$this->getSingularClassName($this->argument('name'))))
         ];
     }
 
@@ -125,10 +125,15 @@ class MakeTypeCommand extends Command
         $temp = 'return [';
         for($i = 0 ; $i < $fieldCount ; $i++){
             $temp .= "'".$fields[$i]."' => [
-                    'type' => Type::".$dataTypes[$i]."(),
-                    'description' => '".$fields[$i]."'
-                ],";
-            //$fieldsArr[$fields[$i]] = ['type' => 'Type::'.$dataTypes[$i]."()",'description' => $fields[$i]];
+                    'type' => Type::".str_replace('!','',$dataTypes[$i])."(),
+                    'description' => '".$fields[$i]."'";
+
+            if(str_contains($dataTypes[$i],'!')){
+                $temp .= ",'required' => TRUE";
+            }
+
+            $temp .=   " ],";
+
         }
 
         $search = 'return [';
@@ -147,7 +152,7 @@ class MakeTypeCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Type') . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
+        return base_path('app/GraphQL/Type') . '/' . str_replace('Input','',$this->getSingularClassName($this->argument('name'))).'/'.$this->getSingularClassName($this->argument('name')) . '.php';
     }
 
     /**

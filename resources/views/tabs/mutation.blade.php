@@ -1,15 +1,34 @@
 <form id="makeMutationFileForm">
     @csrf
     <div class="form-group">
+        <label for="name">Folder name:</label>
+        <input type="text" id="folder_name" name="folder_name" value="{!! old('mutation_name') !!}">
+        <span style="color:blue">If possible please enter your folder name like, Project, Page.</span>
+        <span style="color:red" class="folderNameError"></span><br>
+    </div>
+    <div class="form-group">
         <label for="name">Mutation name:</label>
-        <input type="text" id="query_name" name="mutation_name" value="{!! old('mutation_name') !!}">
-        <span style="color:blue">If possible please enter your mutation name like, ProjectUpsert.</span>
+        <input type="text" id="mutation_name" name="mutation_name" value="{!! old('mutation_name') !!}">
+        <p>Note : If you enter mutation name then it will update mutation name globally</p>
+        <span style="color:blue">If possible please enter your mutation name like, Upsert.Delete. It will create mutation foldername/mutationame</span>
         <span style="color:red" class="queryNameError"></span><br>
     </div>
 
     <div class="form-group">
         <label for="queryText">Enter mutation text</label>
         <textarea class="form-control container" id="queryText" name="mutation_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
+        <span style="color:red" class="mutationFormatError"></span><br>
+    </div>
+    <div class="form-group">
+        <label for="queryText">Mutation sample Obj (i.e "!" used for field required or not)</label>
+        <textarea class="form-control container" id="queryText" name="mutation_text" rows="5"  cols="50" disabled>
+        mutation {
+            insertUserCampaignMobile(
+                mobileNumberWithCallingCode: String!
+                campaignId: Int!
+            ): User
+        }
+        </textarea>
     </div>
 
 
@@ -69,6 +88,9 @@
     $('#makeMutationFileForm').on('submit',function(e){
         e.preventDefault();
 
+        $('.mutationFormatError').text('');
+        $('.folderNameError').text('');
+        $('.methodsError').text('');
         $('.loading').show();
 
         $.ajax({
@@ -86,8 +108,10 @@
                 $('.loading').hide();
             },
             error: function(response) {
-                console.log(response.responseJSON);
-                response.responseJSON.hasOwnProperty('model_name') ? $('.modelNameError').text(response.responseJSON.model_name[0]) : '';
+                
+                
+                (typeof response.responseJSON.format != undefined) ? $('.mutationFormatError').text(response.responseJSON.format) : '';
+                response.responseJSON.hasOwnProperty('folder_name') ? $('.folderNameError').text(response.responseJSON.folder_name[0]) : '';
                 response.responseJSON.hasOwnProperty('method') ? $('.methodsError').text(response.responseJSON.method[0]) : '';
             },
         });

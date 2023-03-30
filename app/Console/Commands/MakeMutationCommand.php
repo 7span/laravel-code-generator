@@ -14,7 +14,7 @@ class MakeMutationCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:mutation {name} {--fields=} {--types=} {--required=} {--alias=}';
+    protected $signature = 'make:mutation {name} {folderName} {--fields=} {--types=} {--required=} {--alias=}';
 
     /**
      * The console command description.
@@ -48,7 +48,7 @@ class MakeMutationCommand extends Command
     public function handle()
     {
         $path = $this->getSourceFilePath();
-
+        
         $this->makeDirectory(dirname($path));
 
         $contents = $this->getSourceFile();
@@ -80,10 +80,10 @@ class MakeMutationCommand extends Command
     public function getStubVariables()
     {
         return [
-            'NAMESPACE' => 'App\\GraphQL\\Mutation',
+            'NAMESPACE' => 'App\\GraphQL\\Mutation\\'.$this->argument('folderName'),
             'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
-            'SERVICE_CLASSNAME' => $this->getSingularName($this->argument('name')),
-            'SERVICE_CLASSNAME_VARIABLE' => $this->getSingularName($this->argument('name'),true),
+            'SERVICE_CLASSNAME' => $this->argument('folderName'),
+            'SERVICE_CLASSNAME_VARIABLE' => $this->getSingularName($this->argument('folderName')),
         ];
     }
 
@@ -156,7 +156,7 @@ class MakeMutationCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Mutation') . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
+        return base_path('app/GraphQL/Mutation') . '/' .$this->argument('folderName').'/' . $this->argument('name') . '.php';
     }
 
     /**
@@ -176,12 +176,9 @@ class MakeMutationCommand extends Command
      */
     public function getSingularName($name,$is_lower = false)
     {
-        $name = str_replace('upsert','', $name);
-        $name = str_replace('Upsert','', $name);
-        if($is_lower){
-            return lcfirst(Pluralizer::singular($name));
-        }
-        return $this->getSingularClassName($name);
+        
+        return lcfirst($name);
+       
     }
 
     /**

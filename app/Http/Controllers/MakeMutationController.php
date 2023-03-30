@@ -19,6 +19,15 @@ class MakeMutationController extends Controller
 
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'folder_name' => 'required|max:255',
+        ], [
+            'folder_name.required' => 'Please enter folder name.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
         // Path for generated files
         $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
 
@@ -29,8 +38,13 @@ class MakeMutationController extends Controller
         }
 
         // Get mutation name
-        $mutationName = TypeHelper::getMutationName($request->get('mutation_name'));
+        $mutationName = $request->get('mutation_name');
+        if(!empty($mutationName)){
+            $mutationName = TypeHelper::getMutationName($mutationName);
+        }
         $mutationObj = $request->get('mutation_text');
+        $folderName = ucfirst($request->get('folder_name'));
+        
         $fields = [];
         $dataTypes = [];
         $requiredArr = [];
@@ -38,10 +52,19 @@ class MakeMutationController extends Controller
         if(!empty($mutationObj)){
             $mutationObj = explode('{',$mutationObj);
             
-            $mutationKeyword = ucfirst(trim($mutationObj[0]));    // if required validation in future
+            $mutationKeyword = ucfirst(trim($mutationObj[0]));  
+            if(empty($mutationKeyword) || $mutationKeyword != 'Mutation'){
+                $foramt_error = ['format' => "Please Enter valid mutation format."];
+                return response()->json($foramt_error, 422);
+            }
             $mutationObjData = explode('(',$mutationObj[1]);
-            
-            $mutationName = ucfirst(trim(preg_replace('/\s\s+/', '', $mutationObjData[0])));
+            if(empty($mutationName)){
+                $mutationName = ucfirst(trim(preg_replace('/\s\s+/', '', $mutationObjData[0])));
+            }
+            if(empty($mutationObjData[1])){
+                $foramt_error = ['format' => "Please Enter valid mutation format."];
+                return response()->json($foramt_error, 422);
+            }
             $mutationTexts = TypeHelper::getMutationFields($mutationObjData[1]);
 
             $mutationTexts = explode(',', $mutationTexts);
@@ -53,9 +76,12 @@ class MakeMutationController extends Controller
                     $requiredVal = "1";
                 }
                 $dataType = str_replace('!','',$splitText[1]);
+
+                $aliasVal = TypeHelper::camelCaseToSnakeCase($splitText[0]);
                 array_push($fields, $splitText[0]);
                 array_push($dataTypes, $dataType);
                 array_push($requiredArr,$requiredVal);
+                array_push($aliasArr,$aliasVal);
             }
         } else {
             $inputName = $request->get('input_name');
@@ -72,11 +98,12 @@ class MakeMutationController extends Controller
                 array_push($requiredArr,$requiredVal);
             }
         }
+        $mutationName = $mutationName."Mutation";
             
 
-        $filename = TypeHelper::makeMutation($mutationName, implode(',',$fields),implode(',',$dataTypes),implode(',',$requiredArr),implode(',',$aliasArr));
+        $filename = TypeHelper::makeMutation($mutationName,$folderName, implode(',',$fields),implode(',',$dataTypes),implode(',',$requiredArr),implode(',',$aliasArr));
         // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $mutationName . '.php'));
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/'.$folderName));
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

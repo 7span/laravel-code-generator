@@ -86,11 +86,11 @@ class TypeHelper
         return $filename;
     }
 
-    public static function makeMutation($mutationName, $fields, $dataTypes, $required, $alias)
+    public static function makeMutation($mutationName,$folderName, $fields, $dataTypes, $required, $alias)
     {
         // Make model using command
-        \Artisan::call('make:mutation ' . $mutationName . ' --fields='.$fields.' --types='.$dataTypes.' --required='.$required.' --alias='.$alias);
-        $filename = base_path('app/GraphQL/Mutation/' . $mutationName . '.php');
+        \Artisan::call('make:mutation ' . $mutationName . ' '.$folderName.' --fields='.$fields.' --types='.$dataTypes.' --required='.$required.' --alias='.$alias);
+        $filename = base_path('app/GraphQL/Mutation/'.$folderName);
 
         return $filename;
     }
@@ -103,5 +103,10 @@ class TypeHelper
         $filename = base_path('app/GraphQL/Query/' .str_replace('CollectionQuery','',$queryName));
 
         return $filename;
+    }
+
+    public static function camelCaseToSnakeCase($string)
+    {
+        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $string));
     }
 }

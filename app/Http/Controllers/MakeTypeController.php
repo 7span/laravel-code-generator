@@ -64,15 +64,8 @@ class MakeTypeController extends Controller
         $typeobj = $request->get('type_obj');
         if(!empty($typeobj)){
             $typeobj = explode('{',$typeobj);
-
-            $typeKeyword = ucfirst(trim($typeobj[0]));
+            $typeKeyword = ucfirst(trim(explode(' ',$typeobj[0])[0]));
             if(empty($typeKeyword) || $typeKeyword != 'Type'){
-                $foramt_error = ['format' => "Please Enter valid type format."];
-                return response()->json($foramt_error, 422);
-            }
-            $typeObjData = explode('(',$typeobj[1]);
-            
-            if(empty($typeObjData[1])){
                 $foramt_error = ['format' => "Please Enter valid type format."];
                 return response()->json($foramt_error, 422);
             }

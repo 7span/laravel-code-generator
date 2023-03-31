@@ -6,6 +6,7 @@ use Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
+use App\Library\TypeHelper;
 
 class MakeQueryCollectionCommand extends Command
 {
@@ -125,10 +126,18 @@ class MakeQueryCollectionCommand extends Command
 
         $temp = 'return [';
         for($i = 0 ; $i < $fieldCount ; $i++){
+            $aliasVal = TypeHelper::camelCaseToSnakeCase($fields[$i]);
+
             $temp .= "'".$fields[$i]."' => [
                     'name' => '".$fields[$i]."',
-                    'type' => Type::".$dataTypes[$i]."()
-                ],";
+                    'type' => Type::".$dataTypes[$i]."(),";
+
+            $temp .= "'alias' => '".$aliasVal."'";
+            if(str_contains($dataTypes[$i],'!')){
+                $temp .= ",'rules' => ['required']";
+            }
+
+            $temp .= "],";
         }
 
         $search = 'return [';

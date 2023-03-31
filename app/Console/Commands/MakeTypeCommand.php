@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
-use App\Library\TextHelper;
+use App\Library\TypeHelper;
 
 class MakeTypeCommand extends Command
 {
@@ -117,19 +116,18 @@ class MakeTypeCommand extends Command
 
         $fields = explode(',',$this->option('fields'));
         $dataTypes = explode(',',$this->option('types'));
-
-        $fieldsArr = [];
         $fieldCount = count($fields);
-        $modelName = str_replace('Type','',$this->getSingularClassName($this->argument('name')));
 
         $temp = 'return [';
         for($i = 0 ; $i < $fieldCount ; $i++){
             $temp .= "'".$fields[$i]."' => [
                     'type' => Type::".str_replace('!','',$dataTypes[$i])."(),
-                    'description' => '".$fields[$i]."'";
+                    'description' => '".$fields[$i]."',";
 
+            $aliasVal = TypeHelper::camelCaseToSnakeCase($fields[$i]);
+            $temp .= "'alias' => '".$aliasVal."'";
             if(str_contains($dataTypes[$i],'!')){
-                $temp .= ",'required' => TRUE";
+                $temp .= ",'rules' => ['required']";
             }
 
             $temp .=   " ],";
@@ -152,7 +150,7 @@ class MakeTypeCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Type') . '/' . str_replace('Input','',$this->getSingularClassName($this->argument('name'))).'/'.$this->getSingularClassName($this->argument('name')) . '.php';
+        return base_path('app/GraphQL/Type') . '/' . str_replace('Type','',str_replace('Input','',$this->getSingularClassName($this->argument('name')))).'/'.$this->getSingularClassName($this->argument('name')) . '.php';
     }
 
     /**

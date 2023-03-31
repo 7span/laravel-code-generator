@@ -1,5 +1,5 @@
 var addFieldButton = document.getElementById("addFieldButton");
-document.getElementById("migration_fields").addEventListener('click', function() {        
+document.getElementById("migration_fields").addEventListener('click', function() {
     addFieldButton.style.display = (this.checked)? "block" : "none";
 });
 
@@ -9,17 +9,19 @@ $('#makeTypeFileForm').on('submit',function(e){
 
     $('.loading').show();
 
+    $('.typeObjectError').text('');
+
     var typeFields = [];
     var typeAlias = [];
     var input = document.getElementsByClassName('added_type_input');
-    
+
     for (var i = 0; i < input.length; i++) {
         var a = input[i];
         console.log(a.value);
         typeFields.push(a.name.replace("type_fields[", "").replace("]", ""));
     }
     console.log(typeFields);
-    
+
     $.ajax({
         url: "/make-type",
         type: "POST",
@@ -34,8 +36,9 @@ $('#makeTypeFileForm').on('submit',function(e){
             $('.loading').hide();
         },
         error: function(response) {
-            console.log(response.responseJSON);
             response.responseJSON.hasOwnProperty('type_name') ? $('.typeNameError').text(response.responseJSON.type_name[0]) : '';
+
+            (typeof response.responseJSON.format != undefined) ? $('.typeObjectError').text(response.responseJSON.format) : '';
         },
     });
 });

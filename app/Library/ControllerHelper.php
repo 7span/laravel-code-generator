@@ -9,9 +9,6 @@ class ControllerHelper
 {
     public static function makeController($modelName, $generatedFilesPath, $adminCrud, $methods)
     {
-        // Copy traits files into Generated_files
-        File::copy(base_path('app/Traits/ApiResponser.php'), storage_path('app/' . $generatedFilesPath . '/Traits/ApiResponser.php'));
-
         // Make API controller using command and move it to Generated_files
         \Artisan::call('make:controller ' . $modelName . " --methods='" . $methods . "'");
         Storage::disk('local')->makeDirectory($generatedFilesPath . '/Http/Controllers/API/V1');

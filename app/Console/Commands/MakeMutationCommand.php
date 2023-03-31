@@ -21,7 +21,7 @@ class MakeMutationCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Make service file';
+    protected $description = 'This command is used to create mutation.';
 
     /**
      * Filesystem instance
@@ -48,7 +48,7 @@ class MakeMutationCommand extends Command
     public function handle()
     {
         $path = $this->getSourceFilePath();
-        
+
         $this->makeDirectory(dirname($path));
 
         $contents = $this->getSourceFile();
@@ -119,9 +119,9 @@ class MakeMutationCommand extends Command
         $dataTypes = explode(',',$this->option('types'));
         $requiredData = explode(',',$this->option('required'));
         $alias = explode(',',$this->option('alias'));
-        
+
         $fieldCount = count($fields);
-        
+
         $temp = 'return [';
         for($i = 0 ; $i < $fieldCount ; $i++){
             $rule = '';
@@ -132,7 +132,7 @@ class MakeMutationCommand extends Command
             if(!empty($alias[$i])){
                 $aliasData = "'alias' => '".$alias[$i]."',";
             }
-            $temp .= 
+            $temp .=
                 "'".$fields[$i]."' => [
                     $aliasData
                     'name' => '".$fields[$i]."',
@@ -176,9 +176,9 @@ class MakeMutationCommand extends Command
      */
     public function getSingularName($name,$is_lower = false)
     {
-        
+
         return lcfirst($name);
-       
+
     }
 
     /**

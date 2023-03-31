@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class ModelHelper
 {
     const INDENT = '    ';
-    
+
     public static function getModelName($string)
     {
         $string = ucwords($string);
@@ -59,9 +59,9 @@ class ModelHelper
             foreach ($scopeFields as $key => $scopeField) {
                 $newScopeField = str_replace(' ', '', ucwords(str_replace('_', ' ', $scopeField)));
                 if ($key == 0) {
-                    $scopesText .= 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value)' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
+                    $scopesText .= 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value);' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
                 } else {
-                    $scopesText .= self::INDENT . 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value)' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
+                    $scopesText .= self::INDENT . 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value);' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
                 }
 
                 if (array_key_last($scopeFields) != $key) {
@@ -81,10 +81,5 @@ class ModelHelper
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));
-
-        // Make folder in Generated_files and copy traits files into it
-        Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
-        File::copy(base_path('app/Traits/BaseModel.php'), storage_path('app/' . $generatedFilesPath . '/Traits/BaseModel.php'));
-        File::copy(base_path('app/Traits/BootModel.php'), storage_path('app/' . $generatedFilesPath . '/Traits/BootModel.php'));
     }
 }

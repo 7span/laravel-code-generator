@@ -19,14 +19,14 @@ class $CLASSNAME$ extends Mutation
     {
     }
 
-    public function type(): Type
+    public function type(): boolean
     {
-        return GraphQL::type('$SERVICE_CLASSNAME_VARIABLE$');
+        return Type::boolean();
     }
 
     public function args(): array
     {
-        return [ 
+        return [
         ];
     }
 

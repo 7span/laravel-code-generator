@@ -9,9 +9,6 @@ class ServiceHelper
 {
     public static function makeServiceFile($modelName, $generatedFilesPath, $methods)
     {
-        // Copy traits files into Generated_files
-        File::copy(base_path('app/Traits/PaginationTrait.php'), storage_path('app/' . $generatedFilesPath . '/Traits/PaginationTrait.php'));
-
         // Make lang folder into Generated_files and copy lang file into it
         Storage::disk('local')->makeDirectory($generatedFilesPath . '/lang/en');
         File::copy(base_path('lang/en/entity.php'), storage_path('app/' . $generatedFilesPath . '/lang/en/entity.php'));

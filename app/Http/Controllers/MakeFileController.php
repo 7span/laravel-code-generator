@@ -51,6 +51,9 @@ class MakeFileController extends Controller
         // Is scope defined for model
         $scope = $request->get('scope');
 
+        // Is scope defined for model
+        $trait = $request->get('trait');
+
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
         if ($storage == false) {
@@ -71,6 +74,16 @@ class MakeFileController extends Controller
 
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods));
+
+        if($trait == 1){
+            // Make folder in Generated_files and copy traits files into it
+            Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
+            File::copy(base_path('app/Traits/BaseModel.php'), storage_path('app/' . $generatedFilesPath . '/Traits/BaseModel.php'));
+            File::copy(base_path('app/Traits/BootModel.php'), storage_path('app/' . $generatedFilesPath . '/Traits/BootModel.php'));
+            File::copy(base_path('app/Traits/ApiResponser.php'), storage_path('app/' . $generatedFilesPath . '/Traits/ApiResponser.php'));
+            File::copy(base_path('app/Traits/PaginationTrait.php'), storage_path('app/' . $generatedFilesPath . '/Traits/PaginationTrait.php'));
+            File::copy(base_path('app/Traits/ResourceFilterable.php'), storage_path('app/' . $generatedFilesPath . '/Traits/ResourceFilterable.php'));
+        }
 
         // Make migration and move it to Generated_files
         MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete);

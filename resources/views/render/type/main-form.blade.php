@@ -21,15 +21,16 @@
     </div>
 
     <div class="form-group col-lg-6">
-        <label for="name">Type Input Object Snippet :</label>
+        <label for="name">Type Input Object Snippet : <span style="color:red">("!" is used for field required or not)</span></label>
         <textarea class="form-control container" rows="7"  cols="50" disabled>
             type FormFieldInput {
                 id: Int
-                name: String
+                name: String!
                 type: String
                 validations: String
              }
         </textarea>
+
     </div>
 
     <div class="form-group ">

@@ -44,15 +44,21 @@ class MakeMutationController extends Controller
         }
         $mutationObj = $request->get('mutation_text');
         $folderName = ucfirst($request->get('folder_name'));
-        
+
         $fields = [];
         $dataTypes = [];
         $requiredArr = [];
         $aliasArr = [];
         if(!empty($mutationObj)){
+
+            if(!(strpos($mutationObj,'{') && strpos($mutationObj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curlybrecket is missing."];
+                return response()->json($foramt_error, 422);
+            }
+
             $mutationObj = explode('{',$mutationObj);
-            
-            $mutationKeyword = ucfirst(trim($mutationObj[0]));  
+
+            $mutationKeyword = ucfirst(trim($mutationObj[0]));
             if(empty($mutationKeyword) || $mutationKeyword != 'Mutation'){
                 $foramt_error = ['format' => "Please Enter valid mutation format."];
                 return response()->json($foramt_error, 422);
@@ -99,7 +105,7 @@ class MakeMutationController extends Controller
             }
         }
         $mutationName = $mutationName."Mutation";
-            
+
 
         $filename = TypeHelper::makeMutation($mutationName,$folderName, implode(',',$fields),implode(',',$dataTypes),implode(',',$requiredArr),implode(',',$aliasArr));
         // Move the file to Generated_files
@@ -113,6 +119,6 @@ class MakeMutationController extends Controller
 
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);
 
-        
+
     }
 }

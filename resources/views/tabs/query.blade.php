@@ -4,6 +4,7 @@
     <div class="form-group">
         <label for="name">Query Object:</label>
         <textarea class="form-control container" id="query_obj" name="query_obj" rows="3"  cols="50">{!! old('type_name') !!}</textarea>
+        <span style="color:red" class="queryObjectError"></span>
     </div>
 
     <div class="form-group">
@@ -69,6 +70,7 @@
         e.preventDefault();
 
         $('.loading').show();
+        $('.queryObjectError').text();
 
         $.ajax({
             url: "/make-query",
@@ -88,6 +90,8 @@
                 console.log(response.responseJSON);
                 response.responseJSON.hasOwnProperty('model_name') ? $('.modelNameError').text(response.responseJSON.model_name[0]) : '';
                 response.responseJSON.hasOwnProperty('method') ? $('.methodsError').text(response.responseJSON.method[0]) : '';
+
+                (typeof response.responseJSON.format != undefined) ? $('.queryObjectError').text(response.responseJSON.format) : '';
             },
         });
     });

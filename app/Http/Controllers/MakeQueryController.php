@@ -89,8 +89,26 @@ class MakeQueryController extends Controller
 
         $queryObj = $request->get('query_obj');
         if(!empty($queryObj)){
+
+            if(!(strpos($queryObj,'{') && strpos($queryObj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curlybrecket is missing."];
+                return response()->json($foramt_error, 422);
+            }
+
             $queryObj = explode('{',$queryObj);
             $queryObjData = explode('(',$queryObj[1]);
+
+            $queryKeyword = ucfirst(trim($queryObj[0]));
+            if(empty($queryKeyword) || $queryKeyword != 'Query'){
+                $foramt_error = ['format' => "Please Enter valid query format."];
+                return response()->json($foramt_error, 422);
+            }
+
+            if(empty($queryObjData[1])){
+                $foramt_error = ['format' => "Please Enter valid query format."];
+                return response()->json($foramt_error, 422);
+            }
+
 
             $queryName = trim(preg_replace('/\s\s+/', '', $queryObjData[0]));
             $queryTexts = TypeHelper::getQueryFields($queryObjData[1]);

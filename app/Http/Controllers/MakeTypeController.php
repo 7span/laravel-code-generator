@@ -63,6 +63,12 @@ class MakeTypeController extends Controller
         }
         $typeobj = $request->get('type_obj');
         if(!empty($typeobj)){
+
+            if(!(strpos($typeobj,'{') && strpos($typeobj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curlybrecket is missing."];
+                return response()->json($foramt_error, 422);
+            }
+
             $typeobj = explode('{',$typeobj);
             $typeKeyword = ucfirst(trim(explode(' ',$typeobj[0])[0]));
             if(empty($typeKeyword) || $typeKeyword != 'Type'){

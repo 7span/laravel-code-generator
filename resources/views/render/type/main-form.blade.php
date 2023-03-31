@@ -22,7 +22,7 @@
 
     <div class="form-group col-lg-6">
         <label for="name">Type Input Object Snippet :</label>
-        <textarea class="form-control container" rows="6"  cols="50" disabled>
+        <textarea class="form-control container" rows="7"  cols="50" disabled>
             type FormFieldInput {
                 id: Int
                 name: String
@@ -32,7 +32,7 @@
         </textarea>
     </div>
 
-    <div class="form-group">
+    <div class="form-group ">
         <label for="name">Type name:</label>
         <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
         <input type="text" id="type_name" name="type_name" value="ProjectType" required="">
@@ -40,14 +40,21 @@
         <span style="color:red" class="typeNameError"></span><br>
     </div>
 
+
     <input type="String" name="type_fields[name]" value="{'field':name', 'alias':name', 'type':'String', 'description':'name of xyz'}" class="added_type_input" style="display:none">
     <input type="int" name="type_fields[id]" value="{'field':id', 'alias':id', 'type':'int', 'description':'id of xyz'}" class="added_type_input" style="display:none">
 
-    <div class="form-group">
+    <div class="form-group col-lg-6">
         <label for="typeText">Enter type text</label>
-        <!-- <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea> -->
-        <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)">id: int,name: String</textarea>
+        <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
         <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button>
+    </div>
+
+    <div class="form-group col-lg-6">
+        <label for="name">Type Text Snippet :</label>
+        <textarea class="form-control container" rows="3"  cols="50" disabled>
+            id: int,name: String
+        </textarea>
     </div>
 
     <!-- <button type="button" class="btn btn-warning" id="editTypeFieldModal" data-toggle="modal" data-target="#editTypeFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->

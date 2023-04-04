@@ -35,7 +35,7 @@
 
     {{-- Start HERE --}}
 
-    <div class="inputs inout-boxes-wrap" style="display:block">
+    <div class="inputs inout-boxes-wrap" style="display:none">
         <div class="row add-more">
             <div class="col-md-3">
                 <div class="form-group">
@@ -78,7 +78,7 @@
             </div>
 
         </div>
-        
+
     </div>
     <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate code files</i></button>
 </form>
@@ -108,8 +108,8 @@
                 $('.loading').hide();
             },
             error: function(response) {
-                
-                
+
+
                 (typeof response.responseJSON.format != undefined) ? $('.mutationFormatError').text(response.responseJSON.format) : '';
                 response.responseJSON.hasOwnProperty('folder_name') ? $('.folderNameError').text(response.responseJSON.folder_name[0]) : '';
                 response.responseJSON.hasOwnProperty('method') ? $('.methodsError').text(response.responseJSON.method[0]) : '';
@@ -120,7 +120,7 @@
         var obj = $('.inout-boxes-wrap');
         var $row = obj.children().first();
         var $clone = $row.clone();
-        
+
         $clone.find('.rowCls').removeClass('add_more_row').addClass('remove_raw');
         $clone.find('input[type=text]').val('');
         $clone.find('.rowCls').val('-');

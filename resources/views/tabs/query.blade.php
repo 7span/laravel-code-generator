@@ -1,39 +1,56 @@
+
+<br>
+<b><span style="color:red">Please enter either object or text.</span></b>
+
 <form id="makeQueryFileForm">
     @csrf
 
-    <div class="form-group">
-        <label for="name">Query Object:</label>
-        <textarea class="form-control container" id="query_obj" name="query_obj" rows="3"  cols="50">{!! old('type_name') !!}</textarea>
-        <span style="color:red" class="queryObjectError"></span>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="name">Query Object:</label>
+                <textarea class="form-control container" id="query_obj" name="query_obj" rows="3"  cols="50">{!! old('type_name') !!}</textarea>
+                <span style="color:red" class="queryObjectError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Query Object Snippet:</label>
+                <textarea class="form-control container"  rows="7"  cols="50" disabled>
+                    query {
+                        Project(
+                            perPage: Int
+                            page: Int
+                            workspaceId: Int
+                            campaignId: Int
+                            formId: Int
+                            search: String
+                        ): FormFields
+                    }
+                </textarea>
+            </div>
+        </div>
+
+            <div class="vertical" style="border-left: 6px solid gray;
+            height: 430px;
+            position:absolute;
+            left: 50%;"></div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="name">Query name:</label>
+                <input type="text" id="query_name" name="query_name" value="{!! old('query_name') !!}">
+                <span style="color:blue">If possible please enter your query name like Project,Category.</span>
+                <span style="color:red" class="queryNameError"></span><br>
+            </div>
+
+            <div class="form-group">
+                <label for="queryText">Enter query text</label>
+                <textarea class="form-control container" id="queryText" name="query_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="name">Query Object Snippet:</label>
-        <textarea class="form-control container"  rows="7"  cols="50" disabled>
-            query {
-                Project(
-                    perPage: Int
-                    page: Int
-                    workspaceId: Int
-                    campaignId: Int
-                    formId: Int
-                    search: String
-                ): FormFields
-            }
-        </textarea>
-    </div>
 
-    <div class="form-group">
-        <label for="name">Query name:</label>
-        <input type="text" id="query_name" name="query_name" value="{!! old('query_name') !!}">
-        <span style="color:blue">If possible please enter your query name like Project,Category.</span>
-        <span style="color:red" class="queryNameError"></span><br>
-    </div>
 
-    <div class="form-group">
-        <label for="queryText">Enter query text</label>
-        <textarea class="form-control container" id="queryText" name="query_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
-    </div>
 
     {{-- <div class="form-check">
         <input type="hidden" name="pre_process" value="0" checked="checked">

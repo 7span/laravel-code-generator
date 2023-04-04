@@ -1,0 +1,71 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Models\$CLASS_NAME$;
+use App\Traits\PaginationTrait;
+
+class $CLASS_NAME$Service
+{
+    use  PaginationTrait;
+
+    public function __construct()
+    {
+        private $this->$SINGULAR_VARIABLE$Obj = new $CLASS_NAME$;
+    }
+
+    public function collection($inputs = null)
+    {
+        $inputs = $this->paginationAttribute($inputs);
+
+        $select = '$PLURAL_VARIABLE$.*';
+        if (isset($inputs['select'])) {
+            $select = $inputs['select'];
+        }
+
+        $$PLURAL_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->select($select);
+        if (isset($inputs['with'])) {
+            $$PLURAL_VARIABLE$ = $$PLURAL_VARIABLE$->with($inputs['with']);
+        }
+
+
+        $inputs['limit'] = $inputs['limit'] == -1 ? $$PLURAL_VARIABLE$->count() : $inputs['limit'];
+        $$PLURAL_VARIABLE$ = $$PLURAL_VARIABLE$->paginate($inputs['limit'], ['*'], 'page', $inputs['page']);
+
+        return $$PLURAL_VARIABLE$;
+    }
+
+    public function store($inputs = null)
+    {
+        $this->$SINGULAR_VARIABLE$Obj->create($inputs);
+        return true;
+
+    }
+
+    public function resource($id, $inputs = null)
+    {
+        return $this->$SINGULAR_VARIABLE$Obj->select('$PLURAL_VARIABLE$.*')
+            ->where('$PLURAL_VARIABLE$.id', $id)
+            ->first();
+
+    }
+
+    public function update($id, $inputs = null)
+    {
+        $$SINGULAR_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->resource($id);
+        throw_if(empty($$SINGULAR_VARIABLE$), new NotFoundException(__('error.entityNotFound', ['entity' => '$SINGULAR_VARIABLE$'])));
+
+        $$SINGULAR_VARIABLE$->update($inputs);
+        return true;
+    }
+
+    public function destroy(int $id)
+    {
+        $this->resource($id)->delete();
+        return true;
+    }
+
+
+
+
+

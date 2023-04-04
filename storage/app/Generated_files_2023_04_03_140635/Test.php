@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Project extends Model
+class Test extends Model
 {
     use BaseModel, BootModel, HasFactory, SoftDeletes;
 
-    protected $table = 'projects';
+    protected $table = 'tests';
 
     public $fillable = [
         'created_by',

@@ -21,7 +21,12 @@ class RequestHelper
             TextHelper::replaceStringInFile($requestFilePath, $stringToReplace, $ruleText);
         }
 
-        // Move request file to Generated_files
+        file_put_contents($requestFilePath, "");
+
+        $contentStub = file_get_contents(__DIR__.'/../../stubs/validation.stub');
+
+        file_put_contents($requestFilePath,$contentStub);
+
         File::move($requestFilePath, storage_path('app/' . $generatedFilesPath . '/Http/Requests/' . $modelName . 'Request.php'));
 
         // Delete the Requests folder

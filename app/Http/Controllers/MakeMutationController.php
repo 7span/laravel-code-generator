@@ -9,6 +9,7 @@ use App\Library\TypeHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Library\ServiceHelper;
 
 class MakeMutationController extends Controller
 {
@@ -110,6 +111,11 @@ class MakeMutationController extends Controller
         $filename = TypeHelper::makeMutation($mutationName,$folderName, implode(',',$fields),implode(',',$dataTypes),implode(',',$requiredArr),implode(',',$aliasArr));
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/'.$folderName));
+
+
+        $modelName = str_replace('Mutation','',$mutationName);
+        // Make service file and move it to Generated_files
+        ServiceHelper::makeQraphqlServiceFile($modelName, $generatedFilesPath);
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

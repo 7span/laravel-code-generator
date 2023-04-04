@@ -7,6 +7,7 @@ use File;
 use App\Library\ZipHelper;
 use App\Library\TypeHelper;
 use Illuminate\Support\Facades\Storage;
+use App\Library\ServiceHelper;
 
 class MakeQueryController extends Controller
 {
@@ -144,6 +145,12 @@ class MakeQueryController extends Controller
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('ResourceQuery','',$queryName)).'/'.$queryName.'.php');
+
+
+        $modelName = str_replace('CollectionQuery','',str_replace('ResourceQuery','',$queryName));
+
+        // Make service file and move it to Generated_files
+        ServiceHelper::makeQraphqlServiceFile($modelName, $generatedFilesPath);
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

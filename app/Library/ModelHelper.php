@@ -23,8 +23,9 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete)
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$isForGraphql = false)
     {
+
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
@@ -33,6 +34,17 @@ class ModelHelper
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
+
+        if($isForGraphql){
+            $useText = "use App\Traits\BaseModel;";
+            TextHelper::replaceStringInFile($filename, $useText, "");
+
+            $useText = "use App\Traits\BootModel;";
+            TextHelper::replaceStringInFile($filename, $useText, "");
+
+            $useText = "use BaseModel, BootModel,";
+            TextHelper::replaceStringInFile($filename, $useText, "use ");
+        }
 
         // Replace the content of file as per our need
         $stringToReplace = 'fillable = [';

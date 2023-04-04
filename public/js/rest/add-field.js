@@ -1,9 +1,19 @@
 $('#addFieldForm').on('submit', function(e){
     e.preventDefault();
-        
+
     var column_type = $('#column_type').find(":selected").val();
     var column_name = $("input[name='column_name']").val().replace(/[^\w\s]/gi, "");
     var column_validation = $('#column_validation').find(":selected").val();
+    let names = [];
+
+    jQuery('#myTable > tbody > tr').each(function(index, value) {
+        names.push($('td:eq(0)', this).text());
+    });
+
+    if($.inArray(column_name,names) != -1){
+        $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
+        return true;
+    }
 
     if (column_type == "blank") {
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>")
@@ -18,30 +28,30 @@ $('#addFieldForm').on('submit', function(e){
             });
 
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'" + values + "'}";
-        
+
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else if (column_type == 'decimal' || column_type == 'double' || column_type == 'float') {
             var total_number = $("input[name='decimal_total_number']").val();
             var decimal_precision = $("input[name='decimal_precision']").val();
-            
+
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'total_number':'" + total_number + "', 'decimal_precision':'" + decimal_precision + "'}";
-            
+
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else if (column_type == 'string') {
             var character_limit = $("input[name='character_limit']").val();
-            
+
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit':'" + character_limit + "'}";
-            
+
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else if (column_type == 'foreignKey') {
             var table_name = $("input[name='table_name']").val();
-            
+
             var value = "{'type':'" + column_type + "', 'validation':'optional', 'possible_values':'', 'table_name':'" + table_name + "'}";
-            
+
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else {
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
-            
+
             $('#makeFileForm #model_name').after('<input type="' + column_type + '" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         }
 
@@ -53,15 +63,15 @@ $('#addFieldForm').on('submit', function(e){
             $('#scope_fields').show();
             $('#label_scope_fields').show();
         }
-        
+
         $('#addFieldModal').modal('toggle');
         $('#addFieldForm').trigger('reset');
-    
+
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".table_name_div").css("display", "none"); // display clone div for table name
         $(".character_div").css("display", "none"); // hide clone div for varchar
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
-        
+
         $(".cloned_input").remove();
     }
 });

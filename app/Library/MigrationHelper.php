@@ -18,12 +18,10 @@ class MigrationHelper
         $files = scandir(base_path('database/migrations'), SCANDIR_SORT_DESCENDING);
         $newest_file = $files[0];
         $filename = base_path('database/migrations/' . $newest_file);
-        $stringToReplace = 'table->id();';
-        $replaceWith = 'table->id();' . $migrationText;
-        TextHelper::replaceStringInFile($filename, $stringToReplace, str_replace('"', "'", $replaceWith));
-        
+
         $stringToReplace = '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();';
         $replaceWith = $softDelete == "1" ? '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();' : '$table->timestamps();';
+        $replaceWith = $migrationText. PHP_EOL . self::INDENT . self::INDENT . self::INDENT .$replaceWith;
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Move migration file to Generated_files

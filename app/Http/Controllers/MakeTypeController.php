@@ -9,6 +9,8 @@ use App\Library\TypeHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Library\ModelHelper;
+use Illuminate\Support\Pluralizer;
 
 class MakeTypeController extends Controller
 {
@@ -99,6 +101,21 @@ class MakeTypeController extends Controller
             array_push($fields, $splitTypeText[0]);
             array_push($dataTypes, $splitTypeText[1]);
         }
+
+
+        $modelName = str_replace('Type','',str_replace('Input','',$typeName));
+        // Get table name
+        $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
+        $scope = '';
+        $softDelete = 1;
+        // Make model and move it to Generated_files
+
+        $tempFields = "";
+        foreach($fields as $field){
+            $tempFields .= "'".$field."',";
+        }
+        
+        ModelHelper::makeModel($modelName, $tableName, $tempFields, $generatedFilesPath, $scope, $softDelete,true);
 
         // Get replaceable text
         $filename = TypeHelper::makeType($typeName, implode(',',$fields),implode(',',$dataTypes));

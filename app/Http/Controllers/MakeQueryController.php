@@ -152,6 +152,9 @@ class MakeQueryController extends Controller
         // Make service file and move it to Generated_files
         ServiceHelper::makeQraphqlServiceFile($modelName, $generatedFilesPath);
 
+        File::copy(base_path('app/Traits/PaginationTrait.php'),storage_path('app/' . $generatedFilesPath . '/Traits/PaginationTrait.php'));
+        File::copy(base_path('app/Traits/SelectFieldTrait.php'),storage_path('app/' . $generatedFilesPath . '/Traits/SelectFieldTrait.php'));
+
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);
 

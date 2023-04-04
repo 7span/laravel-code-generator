@@ -83,6 +83,7 @@ class MakeFileController extends Controller
             File::copy(base_path('app/Traits/ApiResponser.php'), storage_path('app/' . $generatedFilesPath . '/Traits/ApiResponser.php'));
             File::copy(base_path('app/Traits/PaginationTrait.php'), storage_path('app/' . $generatedFilesPath . '/Traits/PaginationTrait.php'));
             File::copy(base_path('app/Traits/ResourceFilterable.php'), storage_path('app/' . $generatedFilesPath . '/Traits/ResourceFilterable.php'));
+            File::copy(base_path('app/Traits/SelectFieldTrait.php'),storage_path('app/' . $generatedFilesPath . '/Traits/SelectFieldTrait.php'));
         }
 
         // Make migration and move it to Generated_files

@@ -19,7 +19,7 @@ class $CLASSNAME$ extends Mutation
     {
     }
 
-    public function type(): boolean
+    public function type(): Type
     {
         return Type::boolean();
     }

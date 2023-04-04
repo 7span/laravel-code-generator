@@ -114,7 +114,7 @@ class MakeTypeController extends Controller
         foreach($fields as $field){
             $tempFields .= "'".$field."',";
         }
-        
+
         ModelHelper::makeModel($modelName, $tableName, $tempFields, $generatedFilesPath, $scope, $softDelete,true);
 
         // Get replaceable text

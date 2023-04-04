@@ -9,9 +9,11 @@ class $CLASS_NAME$Service
 {
     use  PaginationTrait;
 
+    private $this->$SINGULAR_VARIABLE$Obj;
+
     public function __construct()
     {
-        private $this->$SINGULAR_VARIABLE$Obj = new $CLASS_NAME$;
+        $this->$SINGULAR_VARIABLE$Obj = new $CLASS_NAME$;
     }
 
     public function collection($inputs = null)

@@ -16,6 +16,7 @@ class RequestHelper
 
         // Replace the content of file as per our need
         $requestFilePath = base_path('app/Http/Requests/' . $modelName . 'Request.php');
+        
         if ($ruleText != '') {
             $stringToReplace = '//';
             TextHelper::replaceStringInFile($requestFilePath, $stringToReplace, $ruleText);

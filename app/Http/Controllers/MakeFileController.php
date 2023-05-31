@@ -37,7 +37,7 @@ class MakeFileController extends Controller
         $modelName = ModelHelper::getModelName($request->get('model_name'));
 
         // Path for generated files
-        $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
+        $generatedFilesPath = $modelName.'_'.date('Y_m_d_His', time());
 
         // Get methods which is selected
         $methods = $request->get('method');

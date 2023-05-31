@@ -18,12 +18,11 @@ class MigrationHelper
         $files = scandir(base_path('database/migrations'), SCANDIR_SORT_DESCENDING);
         $newest_file = $files[0];
         $filename = base_path('database/migrations/' . $newest_file);
-<<<<<<< HEAD
-=======
+
         $stringToReplace = "table->smallIncrements('id')->index();";
         $replaceWith = "table->smallIncrements('id')->index();" . $migrationText;
         TextHelper::replaceStringInFile($filename, $stringToReplace, str_replace('"', "'", $replaceWith));
->>>>>>> 680292cf9492fd88265bd67f58b16de711901c76
+
 
         $stringToReplace = '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();';
         $replaceWith = $softDelete == "1" ? '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();' : '$table->timestamps();';

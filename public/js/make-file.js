@@ -1,5 +1,5 @@
 var addFieldButton = document.getElementById("addFieldButton");
-document.getElementById("migration_fields").addEventListener('click', function() {        
+document.getElementById("migration_fields").addEventListener('click', function() {
     addFieldButton.style.display = (this.checked)? "block" : "none";
 });
 
@@ -16,7 +16,7 @@ $('#makeFileForm').on('submit',function(e){
     e.preventDefault();
 
     $('.loading').show();
-    
+
     $.ajax({
         url: "/make-files",
         type: "POST",
@@ -26,6 +26,9 @@ $('#makeFileForm').on('submit',function(e){
                 // alert(response.file_path);
                 // window.location.href = "file://" + response.file_path;
                 window.location.href = response.file_path;
+                setTimeout(function() {
+                    location.reload();
+                }, 5000);
             }
         },
         complete: function(){

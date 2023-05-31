@@ -72,7 +72,6 @@ class MakeFileController extends Controller
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods));
 
-
         // Make migration and move it to Generated_files
         MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete);
 
@@ -84,7 +83,7 @@ class MakeFileController extends Controller
 
         // Make resource files and move it to Generated_files
         ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
-        
+
         // Make request file and move it to Generated_files
         RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
 

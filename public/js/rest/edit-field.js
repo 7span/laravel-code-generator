@@ -21,8 +21,8 @@ $('#editFieldForm').on('submit', function(e){
             $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
             return true;
         }
-        
-        var column_validation = $('#edit_column_validation').find(":selected").val();
+
+        var column_validation = $('#edit_column_validation').val().join('|');
 
         $('.table tbody tr[data-row="' + which_row + '"]').attr('data-column-type', column_type).attr('data-column-name', column_name).attr('data-column-validation', column_validation);;
 
@@ -83,5 +83,21 @@ $('#editFieldForm').on('submit', function(e){
 
         $(".edit_possible").css("display", "none");
         $(".cloned_input").remove();
+    }
+});
+
+
+$('#edit_column_validation').on('change',function(){
+    var values = $(this).val();
+    if(values.includes('optional')){
+        $("select option[value='required']").attr('disabled', true);
+    }else{
+        $("select option[value='required']").attr('disabled', false);
+    }
+
+    if(values.includes('required')){
+        $("select option[value='optional']").attr('disabled', true);
+    }else{
+        $("select option[value='optional']").attr('disabled', false);
     }
 });

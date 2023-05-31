@@ -3,7 +3,6 @@ $('#addFieldForm').on('submit', function(e){
 
     var column_type = $('#column_type').find(":selected").val();
     var column_name = $("input[name='column_name']").val().replace(/[^\w\s]/gi, "");
-    var column_validation = $('#column_validation').find(":selected").val();
     let names = [];
 
     jQuery('#myTable > tbody > tr').each(function(index, value) {
@@ -14,6 +13,7 @@ $('#addFieldForm').on('submit', function(e){
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
         return true;
     }
+    var column_validation = $('#column_validation').val().join("|");
 
     if (column_type == "blank") {
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>")
@@ -73,5 +73,20 @@ $('#addFieldForm').on('submit', function(e){
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
 
         $(".cloned_input").remove();
+    }
+});
+
+$('#column_validation').on('change',function(){
+    var values = $(this).val();
+    if(values.includes('optional')){
+        $("select option[value='required']").attr('disabled', true);
+    }else{
+        $("select option[value='required']").attr('disabled', false);
+    }
+
+    if(values.includes('required')){
+        $("select option[value='optional']").attr('disabled', true);
+    }else{
+        $("select option[value='optional']").attr('disabled', false);
     }
 });

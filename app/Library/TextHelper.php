@@ -5,7 +5,7 @@ namespace App\Library;
 class TextHelper
 {
     const INDENT = '    ';
-    
+
     // A function to make replaceable text
     public static function getReplaceableText($tableFields, $tableName)
     {
@@ -18,10 +18,11 @@ class TextHelper
             foreach ($tableFields as $field => $values) {
                 $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                 $fieldType = $val['type'];
-                $validation = $val['validation'];
+                $validation = explode('|',$val['validation']);
                 $possibleValues = $val['possible_values'];
 
-                $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
+                // $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
+                $null_or_not_null = !in_array('required',$validation) ?  '->nullable()' : '';
 
                 if ($fieldType == 'enum') {
                     $pVal = '';
@@ -53,10 +54,10 @@ class TextHelper
                     $migrationText .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->' . $fieldType . '("' . $field . '")' . $null_or_not_null . ';';
                 }
 
-                if ($validation == 'required' && array_key_last($tableFields) != $field) {
-                    $ruleText .= '"' . $field . '" => "' . $validation . '",' . PHP_EOL;
-                } elseif ($validation == 'required' && array_key_last($tableFields) == $field) {
-                    $ruleText .= self::INDENT . self::INDENT . self::INDENT . '"' . $field . '" => "' . $validation . '"';
+                if (in_array('required',$validation) && array_key_last($tableFields) != $field) {
+                    $ruleText .= '"' . $field . '" => "' . implode('|',$validation) . '",' . PHP_EOL;
+                } elseif (in_array('required',$validation) && array_key_last($tableFields) == $field) {
+                    $ruleText .= self::INDENT . self::INDENT . self::INDENT . '"' . $field . '" => "' . implode('|',$validation) . '"';
                 }
 
                 $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'" . $field . "',";

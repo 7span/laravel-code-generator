@@ -26,9 +26,11 @@
                     <div class="form-group">
                         <label class="control-label">Validation for field</label>
                         <div>
-                            <select id="edit_column_validation" class="form-control" name="edit_column_validation">
+                            <select id="edit_column_validation" class="form-control" name="edit_column_validation" multiple>
                                 <option value="optional">Optional</option>
                                 <option value="required">Required</option>
+                                <option value="email">Email</option>
+                                <option value="unique">Unique</option>
                                 <!-- <option value="unique">Required | Unique</option> -->
                             </select>
                         </div>

@@ -4,7 +4,7 @@ namespace App\Http\Resources\$CLASS_NAME$;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class Resource extends ResourceCollection
+class Collection extends ResourceCollection
 {
     protected $model = 'App\Http\Resources\$CLASS_NAME$\Resource';
 

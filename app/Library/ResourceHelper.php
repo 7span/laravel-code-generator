@@ -9,8 +9,6 @@ class ResourceHelper
 {
     public static function makeResourceFiles($modelName, $methods, $generatedFilesPath)
     {
-        // Copy traits files into Generated_files
-        File::copy(base_path('app/Traits/ResourceFilterable.php'), storage_path('app/' . $generatedFilesPath . '/Traits/ResourceFilterable.php'));
 
         // Make resource file using command and move it to Generated_files
         \Artisan::call('make:resource ' . $modelName);

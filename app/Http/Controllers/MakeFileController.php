@@ -37,7 +37,7 @@ class MakeFileController extends Controller
         $modelName = ModelHelper::getModelName($request->get('model_name'));
 
         // Path for generated files
-        $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
+        $generatedFilesPath = $modelName.'_'. date('Y_m_d_His', time());
 
         // Get methods which is selected
         $methods = $request->get('method');
@@ -50,6 +50,8 @@ class MakeFileController extends Controller
 
         // Is scope defined for model
         $scope = $request->get('scope');
+
+        $trait = $request->get('trait');
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
@@ -71,6 +73,13 @@ class MakeFileController extends Controller
 
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods));
+
+        if($trait == 1){
+            // Make folder in Generated_files and copy traits files into it
+            Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
+
+            File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath.'/Traits'));
+        }
 
         // Make migration and move it to Generated_files
         MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete);

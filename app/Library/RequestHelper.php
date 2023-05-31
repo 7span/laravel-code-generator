@@ -20,7 +20,7 @@ class RequestHelper
         if ($ruleText != '') {
             $stringToReplace = '//';
             trim(preg_replace('/\t+/', '', $ruleText));
-            TextHelper::replaceStringInFile($requestFilePath, $stringToReplace, trim($ruleText));
+            TextHelper::replaceStringInFile($requestFilePath, $stringToReplace, $ruleText);
         }
 
         // Move request file to Generated_files

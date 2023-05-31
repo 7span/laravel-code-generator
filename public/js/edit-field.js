@@ -50,7 +50,13 @@ $('#editFieldForm').on('submit', function(e){
             var value = "{'type':'" + column_type + "', 'validation':'optional', 'possible_values':'', 'table_name':'" + table_name + "'}";
 
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
-        } else {
+        }else if(column_type == 'date'){
+            $("input[name='table_fields[" + old_column_name + "]']").remove();
+            var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
+            
+            $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
+
+        }else {
             $("input[name='table_fields[" + old_column_name + "]']").remove();
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')

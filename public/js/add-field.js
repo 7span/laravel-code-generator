@@ -50,7 +50,11 @@ $('#addFieldForm').on('submit', function(e){
             var value = "{'type':'" + column_type + "', 'validation':'optional', 'possible_values':'', 'table_name':'" + table_name + "'}";
 
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
-        } else {
+        }else if(column_type == 'date'){
+            var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
+
+            $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
+        }else {
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
 
             $('#makeFileForm #model_name').after('<input type="' + column_type + '" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
@@ -66,7 +70,7 @@ $('#addFieldForm').on('submit', function(e){
         }
 
         $('#addFieldModal').modal('toggle');
-        $('#addFieldForm').trigger('reset');
+        //$('#addFieldForm').trigger('reset');
 
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".table_name_div").css("display", "none"); // display clone div for table name

@@ -97,7 +97,7 @@ class MakeFileController extends Controller
 
         // Make resource files and move it to Generated_files
         ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
-
+        
         // Make request file and move it to Generated_files
         RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
 

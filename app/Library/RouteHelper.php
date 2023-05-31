@@ -12,9 +12,9 @@ class RouteHelper
         Storage::disk('local')->put($generatedFilesPath . '/api-v1.php', file_get_contents(base_path('stubs/api.v1.routes.stub')));
 
         if (count($methods) == 5) {
-            $route = "Route::apiResource('" . strtolower($modelName) . "s', " . ucfirst($modelName) . 'Controller::class);';
+            $route = "Route::apiResource('" . strtolower($modelName) . "s', " . 'V1' . '\\' . ucfirst($modelName) . 'Controller::class);';
         } else {
-            $route = "Route::apiResource('" . strtolower($modelName) . "s', " . ucfirst($modelName) . "Controller::class)->only(['" . implode("', '", $methods) . "']);";
+            $route = "Route::apiResource('" . strtolower($modelName) . "s', " . 'V1' . '\\' . ucfirst($modelName) . "Controller::class)->only(['" . implode("', '", $methods) . "']);";
         }
         Storage::disk('local')->append($generatedFilesPath . '/api-v1.php', $route, PHP_EOL);
 

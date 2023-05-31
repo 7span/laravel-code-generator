@@ -22,32 +22,42 @@
       <input type="checkbox" id="resource" name="resource" value="1" @checked(old('resource') ?? 'checked')><label class="light" for="resource">Do you want resource file?</label><br>
 
       <input type="hidden" name="request" value="0" checked="checked">
-      <input type="checkbox" id="request" name="request" value="1" @checked(old('request') ?? 'checked')><label class="light" for="request">Do you want request file?</label><br><br>
+      <input type="checkbox" id="request" name="request" value="1" @checked(old('request') ?? 'checked')><label class="light" for="request">Do you want request file?</label><br>
+
+      <input type="hidden" name="trait" value="0" checked="checked">
+      <input type="checkbox" id="trait" name="trait" value="1" @checked(old('trait') ?? 'checked')><label class="light" for="trait">Do you want below trait files?</label><br>
+      <ul>
+        <li>ApiResponse.php</li>
+        <li>BaseModel.php</li>
+        <li>BootModel.php</li>
+        <li>PaginationTrait.php</li>
+        <li>ResourceFilterable.php</li>
+      </ul>
 
       <label for="name">Which method do you want to include?</label>
-      
+
       <input type="checkbox" id="index" name="method[]" value="index" @if(is_array(old('method')) && in_array('index', old('method'))) checked @endif><label class="light" for="index">Index</label>
       <!-- <input type="checkbox" id="index" name="method[]" value="index" checked><label class="light" for="index">Index</label> -->
-      
+
       <input type="checkbox" id="store" name="method[]" value="store" @if(is_array(old('method')) && in_array('store', old('method'))) checked @endif><label class="light" for="store">Store</label>
-      
+
       <input type="checkbox" id="show" name="method[]" value="show" @if(is_array(old('method')) && in_array('show', old('method'))) checked @endif><label class="light" for="show">Show</label>
-      
+
       <input type="checkbox" id="update" name="method[]" value="update" @if(is_array(old('method')) && in_array('update', old('method'))) checked @endif><label class="light" for="update">Update</label>
-      
+
       <input type="checkbox" id="destroy" name="method[]" value="destroy" @if(is_array(old('method')) && in_array('destroy', old('method'))) checked @endif><label class="light" for="destroy">Destroy</label><br>
-      
+
       <span style="color:red" class="methodsError"></span><br><br>
 
       <input type="hidden" name="migration_fields" value="0" checked="checked">
       <input type="checkbox" id="migration_fields" name="migration_fields" value="1" @checked(old('migration_fields'))><label class="light" for="migration_fields">Want to add more fields in the table?</label><br><br>
-      
+
       <button type="button" class="btn btn-warning" id="addFieldButton" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
       <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
-      
+
       <input type="hidden" name="scope_fields" value="0" checked="checked">
       <input type="checkbox" id="scope_fields" name="scope_fields" @checked(old('scope'))><label class="light" for="scope_fields" id="label_scope_fields">Want to add scope in the model file?</label><br><br>
-      
+
       <button type="button" class="btn btn-warning" id="addScopeButton" style="display:none" data-toggle="modal" data-target="#addScopeFieldModal"><i class="fas fa-plus"> Add new scope field</i></button><br><br>
 
       <div class="row">

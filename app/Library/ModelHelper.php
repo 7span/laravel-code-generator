@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class ModelHelper
 {
     const INDENT = '    ';
-    
+
     public static function getModelName($string)
     {
         $string = ucwords($string);
@@ -81,10 +81,5 @@ class ModelHelper
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));
-
-        // Make folder in Generated_files and copy traits files into it
-        Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
-        File::copy(base_path('app/Traits/BaseModel.php'), storage_path('app/' . $generatedFilesPath . '/Traits/BaseModel.php'));
-        File::copy(base_path('app/Traits/BootModel.php'), storage_path('app/' . $generatedFilesPath . '/Traits/BootModel.php'));
     }
 }

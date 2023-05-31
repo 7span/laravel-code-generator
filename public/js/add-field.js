@@ -5,6 +5,17 @@ $('#addFieldForm').on('submit', function(e){
     var column_name = $("input[name='column_name']").val().replace(/[^\w\s]/gi, "");
     var column_validation = $('#column_validation').val().join("|");
 
+    let names = [];
+
+    jQuery('#myTable > tbody > tr').each(function(index, value) {
+        names.push($('td:eq(0)', this).text());
+    });
+
+    if($.inArray(column_name,names) != -1){
+        alert('Column already exists.');
+        return true;
+    }
+
     if (column_type == "blank") {
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>")
     } else {

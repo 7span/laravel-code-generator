@@ -75,6 +75,11 @@ $('#addFieldForm').on('submit', function(e){
 
         $(".cloned_input").remove();
     }
+
+    $('#addFieldForm')[0].reset();
+    $("select option[value='required']").attr('disabled', false);
+    $("select option[value='optional']").attr('disabled', false);
+
 });
 
 $('#column_validation').on('change',function(){

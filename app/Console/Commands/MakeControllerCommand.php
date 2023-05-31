@@ -87,6 +87,7 @@ class MakeControllerCommand extends Command
             // 'USE'               => $use,
             'SINGULAR_VARIABLE' => Str::singular(strtolower($this->argument('name'))),
             'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
+            'MODEL_NAME' => ucfirst($this->argument('name')),
         ];
     }
 

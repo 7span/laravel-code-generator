@@ -71,6 +71,10 @@ $('#editFieldForm').on('submit', function(e){
         $(".edit_possible").css("display", "none");
         $(".cloned_input").remove();
     }
+
+    $('#editFieldForm')[0].reset();
+    $("select option[value='required']").attr('disabled', false);
+    $("select option[value='optional']").attr('disabled', false);
 });
 
 

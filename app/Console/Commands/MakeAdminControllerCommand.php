@@ -86,7 +86,7 @@ class MakeAdminControllerCommand extends Command
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
             // 'USE'               => $use,
             'SINGULAR_VARIABLE' => Str::singular(strtolower($this->argument('name'))),
-            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
+            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name')))
         ];
     }
 

@@ -5,6 +5,7 @@ namespace $NAMESPACE$;
 use App\Services\$CLASS_NAME$Service;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\$CLASS_NAME$\Request as $CLASS_NAME$Request;
+use APP\Models\$MODEL_NAME$;
 
 class $CLASS_NAME$Controller extends Controller
 {

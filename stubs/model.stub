@@ -30,7 +30,7 @@ class {{ class }} extends Model
     public $queryable = [
         'id'
     ];
-    
+
     protected $relationship = [];
 
     protected $scopedFilters = [];

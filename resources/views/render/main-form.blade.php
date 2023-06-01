@@ -77,36 +77,50 @@
                 <th scope="row">auto_increment</th>
                 <td>id</td>
                 <td>required</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="2">
                 <th scope="row">date_time_picker</th>
                 <td>created_at</td>
                 <td>required</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="3">
                 <th scope="row">date_time_picker</th>
                 <td>updated_at</td>
                 <td>required</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="4">
                 <th scope="row">date_time_picker</th>
                 <td>deleted_at</td>
                 <td>optional</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="5">
                 <th scope="row">integer</th>
                 <td>created_by</td>
                 <td>optional</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="6">
                 <th scope="row">integer</th>
                 <td>updated_by</td>
                 <td>optional</td>
+                <td></td>
+                <td></td>
               </tr>
-              <tr data-row="7">
+              <tr data-row="7" data-column-name="deleted_by">
                 <th scope="row">integer</th>
                 <td>deleted_by</td>
                 <td>optional</td>
+                <td></td>
+                <td><button type='button' class='btn btn-danger btn-delete'><i class='far fa-trash-alt btn-delete'></i></button></td>
               </tr>
             </tbody>
           </table>

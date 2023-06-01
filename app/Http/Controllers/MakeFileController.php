@@ -55,6 +55,11 @@ class MakeFileController extends Controller
 
         $deletedBy = $request->get('deleted_by');
 
+        $service = $request->get('service');
+        $resource = $request->get('resource');
+        $requestFile = $request->get('request');
+        
+
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
         if ($storage == false) {
@@ -89,14 +94,20 @@ class MakeFileController extends Controller
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);
 
-        // Make service file and move it to Generated_files
-        ServiceHelper::makeServiceFile($modelName, $generatedFilesPath, implode(',', $methods));
+        if($service == 1){
+            // Make service file and move it to Generated_files
+            ServiceHelper::makeServiceFile($modelName, $generatedFilesPath, implode(',', $methods));
+        }
 
-        // Make resource files and move it to Generated_files
-        ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
+        if($resource == 1){
+            // Make resource files and move it to Generated_files
+            ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
+        }
 
-        // Make request file and move it to Generated_files
-        RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
+        if($requestFile == 1){
+            // Make request file and move it to Generated_files
+            RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
+        }
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

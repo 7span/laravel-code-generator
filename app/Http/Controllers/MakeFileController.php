@@ -84,7 +84,7 @@ class MakeFileController extends Controller
         }
 
         // Make migration and move it to Generated_files
-        MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete);
+        MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
 
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);

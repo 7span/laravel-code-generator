@@ -23,18 +23,31 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete)
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '')
     {
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
         $filename = base_path('app/Models/' . $modelName . '.php');
 
+        
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
 
+        $stringToReplace = '{{ softdelete }}';
+        $replaceText = $softDelete == "1" ? "use Illuminate\Database\Eloquent\SoftDeletes;" : '';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
+
+        $stringToReplace = '{{ uses }}';
+        $replaceText = "use BaseModel, BootModel, HasFactory".($softDelete == "1" ? ", SoftDeletes;" : ';');
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
+
         // Replace the content of file as per our need
+        
+        if(empty($deletedBy)){
+            $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'deleted_by',";
+        }
         $stringToReplace = 'fillable = [';
         $replaceWith = 'fillable = [' . $fillableText;
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
@@ -75,6 +88,9 @@ class ModelHelper
             $replaceWith = $stringToReplace . $scopedFiltersText;
             TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
+            $stringToReplace = '{{ scopes }}';
+            TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
+        } else {
             $stringToReplace = '{{ scopes }}';
             TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
         }

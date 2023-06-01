@@ -53,6 +53,8 @@ class MakeFileController extends Controller
 
         $trait = $request->get('trait');
 
+        $deletedBy = $request->get('deleted_by');
+
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
         if ($storage == false) {
@@ -69,7 +71,7 @@ class MakeFileController extends Controller
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
 
         // Make model and move it to Generated_files
-        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete);
+        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy);
 
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods));

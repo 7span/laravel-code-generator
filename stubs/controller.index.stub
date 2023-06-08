@@ -1,6 +1,4 @@
-    public function index($CLASS_NAME$Request $request)
+    public function index(Request $request)
     {
-        $$PLURAL_VARIABLE$ = $this->$SINGULAR_VARIABLE$Service->collection($request->all());
-
-        return new $CLASS_NAME$Collection($$PLURAL_VARIABLE$);
+        {{ indexMethod }}
     }

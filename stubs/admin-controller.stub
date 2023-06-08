@@ -5,18 +5,17 @@ namespace App\Http\Controllers\Api\V1\Admin;
 use App\Models\$CLASS_NAME$;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
-use App\Services\$CLASS_NAME$Service;
+{{ service }}
 use App\Http\Controllers\Controller;
-use App\Http\Requests\$CLASS_NAME$\Request as $CLASS_NAME$Request;
-
+{{ request }}
 
 class $CLASS_NAME$Controller extends Controller
 {
     use ApiResponser;
 
-    private $$SINGULAR_VARIABLE$Service;
+    {{ singularService }}
 
     public function __construct()
     {
-        $this->$SINGULAR_VARIABLE$Service = new $CLASS_NAME$Service;
+        {{ serviceObj }}
     }

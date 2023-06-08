@@ -23,14 +23,13 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '')
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '')
     {
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
         $filename = base_path('app/Models/' . $modelName . '.php');
 
-        
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
@@ -94,6 +93,12 @@ class ModelHelper
             $stringToReplace = '{{ scopes }}';
             TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
         }
+        $bootTrait = '';
+        if (empty($trait)) {
+            $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+        }
+        $stringToReplace = '{{ bootTrait }}';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));

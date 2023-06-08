@@ -1,6 +1,4 @@
-    public function update($CLASS_NAME$ $$SINGULAR_VARIABLE$, $CLASS_NAME$Request $request)
+    public function update({{ updaterRequestName }})
     {
-        $$SINGULAR_VARIABLE$Obj = $this->$SINGULAR_VARIABLE$Service->update($$SINGULAR_VARIABLE$->id, $request->validated());
-
-        return isset($$SINGULAR_VARIABLE$Obj['errors']) ? $this->error($$SINGULAR_VARIABLE$Obj) : $this->success($$SINGULAR_VARIABLE$Obj);
+        {{ updateMethod }}
     }

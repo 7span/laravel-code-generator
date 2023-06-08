@@ -37,12 +37,5 @@ class {{ class }} extends Model
 
     {{ scopes }}
 
-    public static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->created_by = auth()->id();
-            $model->updated_by = auth()->id();
-        });
-    }
+    {{ bootTrait }}
 }

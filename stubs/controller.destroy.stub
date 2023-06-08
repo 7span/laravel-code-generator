@@ -1,6 +1,4 @@
     public function destroy($CLASS_NAME$ $$SINGULAR_VARIABLE$)
     {
-        $$SINGULAR_VARIABLE$ = $this->$SINGULAR_VARIABLE$Service->destroy($$SINGULAR_VARIABLE$->id);
-
-        return $this->success($$SINGULAR_VARIABLE$);
+        {{ destroyMethod }}
     }

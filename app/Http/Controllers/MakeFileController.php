@@ -76,10 +76,10 @@ class MakeFileController extends Controller
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
 
         // Make model and move it to Generated_files
-        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy);
+        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait);
 
         // Make controller and move it to Generated_files
-        ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods));
+        ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods), $service, $resource, $requestFile);
 
         if($trait == 1){
             // Make folder in Generated_files and copy traits files into it

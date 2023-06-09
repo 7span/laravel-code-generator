@@ -23,7 +23,7 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '')
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationModel = '', $relationShip = '')
     {
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
@@ -97,8 +97,37 @@ class ModelHelper
         if (empty($trait)) {
             $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
         }
+
         $stringToReplace = '{{ bootTrait }}';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
+
+        $mainModel = lcfirst($modelName);    
+        $relationData = '';
+        if(!empty($relationModel)){
+            foreach($relationModel as $rkey => $val){
+                if(!empty($val)){
+                    $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
+
+                    $modelname = ucfirst($val);
+                    $secondModel = $modelRelationName = lcfirst($val);
+                    if($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany'){
+                        $modelRelationName = $modelRelationName.'s';
+                    }
+                    $secondArg = '';
+                    if($relationShipVal == 'belongsToMany'){
+                        $secondArg = ", '".$secondModel.'_'.$mainModel."'";
+                    }
+                    $newintend = '';
+                    if($rkey != 0){
+                        $newintend = self::INDENT;
+                    }
+                    $relationData .= $newintend.'public function '.$modelRelationName.'()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  $this->' . $relationShipVal . '('.$modelname.'::class'.$secondArg.');' . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+                }
+            }   
+        }
+        $stringToReplace = '{{ relation }}';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $relationData);
+       
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));

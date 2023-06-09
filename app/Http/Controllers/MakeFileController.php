@@ -58,6 +58,12 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
+
+        $relationModel = $request->get('relation_model');
+        $relationShip = $request->get('relation_ship');
+
+        $includeModel = $request->get('add_model');
+        $includeMigration = $request->get('add_migration');
         
 
         // Check if Generated_files folder exit otherwise create it
@@ -75,9 +81,10 @@ class MakeFileController extends Controller
         // Get replaceable text
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
 
-        // Make model and move it to Generated_files
-        ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait);
-
+        if($includeModel == 1){
+            // Make model and move it to Generated_files
+            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait, $relationModel, $relationShip);
+        }
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods), $service, $resource, $requestFile);
 
@@ -88,9 +95,10 @@ class MakeFileController extends Controller
             File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath.'/Traits'));
         }
 
-        // Make migration and move it to Generated_files
-        MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
-
+        if($includeMigration == 1){
+            // Make migration and move it to Generated_files
+            MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
+        }
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);
 

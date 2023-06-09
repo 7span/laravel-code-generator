@@ -5,9 +5,35 @@
     <fieldset>
       <label for="name">Model name:</label>
       <input type="text" id="model_name" name="model_name" value="{!! old('model_name') !!}">
+
+      <table class="relation_model">
+        <tr class="relationdata">
+            <td>
+              <input type="text" name="relation_model[]" class="relation_model_name">
+            </td>
+            <td>
+              <select name="relation_ship[]" class="relation_ship">
+                  <option value="hasOne">One To One</option>
+                  <option value="hasMany">One To Many</option>
+                  <option value="belongsToMany">Many To Many</option>
+                  <option value="hasOneThrough">Has One Through</option>
+                  <option value="hasManyThrough">Has many Through</option>
+                  <option value="morphOne">One to One(Polymorphic)</option>
+                  <option value="morphMany">One To Many(Polymorphic)</option>
+                  <option value="morphToMany">Many To Many(Polymorphic)</option>
+              </select>
+            </td>
+            <td>
+              <button name="add_more" id="add_more" class="add_new_row add_more">+</button>
+            </td>
+        </tr>
+      </table>
       <!-- <input type="text" id="model_name" name="model_name" value="Project" required=""> -->
       <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
       <span style="color:red" class="modelNameError"></span><br><br>
+
+      <input type="checkbox" id="add_model" name="add_model" value="1" @checked(old('add_model') ?? 'checked')><label class="light" for="add_model">Want to include model?</label><br>
+      <input type="checkbox" id="add_migration" name="add_migration" value="1" @checked(old('add_migration') ?? 'checked')><label class="light" for="add_migration">Want to include migration?</label><br>
 
       <input type="hidden" name="soft_delete" value="0" checked="checked">
       <input type="checkbox" id="soft_delete" name="soft_delete" value="1" @checked(old('soft_delete') ?? 'checked')><label class="light" for="soft_delete">Want to include soft delete?</label><br>

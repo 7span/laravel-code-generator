@@ -38,4 +38,6 @@ class {{ class }} extends Model
     {{ scopes }}
 
     {{ bootTrait }}
+
+    {{ relation }}
 }

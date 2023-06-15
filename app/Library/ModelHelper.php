@@ -23,8 +23,12 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationModel = '', $relationShip = '')
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationArr = '')
     {
+        $relationModel =  $relationArr['relationModel'];
+        $relationShip =  $relationArr['relationShip'];
+        $relationAnotherModel =  $relationArr['relationAnotherModel'];
+        $foreignKey =  $relationArr['foreignKey'];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
@@ -93,13 +97,13 @@ class ModelHelper
             $stringToReplace = '{{ scopes }}';
             TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
         }
-        $bootTrait = '';
-        if (empty($trait)) {
-            $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
-        }
+        // $bootTrait = '';
+        // if (empty($trait)) {
+        //     $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+        // }
 
-        $stringToReplace = '{{ bootTrait }}';
-        TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
+        // $stringToReplace = '{{ bootTrait }}';
+        // TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
 
         $mainModel = lcfirst($modelName);    
         $relationData = '';
@@ -107,6 +111,8 @@ class ModelHelper
             foreach($relationModel as $rkey => $val){
                 if(!empty($val)){
                     $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
+                    $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
+                    $foreignKey = isset($foreignKey[$rkey]) ? $foreignKey[$rkey] : '';
 
                     $modelname = ucfirst($val);
                     $secondModel = $modelRelationName = lcfirst($val);
@@ -117,6 +123,25 @@ class ModelHelper
                     if($relationShipVal == 'belongsToMany'){
                         $secondArg = ", '".$secondModel.'_'.$mainModel."'";
                     }
+                    if($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough'){
+                        $secondModel = $modelRelationName = lcfirst($relationShipSecondModel);
+                        $modelRelationName = $modelRelationName.'s';
+
+                        $modelname = ucfirst($secondModel);
+                        $secondArg = ucfirst($val);
+                        if(!empty($foreignKey))
+                        $secondArg = ", ".ucfirst($val)."::class, '".$foreignKey."'";
+                        else 
+                        $secondArg = ", ".ucfirst($val)."::class";
+                    }
+                    if($relationShipVal == 'morphMany' || $relationShipVal == 'morphToMany'){
+                        $modelRelationName = $modelRelationName.'s';
+                        $secondArg = ", '".$modelRelationName."able'";
+                    }
+                    if($relationShipVal == 'morphOne'){
+                        $secondArg = ", '".$modelRelationName."able'";
+                    }
+                    
                     $newintend = '';
                     if($rkey != 0){
                         $newintend = self::INDENT;

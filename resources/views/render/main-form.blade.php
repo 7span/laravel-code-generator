@@ -9,7 +9,7 @@
       <table class="relation_model">
         <tr class="relationdata">
             <td>
-              <input type="text" name="relation_model[]" class="relation_model_name">
+              <input type="text" name="relation_model[]" class="relation_model_name" placeholder="Relation model name">
             </td>
             <td>
               <select name="relation_ship[]" class="relation_ship">
@@ -22,6 +22,12 @@
                   <option value="morphMany">One To Many(Polymorphic)</option>
                   <option value="morphToMany">Many To Many(Polymorphic)</option>
               </select>
+            </td>
+            <td>
+              <input type="text" name="relation_another_model[]" class="relation_another_model relation_model_name" placeholder="Relational Second model">
+            </td>
+            <td>
+              <input type="text" name="foreign_key[]" class="foreign_key relation_model_name" placeholder="Foreign key">
             </td>
             <td>
               <button name="add_more" id="add_more" class="add_new_row add_more">+</button>

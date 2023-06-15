@@ -61,6 +61,15 @@ class MakeFileController extends Controller
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
+        $relationAnotherModel = $request->get('relation_another_model');
+        $foreignKey = $request->get('foreign_key');
+        
+        $relationArr = array(
+            'relationShip' => $relationShip,
+            'relationModel' => $relationModel,
+            'relationAnotherModel' => $relationAnotherModel,
+            'foreignKey' => $foreignKey
+        );
 
         $includeModel = $request->get('add_model');
         $includeMigration = $request->get('add_migration');
@@ -83,7 +92,7 @@ class MakeFileController extends Controller
 
         if($includeModel == 1){
             // Make model and move it to Generated_files
-            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait, $relationModel, $relationShip);
+            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait, $relationArr);
         }
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods), $service, $resource, $requestFile);

@@ -63,12 +63,15 @@ class MakeFileController extends Controller
         $relationShip = $request->get('relation_ship');
         $relationAnotherModel = $request->get('relation_another_model');
         $foreignKey = $request->get('foreign_key');
+        $localKey = $request->get('local_key');
+        
         
         $relationArr = array(
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
             'relationAnotherModel' => $relationAnotherModel,
-            'foreignKey' => $foreignKey
+            'foreignKey' => $foreignKey,
+            'localKey' => $localKey
         );
 
         $includeModel = $request->get('add_model');

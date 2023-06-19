@@ -29,6 +29,7 @@ class ModelHelper
         $relationShip =  $relationArr['relationShip'];
         $relationAnotherModel =  $relationArr['relationAnotherModel'];
         $foreignKey =  $relationArr['foreignKey'];
+        $localKey =  $relationArr['localKey'];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
@@ -113,16 +114,22 @@ class ModelHelper
                     $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
                     $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
                     $foreignKey = isset($foreignKey[$rkey]) ? $foreignKey[$rkey] : '';
-
+                    $localKey = isset($localKey[$rkey]) ? $localKey[$rkey] : '';
+                    $secondArg = '';
                     $modelname = ucfirst($val);
                     $secondModel = $modelRelationName = lcfirst($val);
-                    if($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany'){
-                        $modelRelationName = $modelRelationName.'s';
-                    }
-                    $secondArg = '';
                     if($relationShipVal == 'belongsToMany'){
                         $secondArg = ", '".$secondModel.'_'.$mainModel."'";
                     }
+                    if($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany'){
+                        $modelRelationName = $modelRelationName.'s';
+                        if(!empty($foreignKey))
+                        $secondArg .= ", '".$foreignKey."'";
+                        if(!empty($localKey))
+                        $secondArg .= ", '".$localKey."'";
+                    }
+                    
+                    
                     if($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough'){
                         $secondModel = $modelRelationName = lcfirst($relationShipSecondModel);
                         $modelRelationName = $modelRelationName.'s';

@@ -192,14 +192,14 @@ class MakeControllerCommand extends Command
 
             $stringToReplace = '{{ indexMethod }}';
             $resourceExist = ($resource == '1') ? 'return new '.$className.'Collection($'.$stubVariables['PLURAL_VARIABLE'].');' : 'return $'.$stubVariables['PLURAL_VARIABLE'].";";
-            $replaceText = "".($service == "1" ? '$'.$stubVariables['PLURAL_VARIABLE'].' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->collection($request->all());'.PHP_EOL . self::INDENT . self::INDENT .$resourceExist : '');
+            $replaceText = "".($service == "1" ? '$'.Str::plural($stubVariables['SINGULAR_VARIABLE']).' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->collection($request->all());'.PHP_EOL . self::INDENT . self::INDENT .$resourceExist : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             
             $stringToReplace = '{{ storeMethod }}';
             $singluarObj = $singularVariable.'Obj';
             $error = $singularVariable.'Obj["errors"]';
-            $ifRequest = ($requestFile == "1" ? '$request->validated()' : '');
+            $ifRequest = ($requestFile == "1" ? '$request->all()' : '');
             $replaceText = "".($service == "1" ? $singluarObj .' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->store('.$ifRequest.');'.PHP_EOL . self::INDENT . self::INDENT .'return isset('.$error.') ? $this->error('.$singluarObj.') : $this->success('.$singluarObj.');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
@@ -212,7 +212,7 @@ class MakeControllerCommand extends Command
 
             $stringToReplace = '{{ updateMethod }}';
             
-            $ifUpdateRequest = ($requestFile == "1" ? ', $request->validated()' : '');
+            $ifUpdateRequest = ($requestFile == "1" ? ', $request->all()' : '');
             $replaceText = "".($service == "1" ? $singluarObj.' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->update('.$id.''.$ifUpdateRequest.');'.PHP_EOL . self::INDENT . self::INDENT .'return isset('.$error.') ? $this->error('.$singluarObj.') : $this->success('.$singluarObj.');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 

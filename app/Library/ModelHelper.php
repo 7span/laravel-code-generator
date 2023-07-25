@@ -28,7 +28,7 @@ class ModelHelper
         $relationModel =  $relationArr['relationModel'];
         $relationShip =  $relationArr['relationShip'];
         $relationAnotherModel =  $relationArr['relationAnotherModel'];
-        $foreignKey =  $relationArr['foreignKey'];
+        $foreignKeyArr =  $relationArr['foreignKey'];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
@@ -112,41 +112,57 @@ class ModelHelper
                 if(!empty($val)){
                     $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
                     $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
-                    $foreignKey = isset($foreignKey[$rkey]) ? $foreignKey[$rkey] : '';
+                    $foreignKey = isset($foreignKeyArr[$rkey]) ? $foreignKeyArr[$rkey] : '';
 
                     $modelname = ucfirst($val);
                     $secondModel = $modelRelationName = lcfirst($val);
-                    if($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany'){
-                        $modelRelationName = $modelRelationName.'s';
+
+                    if(in_array($relationShipVal, ['hasMany', 'belongsToMany', 'hasManyThrough', 'morphMany', 'morphToMany'])){
+                        $modelRelationName = Str::plural($modelRelationName);
                     }
+
                     $secondArg = '';
                     if($relationShipVal == 'belongsToMany'){
                         $secondArg = ", '".$secondModel.'_'.$mainModel."'";
                     }
                     if($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough'){
-                        $secondModel = $modelRelationName = lcfirst($relationShipSecondModel);
-                        $modelRelationName = $modelRelationName.'s';
+
+                        if(empty($relationShipSecondModel)){
+                            continue;
+                        }
+
+                        $secondModel = lcfirst($relationShipSecondModel);
+                        
+                        if($relationShipVal == 'hasOneThrough'){
+                            $modelRelationName .= ucfirst($secondModel);
+                        }
+
+                        if($relationShipVal == 'hasManyThrough'){
+                            $modelRelationName = Str::plural(lcfirst($secondModel));
+                        }
 
                         $modelname = ucfirst($secondModel);
                         $secondArg = ucfirst($val);
-                        if(!empty($foreignKey))
-                        $secondArg = ", ".ucfirst($val)."::class, '".$foreignKey."'";
-                        else 
-                        $secondArg = ", ".ucfirst($val)."::class";
+                        
+                        if(!empty($foreignKey)){
+                            $mainModelId = $tableName = strtolower(preg_replace('/\B([A-Z])/', '_$1', $modelName)) . "_id";
+                            $secondArg = ", ".ucfirst($val)."::class, '".$mainModelId."', '".$foreignKey."'";
+                        }else{
+                            $secondArg = ", ".ucfirst($val)."::class";
+                        }
                     }
                     if($relationShipVal == 'morphMany' || $relationShipVal == 'morphToMany'){
-                        $modelRelationName = $modelRelationName.'s';
-                        $secondArg = ", '".$modelRelationName."able'";
+                        $secondArg = ", '".lcfirst($val)."able'";
                     }
                     if($relationShipVal == 'morphOne'){
-                        $secondArg = ", '".$modelRelationName."able'";
+                        $secondArg = ", '".lcfirst($val)."able'";
                     }
                     
                     $newintend = '';
                     if($rkey != 0){
                         $newintend = self::INDENT;
                     }
-                    $relationData .= $newintend.'public function '.$modelRelationName.'()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  $this->' . $relationShipVal . '('.$modelname.'::class'.$secondArg.');' . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+                    $relationData .= $newintend.'public function '.$modelRelationName.'()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '('.$modelname.'::class'.$secondArg.');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
                 }
             }   
         }

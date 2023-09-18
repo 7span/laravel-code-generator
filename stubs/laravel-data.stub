@@ -1,0 +1,19 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use Illuminate\Http\Request;
+
+class $CLASS_NAME$
+{
+    public function __invoke(Request $request)
+    {
+        $request->validate($this->rules());
+        return $request->all();
+    }
+
+    private function rules(): array
+    {
+        return [];
+    }
+}

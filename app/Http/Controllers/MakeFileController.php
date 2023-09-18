@@ -14,6 +14,7 @@ use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
+use App\Library\LaravelDataHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -58,6 +59,8 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
+        $laraveldata = $request->get('laraveldata');
+
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
@@ -124,6 +127,13 @@ class MakeFileController extends Controller
         if($requestFile == 1){
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
+        }
+
+
+        if($laraveldata == 1){
+        
+             // Make request file and move it to Generated_files
+             LaravelDataHelper::laravelData($modelName, $replaceableText[1], $generatedFilesPath);
         }
 
         // Get real path for our folder

@@ -25,6 +25,7 @@ class RequestHelper
 
         // Move request file to Generated_files
         $requestFilePath = base_path('app/Http/Requests/' .ucfirst($modelName));
+        
         File::copyDirectory($requestFilePath, storage_path('app/' . $generatedFilesPath . '/Http/Requests/' .ucfirst($modelName)));
 
         // Delete the Requests folder

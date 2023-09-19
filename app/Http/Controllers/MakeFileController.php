@@ -59,6 +59,7 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
+       
         $laraveldata = $request->get('laraveldata');
 
 
@@ -66,7 +67,6 @@ class MakeFileController extends Controller
         $relationShip = $request->get('relation_ship');
         $relationAnotherModel = $request->get('relation_another_model');
         $foreignKey = $request->get('foreign_key');
-        
         $relationArr = array(
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
@@ -76,7 +76,6 @@ class MakeFileController extends Controller
 
         $includeModel = $request->get('add_model');
         $includeMigration = $request->get('add_migration');
-        
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
@@ -87,59 +86,65 @@ class MakeFileController extends Controller
         // Get fields of migrations
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
 
+       
         // Get table name
         $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
 
         // Get replaceable text
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
-
-        if($includeModel == 1){
+        
+        if ($includeModel == 1) {
             // Make model and move it to Generated_files
-            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait, $relationArr);
+            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete, $deletedBy, $trait, $relationArr);
         }
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods), $service, $resource, $requestFile);
 
-        if($trait == 1){
+        if ($trait == 1) {
             // Make folder in Generated_files and copy traits files into it
             Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
 
-            File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath.'/Traits'));
+            File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath . '/Traits'));
         }
 
-        if($includeMigration == 1){
+        if ($includeMigration == 1) {
             // Make migration and move it to Generated_files
             MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
         }
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);
 
-        if($service == 1){
+        if ($service == 1) {
             // Make service file and move it to Generated_files
             ServiceHelper::makeServiceFile($modelName, $generatedFilesPath, implode(',', $methods));
         }
 
-        if($resource == 1){
+        if ($resource == 1) {
             // Make resource files and move it to Generated_files
             ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
         }
 
-        if($requestFile == 1){
+
+        // Need 0 to 1 before push code in my branch
+
+        if ($requestFile == 0) {
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
         }
 
 
-        if($laraveldata == 1){
-        
-             // Make request file and move it to Generated_files
-             LaravelDataHelper::laravelData($modelName, $replaceableText[1], $generatedFilesPath);
+        if ($laraveldata == 1) {
+            // Make a laravel data file
+            LaravelDataHelper::laravelData($modelName, $generatedFilesPath);
         }
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);
 
         // Delete the generated folder from the storage
+
+        // $storagepath = storage_path('app/' . $generatedFilesPath);
+        // dd($storagepath);
         File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
 
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);

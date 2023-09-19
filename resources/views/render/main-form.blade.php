@@ -1,6 +1,9 @@
 <form id="makeFileForm">
   <h2>Generate files</h2>
-  <span style="color:red">To use this CRUD generator you first need to install <a href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we are using it in our BaseModel.php file.</span><br><br>
+  <span style="color:red">To use this CRUD generator you first need to install <a href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we are using it in our BaseModel.php file and for laravel data file also you need to install first <a href="https://github.com/spatie/laravel-data" target="_blank">spatie laravel data package</a></span> <br>
+  
+  
+  <br><br>
     @csrf
     <fieldset>
       <label for="name">Model name:</label>

@@ -2,18 +2,12 @@
 
 namespace $NAMESPACE$;
 
-use Illuminate\Http\Request;
+use Spatie\LaravelData\Data;
 
 class $CLASS_NAME$
 {
-    public function __invoke(Request $request)
+    public function __construct($FIELDS$)
     {
-        $request->validate($this->rules());
-        return $request->all();
-    }
 
-    private function rules(): array
-    {
-        return [];
     }
 }

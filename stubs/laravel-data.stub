@@ -3,6 +3,7 @@
 namespace $NAMESPACE$;
 
 use Spatie\LaravelData\Data;
+$FACADE$
 
 class $CLASS_NAME$
 {

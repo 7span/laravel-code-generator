@@ -51,13 +51,16 @@ class MakeLaravelDataCommand extends Command
     public function handle(Request $request)
     {
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
+       
         $fieldsValidation = $this->makeLaravelDataValidation($fields);
+        $laravelClassAdded = $this->makeLaravelDataClassAdded($fields);
+        
 
         $path = $this->getSourceFilePath();
 
         $this->makeDirectory(dirname($path));
 
-        $contents = $this->getSourceFile($fieldsValidation);
+        $contents = $this->getSourceFile($fieldsValidation, $laravelClassAdded);
 
         if (!$this->files->exists($path)) {
             $this->files->put($path, $contents);
@@ -73,9 +76,9 @@ class MakeLaravelDataCommand extends Command
      *
      * @return bool|mixed|string
      */
-    public function getSourceFile($fieldsValidation)
+    public function getSourceFile($fieldsValidation, $laravelClassAdded)
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($fieldsValidation));
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($fieldsValidation, $laravelClassAdded));
     }
 
     /**
@@ -98,6 +101,11 @@ class MakeLaravelDataCommand extends Command
     }
 
 
+    public function laravelDataClassAdded()
+    {
+
+    }
+
     public function makeValidationFormat($fieldName, $type, $validation, $charLimit)
     {
         // $strindDEmo= "#[Max(10)]
@@ -109,28 +117,63 @@ class MakeLaravelDataCommand extends Command
         // #[Required]
         // public ?string $password,";
 
+        $dataTypeWithoutString = [
+        'integer',
+        'bigInteger',
+        'mediumInteger',
+        'tinyInteger',
+        'smallInteger',
+        'unsignedBigInteger',
+        'unsignedInteger',
+        'unsignedMediumInteger',
+        'unsignedSmallInteger',
+        'unsignedTinyInteger',
+        'boolean',
+        'decimal',
+        'double',
+        'float',
+        'enum',
+        'uuid',
+        'date', 
+        'foreignKey'
+    ];
 
-        if($type == 'string') {
+           
+
+        if(!in_array($type, $dataTypeWithoutString)) {
             $dataType = 'string';
-        }else{
-            $dataType='';
+            $charLimit = empty($charLimit) ? '64' : $charLimit; 
+        }
+        else{
+            $dataType = 'int';
+            $charLimit = empty($charLimit) ? '11' : $charLimit;
+        }
+        
+        if($validation == 'optional') {
+            $optionalSymbol = '?';
         }
         if($validation == 'required') {
-            $validate = $validation;
-            $validate = "#[Required]";
-        }else{
-            $validate='';
-        }
+            
+            $validate = "#[Required, Max($charLimit)]";
+            $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
+        }elseif($validation == 'optional'){
 
-        $string = ''.$validate."\n".'public '.$dataType.' $'.$fieldName;
+            $validate="#[Max($charLimit)]";
+            $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
+        }else{
+            $validate ='';
+            $variableAdd='';
+        }
+        
+    
+        // $string = "\n".''.$validate."\n".'public '.$dataType.' $'.$fieldName."\n";
+        
+        $string = "\n".''.$validate."\n". $variableAdd;
         return $string;
 
-        
-        
-
-
-
     }
+
+    // Added Dynamically Validation laravel data
 
     public function makeLaravelDataValidation($fields)
     {
@@ -145,10 +188,62 @@ class MakeLaravelDataCommand extends Command
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
             $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
             $makeValidateFormat = $this->makeValidationFormat($fieldName, $type, $validation, $charLimit);
-            $finalString .=$makeValidateFormat;
+            if(!empty($makeValidateFormat)) {
+                $finalString .=$makeValidateFormat;
+            }
             
         }
         return $finalString;
+    }
+
+    public function makeLaravelDataClassAdded($fields)
+    {
+        
+        $classAddArray = [
+            'required' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Required;'
+            ],
+            'max' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Max;'
+            ],
+        ];
+
+        foreach($fields as $key=>$value) {
+            
+            $jsonString = str_replace("'", '"', $value);
+            $newArray = json_decode($jsonString, true);
+          
+            $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
+            $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
+        
+            if(!empty($validation) && $validation== 'required'){
+                $classAddArray['required']['count'] = 1;
+            }
+            if(!empty($charLimit)){
+                $classAddArray['max']['count'] = 1;
+            }
+        
+        }
+        
+        $laravelDataFacadeClass = $this->addlaravelDataFacade($classAddArray);
+        return $laravelDataFacadeClass;
+    }
+
+
+
+    public function addlaravelDataFacade($laravelDataFacade)
+    {
+        $finalStringFacade = '';
+        foreach($laravelDataFacade as $value)
+        {
+            if($value['count'] > 0) {
+                $finalStringFacade .=   $value['laravelDataClass']."\n";
+            }
+        }
+      
+        return $finalStringFacade;
     }
 
     /**
@@ -157,14 +252,15 @@ class MakeLaravelDataCommand extends Command
      *
      * @return array
      */
-    public function getStubVariables($fieldsValidation)
+    public function getStubVariables($fieldsValidation, $laravelDataFacadeAdded)
     {
         
         return [
             'NAMESPACE' => 'App\\Data\\' . $this->getSingularClassName($this->argument('name')),
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')) . 'Data',
             'SINGULAR_VARIABLE' => lcfirst($this->argument('name')),
-            'FIELDS' => $fieldsValidation
+            'FIELDS' => $fieldsValidation,
+            'FACADE'=> $laravelDataFacadeAdded
         ];
     }
 

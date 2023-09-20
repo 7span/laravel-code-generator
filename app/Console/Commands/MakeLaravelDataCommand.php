@@ -53,7 +53,7 @@ class MakeLaravelDataCommand extends Command
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
        
         $fieldsValidation = $this->makeLaravelDataValidation($fields);
-        $laravelClassAdded = $this->makeLaravelDataClassAdded($fields);
+        $laravelClassAdded = $this->makeLaravelDataClassAdd($fields);
         
 
         $path = $this->getSourceFilePath();
@@ -108,6 +108,7 @@ class MakeLaravelDataCommand extends Command
 
     public function makeValidationFormat($fieldName, $type, $validation, $charLimit)
     {
+        
         // $strindDEmo= "#[Max(10)]
         // public string $name,
 
@@ -138,8 +139,7 @@ class MakeLaravelDataCommand extends Command
         'foreignKey'
     ];
 
-           
-
+        
         if(!in_array($type, $dataTypeWithoutString)) {
             $dataType = 'string';
             $charLimit = empty($charLimit) ? '64' : $charLimit; 
@@ -148,7 +148,7 @@ class MakeLaravelDataCommand extends Command
             $dataType = 'int';
             $charLimit = empty($charLimit) ? '11' : $charLimit;
         }
-        
+        $optionalSymbol= '';
         if($validation == 'optional') {
             $optionalSymbol = '?';
         }
@@ -161,8 +161,8 @@ class MakeLaravelDataCommand extends Command
             $validate="#[Max($charLimit)]";
             $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
         }else{
-            $validate ='';
-            $variableAdd='';
+            $validate="#[Max($charLimit)]";
+            $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
         }
         
     
@@ -196,9 +196,31 @@ class MakeLaravelDataCommand extends Command
         return $finalString;
     }
 
-    public function makeLaravelDataClassAdded($fields)
+    public function makeLaravelDataClassAdd($fields)
     {
-        
+
+        $dataTypes = [
+            'integer',
+            'bigInteger',
+            'mediumInteger',
+            'tinyInteger',
+            'smallInteger',
+            'unsignedBigInteger',
+            'unsignedInteger',
+            'unsignedMediumInteger',
+            'unsignedSmallInteger',
+            'unsignedTinyInteger',
+            'boolean',
+            'decimal',
+            'double',
+            'float',
+            'enum',
+            'uuid',
+            'date', 
+            'foreignKey'
+        ];
+
+
         $classAddArray = [
             'required' => [
                 'count' => 0,
@@ -217,7 +239,13 @@ class MakeLaravelDataCommand extends Command
           
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
             $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
-        
+            $type= !empty($newArray['type']) ? $newArray['type'] : '';
+
+
+            if(in_array($type, $dataTypes)) {
+                $charLimit=11;
+
+            }
             if(!empty($validation) && $validation== 'required'){
                 $classAddArray['required']['count'] = 1;
             }

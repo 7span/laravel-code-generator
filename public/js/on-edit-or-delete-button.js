@@ -27,6 +27,7 @@ $("body").on("click", ".btn-edit", function () {
         $(".edit_possible").css("display", "block"); // display clone div for enum
         $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         $(".edit_character_div").css("display", "none"); // hide clone div for varchar
+        $(".edit_minimum_character_div").css("display", "none"); // hide clone div for varchar
         $(".edit_table_name_div").css("display", "none"); // display clone div for table name
     } else if (column_type == "decimal" || column_type == "double" || column_type == "float") {
         var row = $("input[name='table_fields[" + column_name + "]']").attr("value").replace(/'/g, '"');
@@ -48,11 +49,17 @@ $("body").on("click", ".btn-edit", function () {
         $(".edit_decimal_div").css("display", "block"); // display clone div for decimal/double/float
         $(".edit_possible").css("display", "none"); // hide clone div for enum
         $(".edit_character_div").css("display", "none"); // hide clone div for varchar
+        $(".edit_minimum_character_div").css("display", "none"); // hide clone div for varchar
         $(".edit_table_name_div").css("display", "none"); // display clone div for table name
     } else if (column_type == "string") {
         var row = $("input[name='table_fields[" + column_name + "]']").attr("value").replace(/'/g, '"');
+        console.log('row'   +row);
+     
         var json_to_object = JSON.parse(row);
+        
         var character_limit = json_to_object["character_limit"];
+        var edit_character_limit_minimum = json_to_object["character_limit_minimum"];
+     
 
         $("#editFieldForm .edit_clone_three").after(
             '<input name="character_limit" class="form-control input-lg cloned_input" type="text" value="' +
@@ -60,7 +67,14 @@ $("body").on("click", ".btn-edit", function () {
                 '" />'
         );
 
+        $("#editFieldForm .edit_clone_six").after(
+            '<input name="character_limit_minimum" class="form-control input-lg cloned_input" type="text" value="' +
+            edit_character_limit_minimum +
+                '" />'
+        );
+
         $(".edit_character_div").css("display", "block"); // display clone div for varchar
+        $(".edit_minimum_character_div").css("display", "block"); // hide clone div for varchar
         $(".edit_possible").css("display", "none"); // hide clone div for enum
         $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         $(".edit_table_name_div").css("display", "none"); // display clone div for table name
@@ -77,6 +91,7 @@ $("body").on("click", ".btn-edit", function () {
 
         $(".edit_table_name_div").css("display", "block"); // display clone div for varchar
         $(".edit_character_div").css("display", "none"); // hide clone div for varchar
+        $(".edit_minimum_character_div").css("display", "none"); // hide clone div for varchar
         $(".edit_possible").css("display", "none"); // hide clone div for enum
         $(".edit_decimal_div").css("display", "none"); // hide clone div for decimal/double/float
     }

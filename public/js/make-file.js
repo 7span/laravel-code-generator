@@ -28,7 +28,8 @@ $(document).on('click','.remove_row',function(e){
 });
 $('#makeFileForm').on('submit',function(e){
     e.preventDefault();
-
+    console.log('formdata'+$('#makeFileForm').serialize());
+  
     $('.loading').show();
 
     $.ajax({

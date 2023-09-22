@@ -54,6 +54,13 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="control-label character_div_minimum" style="display:none">Character limit Minimum</label>
+                        <div class="clone_six" style="display:none">
+                            <input type="number" class="form-control input-lg" name="" value="6" min="1" max="255">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
                         <label class="control-label table_name_div" style="display:none">Table name</label>
                         <div class="clone_five" style="display:none">
                             <input type="text" class="form-control input-lg" name="">

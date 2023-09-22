@@ -129,7 +129,7 @@ class MakeControllerCommand extends Command
 
         \Log::info('methods--' . $this->option('methods'));
         $methods = explode(',', $this->option('methods'));
-        // dd($methods);
+       
         $service = $this->option('service');
         $resource = $this->option('resource');
         $requestFile = $this->option('requestFile');

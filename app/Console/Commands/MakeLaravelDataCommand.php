@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
 
@@ -50,9 +51,12 @@ class MakeLaravelDataCommand extends Command
      */
     public function handle(Request $request)
     {
+        // Get table name
+        $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $request->model_name)));
+
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
-       
-        $fieldsValidation = $this->makeLaravelDataValidation($fields);
+        
+        $fieldsValidation = $this->makeLaravelDataValidation($fields, $tableName);
         $laravelClassAdded = $this->makeLaravelDataClassAdd($fields);
         
 
@@ -106,17 +110,9 @@ class MakeLaravelDataCommand extends Command
 
     }
 
-    public function makeValidationFormat($fieldName, $type, $validation, $charLimit)
+    public function makeValidationFormat($fieldName, $type, $validation, $charLimit,$minimumCharacterLimit,  $tableName)
     {
         
-        // $strindDEmo= "#[Max(10)]
-        // public string $name,
-
-        // #[Max(10)]
-        // public string $cname,
-
-        // #[Required]
-        // public ?string $password,";
 
         $dataTypeWithoutString = [
         'integer',
@@ -138,30 +134,74 @@ class MakeLaravelDataCommand extends Command
         'date', 
         'foreignKey'
     ];
+   
+    // public ?DateTime $created_at
+        $charLimit='';
+        $validate='';
+        $minimumCharacterLimit='';
+        $optionalSymbol= '';
 
-        
         if(!in_array($type, $dataTypeWithoutString)) {
             $dataType = 'string';
             $charLimit = empty($charLimit) ? '64' : $charLimit; 
+            $minimumCharacterLimit = empty($minimumCharacterLimit) ? '6' : $minimumCharacterLimit; 
         }
         else{
-            $dataType = 'int';
-            $charLimit = empty($charLimit) ? '11' : $charLimit;
+            if($type == 'date'){
+                $dataType='DateTime';
+            }else{
+                $dataType = 'int';
+                $charLimit = empty($charLimit) ? '11' : $charLimit;
+                $minimumCharacterLimit = empty($minimumCharacterLimit) ? '6' : $minimumCharacterLimit; 
+            }
+           
         }
-        $optionalSymbol= '';
+
         if($validation == 'optional') {
             $optionalSymbol = '?';
         }
+
         if($validation == 'required') {
+            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
+                $validate = "#[Required, Max($charLimit), Min($minimumCharacterLimit)]";
+            }elseif($type == 'date'){
+                    $validate = "#[Required, DateFormat('Y-m-d')]";
+            }else{
+                $validate = "#[Required]";
+            }
             
-            $validate = "#[Required, Max($charLimit)]";
             $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
         }elseif($validation == 'optional'){
-
-            $validate="#[Max($charLimit)]";
+            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
+                $validate="#[Max($charLimit), Min($minimumCharacterLimit)]";
+            }elseif($type == 'date'){
+                $validate = "#[DateFormat('Y-m-d')]";
+            }
             $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
-        }else{
+            
+        }elseif($validation == 'unique'){
+            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
+               
+                $validate = '#[Unique('."'$tableName'".', '."'$fieldName'".'), Max('.$charLimit.'), Min('.$minimumCharacterLimit.')]';
+            }else{
+                $validate = '#[Unique('."'$tableName'".', '."'$fieldName'".')]';
+            }
+          
+            $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
+        }elseif($validation == 'email'){
+            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
+                $validate = '#[Email,Unique('."'$tableName'".', '."'$fieldName'".'), Max('.$charLimit.'), Min('.$minimumCharacterLimit.')]';
+            }else{
+                $validate = '#[Email,Unique('."'$tableName'".', '."'$fieldName'".')]';
+            }
+           
+            $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
+        }
+        else{
+            
             $validate="#[Max($charLimit)]";
+            
+            $validate= !empty($charLimit) ? $validate: '';
             $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
         }
         
@@ -169,13 +209,14 @@ class MakeLaravelDataCommand extends Command
         // $string = "\n".''.$validate."\n".'public '.$dataType.' $'.$fieldName."\n";
         
         $string = "\n".''.$validate."\n". $variableAdd;
+
         return $string;
 
     }
 
     // Added Dynamically Validation laravel data
 
-    public function makeLaravelDataValidation($fields)
+    public function makeLaravelDataValidation($fields, $tableName)
     {
         $finalString='';
         
@@ -187,7 +228,10 @@ class MakeLaravelDataCommand extends Command
             $type= !empty($newArray['type']) ? $newArray['type'] : '';
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
             $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
-            $makeValidateFormat = $this->makeValidationFormat($fieldName, $type, $validation, $charLimit);
+
+            $minimumCharacterLimit = !empty($newArray['character_limit_minimum']) ? $newArray['character_limit_minimum'] : '';
+            
+            $makeValidateFormat = $this->makeValidationFormat($fieldName, $type, $validation, $charLimit, $minimumCharacterLimit, $tableName, );
             if(!empty($makeValidateFormat)) {
                 $finalString .=$makeValidateFormat;
             }
@@ -216,7 +260,6 @@ class MakeLaravelDataCommand extends Command
             'float',
             'enum',
             'uuid',
-            'date', 
             'foreignKey'
         ];
 
@@ -230,6 +273,26 @@ class MakeLaravelDataCommand extends Command
                 'count' => 0,
                 'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Max;'
             ],
+            'min' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Min;'
+            ],
+            'unique' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Unique;'
+            ],
+            'email' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Email;'
+            ],
+            'date' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use DateTime;'
+            ],
+            'date_format' => [
+                'count' => 0,
+                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\DateFormat;'
+            ]
         ];
 
         foreach($fields as $key=>$value) {
@@ -239,19 +302,43 @@ class MakeLaravelDataCommand extends Command
           
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
             $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
+           
+            $minimumCharacterLimit = !empty($newArray['character_limit_minimum']) ? $newArray['character_limit_minimum'] : '';
             $type= !empty($newArray['type']) ? $newArray['type'] : '';
 
 
             if(in_array($type, $dataTypes)) {
-                $charLimit=11;
-
+                $charLimit='11';
+            }else{
+                if($type == 'date') {
+                    $charLimit = '';
+                }else{
+                    if(empty($charLimit)) {
+                        $charLimit= '64';
+                    }
+                }
+               
             }
             if(!empty($validation) && $validation== 'required'){
                 $classAddArray['required']['count'] = 1;
             }
+            if(!empty($validation) && $validation == 'email'){
+                $classAddArray['email']['count'] = 1;
+            }
             if(!empty($charLimit)){
                 $classAddArray['max']['count'] = 1;
             }
+            if($validation== 'unique') {
+                $classAddArray['unique']['count'] = 1;
+            }
+            if(!empty($minimumCharacterLimit)) {
+                $classAddArray['min']['count'] = 1;
+            }
+            if($type == 'date'){
+                $classAddArray['date']['count'] = 1;
+                $classAddArray['date_format']['count'] = 1;
+            }
+            
         
         }
         

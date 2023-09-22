@@ -22,6 +22,7 @@ class MakeFileController extends Controller
 {
     public function makeFiles(Request $request)
     {
+       
         $validator = Validator::make($request->all(), [
             'model_name' => 'required|max:255',
             'method' => 'required|max:255',
@@ -84,11 +85,14 @@ class MakeFileController extends Controller
         }
 
         // Get fields of migrations
+     
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
-
+       
        
         // Get table name
         $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
+
+      
 
         // Get replaceable text
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
@@ -127,7 +131,7 @@ class MakeFileController extends Controller
 
         // Need 0 to 1 before push code in my branch
 
-        if ($requestFile == 0) {
+        if ($requestFile == 1) {
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
         }
@@ -144,7 +148,7 @@ class MakeFileController extends Controller
         // Delete the generated folder from the storage
 
         // $storagepath = storage_path('app/' . $generatedFilesPath);
-        // dd($storagepath);
+    
         File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
 
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);

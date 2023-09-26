@@ -54,12 +54,12 @@
                         </div>
                     </div>
 
-                    <div class="form-group edit_minimum_character_div" style="display:none">
+                    {{--  <div class="form-group edit_minimum_character_div" style="display:none">
                         <label class="control-label">Minimum Character limit</label>
                         <div class="edit_clone_six" style="display:none">
                             <input type="number" class="form-control input-lg" name="" min="10" max="255">
                         </div>
-                    </div>
+                    </div>  --}}
                     <div class="form-group">
                         <label class="control-label edit_table_name_div" style="display:none">Table name</label>
                         <div class="edit_clone_five" style="display:none">

@@ -7,7 +7,7 @@ $FACADE$
 
 class $CLASS_NAME$
 {
-    public function __construct($FIELDS$)
+    public function __construct($FIELDS$     )
     {
 
     }

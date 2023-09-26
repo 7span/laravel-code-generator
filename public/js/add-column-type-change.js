@@ -9,7 +9,7 @@ $("#column_type").on('change', function(){
         $(".possible").css("display", "block"); // display clone div for enum
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         $(".character_div").css("display", "none"); // hide clone div for varchar
-        $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
+        // $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
         $(".table_name_div").css("display", "none"); // hide clone div for table name
 
         $(".clone_one").find("input:last").clone().attr('name', 'possible_values[]').addClass("cloned_input").attr('placeholder', 'Possible value').attr("required", true).insertAfter(".clone_one");
@@ -19,7 +19,7 @@ $("#column_type").on('change', function(){
         $(".decimal_div").css("display", "block"); // display clone div for decimal/double/float
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".character_div").css("display", "none"); // hide clone div for varchar
-        $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
+        // $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
         $(".table_name_div").css("display", "none"); // hide clone div for table name
 
         $(".clone_two").find("input:last").clone().attr('name', 'decimal_precision').addClass("cloned_input").attr('placeholder', 'Decimal precision').attr("required", true).insertAfter(".clone_two");
@@ -34,16 +34,16 @@ $("#column_type").on('change', function(){
 
         $(".clone_three").find("input:last").clone().attr('name', 'character_limit').addClass("cloned_input").attr('placeholder', 'Character limit').attr("required", true).insertAfter(".clone_three");
 
-        $(".character_div_minimum").css("display", "block"); // display clone div for minimum varchar
+        // $(".character_div_minimum").css("display", "block"); // display clone div for minimum varchar
 
-        $(".clone_six").find("input:last").clone().attr('name', 'character_limit_minimum').addClass("cloned_input").attr('placeholder', 'Character limit minimum').attr("required", true).insertAfter(".clone_six");
+        // $(".clone_six").find("input:last").clone().attr('name', 'character_limit_minimum').addClass("cloned_input").attr('placeholder', 'Character limit minimum').attr("required", true).insertAfter(".clone_six");
 
     } else if (column_type == 'foreignKey') {
         $(".cloned_input").remove();
 
         $(".table_name_div").css("display", "block"); // display clone div for table name
         $(".character_div").css("display", "none"); // hide clone div for varchar
-        $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
+        // $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         $(".clone_five").find("input:last").clone().attr('name', 'table_name').addClass("cloned_input").attr('placeholder', 'Table name').attr("required", true).insertAfter(".clone_five");
@@ -54,6 +54,6 @@ $("#column_type").on('change', function(){
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
         $(".character_div").css("display", "none"); // hide clone div for varchar
         $(".table_name_div").css("display", "none"); // hide clone div for table name
-        $(".character_div_minimum").css("display", "none");
+        // $(".character_div_minimum").css("display", "none");
     }
 });

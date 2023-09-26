@@ -11,6 +11,9 @@ use Illuminate\Filesystem\Filesystem;
 
 class MakeLaravelDataCommand extends Command
 {
+
+    const INDENT = '     ';
+
     /**
      * The name and signature of the console command.
      *
@@ -55,10 +58,10 @@ class MakeLaravelDataCommand extends Command
         $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $request->model_name)));
 
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
-        
+
         $fieldsValidation = $this->makeLaravelDataValidation($fields, $tableName);
         $laravelClassAdded = $this->makeLaravelDataClassAdd($fields);
-        
+
 
         $path = $this->getSourceFilePath();
 
@@ -93,12 +96,12 @@ class MakeLaravelDataCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-       
+
         $contents = file_get_contents($stub);
-        
+
 
         foreach ($stubVariables as $search => $replace) {
-            
+
             $contents = str_replace('$' . $search . '$', $replace, $contents);
         }
         return $contents;
@@ -107,110 +110,146 @@ class MakeLaravelDataCommand extends Command
 
     public function laravelDataClassAdded()
     {
-
     }
 
-    public function makeValidationFormat($fieldName, $type, $validation, $charLimit,$minimumCharacterLimit,  $tableName)
+    public function makeValidationFormat($fieldName, $type, $validation, $charLimit,  $tableName)
     {
-        
+
+       $checkDataType = ['enum', 'foreignKey', 'uuid', 'double'];
+
+    
+       if(!in_array($type, $checkDataType)) {
 
         $dataTypeWithoutString = [
-        'integer',
-        'bigInteger',
-        'mediumInteger',
-        'tinyInteger',
-        'smallInteger',
-        'unsignedBigInteger',
-        'unsignedInteger',
-        'unsignedMediumInteger',
-        'unsignedSmallInteger',
-        'unsignedTinyInteger',
-        'boolean',
-        'decimal',
-        'double',
-        'float',
-        'enum',
-        'uuid',
-        'date', 
-        'foreignKey'
-    ];
-   
-    // public ?DateTime $created_at
-        $charLimit='';
-        $validate='';
-        $minimumCharacterLimit='';
-        $optionalSymbol= '';
+            'integer',
+            'bigInteger',
+            'mediumInteger',
+            'tinyInteger',
+            'smallInteger',
+            'unsignedBigInteger',
+            'unsignedInteger',
+            'unsignedMediumInteger',
+            'unsignedSmallInteger',
+            'unsignedTinyInteger',
+            'boolean',
+            'decimal',
+            'double',
+            'float',
+            'enum',
+            'uuid',
+            'date',
+            'foreignKey'
+        ];
 
-        if(!in_array($type, $dataTypeWithoutString)) {
+        // public ?DateTime $created_at
+        $validate = '';
+
+        $optionalSymbol = '';
+        $charLimit = !empty($charLimit) ? $charLimit : '';
+        
+        if (!in_array($type, $dataTypeWithoutString)) {
             $dataType = 'string';
-            $charLimit = empty($charLimit) ? '64' : $charLimit; 
-            $minimumCharacterLimit = empty($minimumCharacterLimit) ? '6' : $minimumCharacterLimit; 
-        }
-        else{
-            if($type == 'date'){
-                $dataType='DateTime';
-            }else{
+           // $charLimit = !empty($charLimit) ? $charLimit : '';
+        } else {
+            if ($type == 'date') {
+                $dataType = 'DateTime';
+            } elseif ($type == 'decimal') {
+                $dataType = 'string';
+              
+            }elseif ($type == 'float') {
+                $dataType = 'string';
+              
+            } elseif($type == 'boolean'){
+                $dataType = 'bool';
+            } 
+            else {
                 $dataType = 'int';
-                $charLimit = empty($charLimit) ? '11' : $charLimit;
-                $minimumCharacterLimit = empty($minimumCharacterLimit) ? '6' : $minimumCharacterLimit; 
+              //  $charLimit = !empty($charLimit) ? '11' : $charLimit;
             }
-           
         }
 
-        if($validation == 'optional') {
+        if ($validation == 'optional') {
             $optionalSymbol = '?';
         }
 
-        if($validation == 'required') {
-            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
-                $validate = "#[Required, Max($charLimit), Min($minimumCharacterLimit)]";
-            }elseif($type == 'date'){
-                    $validate = "#[Required, DateFormat('Y-m-d')]";
-            }else{
+        if ($validation == 'required') {
+            if (!empty($charLimit)) {
+                $validate = "#[Required, Max($charLimit)]";
+            } elseif ($type == 'decimal') {
+                $validate = "#[Required, Numeric]";
+            }elseif ($type == 'float') {
+                $validate = "#[Required, Numeric]";
+            } elseif ($type == 'boolean') {
+                $validate = "#[Required, BooleanType]";
+            } elseif ($type == 'date') {
+                $validate = "#[Required, DateFormat('Y-m-d')]";
+            } 
+            else {
                 $validate = "#[Required]";
             }
-            
-            $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
-        }elseif($validation == 'optional'){
-            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
-                $validate="#[Max($charLimit), Min($minimumCharacterLimit)]";
-            }elseif($type == 'date'){
+
+            $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+        } elseif ($validation == 'optional') {
+            if (!empty($charLimit)) {
+                $validate = "#[Max($charLimit)]";
+            } elseif ($type == 'date') {
                 $validate = "#[DateFormat('Y-m-d')]";
+            } elseif ($type == 'boolean') {
+                $validate = "#[BooleanType]";
+            } elseif ($type == 'decimal') {
+                $validate = "#[Numeric]";
+            }elseif ($type == 'float') {
+                $validate = "#[Numeric]";
             }
-            $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
-            
-        }elseif($validation == 'unique'){
-            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
-               
-                $validate = '#[Unique('."'$tableName'".', '."'$fieldName'".'), Max('.$charLimit.'), Min('.$minimumCharacterLimit.')]';
-            }else{
-                $validate = '#[Unique('."'$tableName'".', '."'$fieldName'".')]';
+            $variableAdd = 'public ' . $optionalSymbol . $dataType . ' $' . $fieldName . ',' . "\n";
+        } elseif ($validation == 'unique') {
+            if (!empty($charLimit)) {
+
+                $validate = '#[Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . '), Max(' . $charLimit . ')]';
+            } elseif ($type == 'decimal') {
+                $validate = '#[Numeric, Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
+            }else {
+                $validate = '#[Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
             }
-          
-            $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
-        }elseif($validation == 'email'){
-            if(!empty($charLimit) && !empty($minimumCharacterLimit)) {
-                $validate = '#[Email,Unique('."'$tableName'".', '."'$fieldName'".'), Max('.$charLimit.'), Min('.$minimumCharacterLimit.')]';
-            }else{
-                $validate = '#[Email,Unique('."'$tableName'".', '."'$fieldName'".')]';
+
+            $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+        } elseif ($validation == 'email') {
+            if (!empty($charLimit)) {
+                $validate = '#[Email,Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . '), Max(' . $charLimit . ')]';
+            } else {
+                $validate = '#[Email,Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
             }
-           
-            $variableAdd = 'public '.$dataType.' $'.$fieldName. ','."\n";
+
+            $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+        } else {
+            if ($type == 'decimal') {
+                $validate = "#[Numeric]";
+                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+            }elseif($type == 'float'){
+                $validate = "#[Numeric]";
+                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+            } elseif ($type == 'date') {
+                $validate = "#[DateFormat('Y-m-d')]";
+                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+            } else {
+
+                $validate = "#[Max($charLimit)]";
+                $validate = !empty($charLimit) ? $validate : '';
+                $variableAdd = 'public ' . $optionalSymbol . $dataType . ' $' . $fieldName . ',' . "\n";
+            }
         }
-        else{
-            
-            $validate="#[Max($charLimit)]";
-            
-            $validate= !empty($charLimit) ? $validate: '';
-            $variableAdd = 'public '.$optionalSymbol.$dataType.' $'.$fieldName.','."\n";
-        }
-        
-    
-        // $string = "\n".''.$validate."\n".'public '.$dataType.' $'.$fieldName."\n";
-        
-        $string = "\n".''.$validate."\n". $variableAdd;
+
+
+
+
+        $string = "\n" . '' . self::INDENT . $validate . "\n" . self::INDENT . $variableAdd;
 
         return $string;
+       }
+      
+       return '';
+
+
 
     }
 
@@ -218,25 +257,24 @@ class MakeLaravelDataCommand extends Command
 
     public function makeLaravelDataValidation($fields, $tableName)
     {
-        $finalString='';
-        
-        foreach($fields as $key=>$value) {
-            
+        $finalString = '';
+
+        foreach ($fields as $key => $value) {
+
             $jsonString = str_replace("'", '"', $value);
             $newArray = json_decode($jsonString, true);
             $fieldName = $key;
-            $type= !empty($newArray['type']) ? $newArray['type'] : '';
+            $type = !empty($newArray['type']) ? $newArray['type'] : '';
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
             $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
 
-            $minimumCharacterLimit = !empty($newArray['character_limit_minimum']) ? $newArray['character_limit_minimum'] : '';
-            
-            $makeValidateFormat = $this->makeValidationFormat($fieldName, $type, $validation, $charLimit, $minimumCharacterLimit, $tableName, );
-            if(!empty($makeValidateFormat)) {
-                $finalString .=$makeValidateFormat;
+            $makeValidateFormat = $this->makeValidationFormat($fieldName, $type, $validation, $charLimit, $tableName,);
+            if (!empty($makeValidateFormat)) {
+                $finalString .= $makeValidateFormat;
             }
-            
         }
+
+
         return $finalString;
     }
 
@@ -254,11 +292,7 @@ class MakeLaravelDataCommand extends Command
             'unsignedMediumInteger',
             'unsignedSmallInteger',
             'unsignedTinyInteger',
-            'boolean',
-            'decimal',
             'double',
-            'float',
-            'enum',
             'uuid',
             'foreignKey'
         ];
@@ -267,81 +301,81 @@ class MakeLaravelDataCommand extends Command
         $classAddArray = [
             'required' => [
                 'count' => 0,
-                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Required;'
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\Required;'
             ],
             'max' => [
                 'count' => 0,
-                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Max;'
-            ],
-            'min' => [
-                'count' => 0,
-                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Min;'
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\Max;'
             ],
             'unique' => [
                 'count' => 0,
-                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Unique;'
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\Unique;'
             ],
             'email' => [
                 'count' => 0,
-                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\Email;'
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\Email;'
             ],
             'date' => [
                 'count' => 0,
-                'laravelDataClass'=> 'use DateTime;'
+                'laravelDataClass' => 'use DateTime;'
             ],
             'date_format' => [
                 'count' => 0,
-                'laravelDataClass'=> 'use Spatie\LaravelData\Attributes\Validation\DateFormat;'
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\DateFormat;'
+            ],
+            'numeric' => [
+                'count' => 0,
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\Numeric;'
+            ],
+            'boolean' => [
+                'count' => 0,
+                'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\BooleanType;'
             ]
         ];
 
-        foreach($fields as $key=>$value) {
-            
+        foreach ($fields as $key => $value) {
+
             $jsonString = str_replace("'", '"', $value);
             $newArray = json_decode($jsonString, true);
-          
+
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
             $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
-           
-            $minimumCharacterLimit = !empty($newArray['character_limit_minimum']) ? $newArray['character_limit_minimum'] : '';
-            $type= !empty($newArray['type']) ? $newArray['type'] : '';
+
+            $type = !empty($newArray['type']) ? $newArray['type'] : '';
 
 
-            if(in_array($type, $dataTypes)) {
-                $charLimit='11';
-            }else{
-                if($type == 'date') {
+            if (in_array($type, $dataTypes)) {
+                $charLimit = '11';
+            } else {
+                if ($type == 'date') {
                     $charLimit = '';
-                }else{
-                    if(empty($charLimit)) {
-                        $charLimit= '64';
-                    }
                 }
-               
             }
-            if(!empty($validation) && $validation== 'required'){
+
+            if (!empty($validation) && $validation == 'required') {
                 $classAddArray['required']['count'] = 1;
             }
-            if(!empty($validation) && $validation == 'email'){
+            if (!empty($validation) && $validation == 'email') {
                 $classAddArray['email']['count'] = 1;
             }
-            if(!empty($charLimit)){
+            if (!empty($charLimit)) {
                 $classAddArray['max']['count'] = 1;
             }
-            if($validation== 'unique') {
+            if ($validation == 'unique') {
                 $classAddArray['unique']['count'] = 1;
             }
-            if(!empty($minimumCharacterLimit)) {
-                $classAddArray['min']['count'] = 1;
-            }
-            if($type == 'date'){
+            if ($type == 'date') {
                 $classAddArray['date']['count'] = 1;
                 $classAddArray['date_format']['count'] = 1;
+            } elseif ($type == 'decimal') {
+                $classAddArray['numeric']['count'] = 1;
+            } elseif($type == 'boolean') {
+                $classAddArray['boolean']['count'] = 1;
+            } elseif($type == 'float') {
+                $classAddArray['numeric']['count'] = 1;
             }
-            
-        
         }
-        
+
         $laravelDataFacadeClass = $this->addlaravelDataFacade($classAddArray);
         return $laravelDataFacadeClass;
     }
@@ -351,13 +385,12 @@ class MakeLaravelDataCommand extends Command
     public function addlaravelDataFacade($laravelDataFacade)
     {
         $finalStringFacade = '';
-        foreach($laravelDataFacade as $value)
-        {
-            if($value['count'] > 0) {
-                $finalStringFacade .=   $value['laravelDataClass']."\n";
+        foreach ($laravelDataFacade as $value) {
+            if ($value['count'] > 0) {
+                $finalStringFacade .=   $value['laravelDataClass'] . "\n";
             }
         }
-      
+
         return $finalStringFacade;
     }
 
@@ -369,13 +402,13 @@ class MakeLaravelDataCommand extends Command
      */
     public function getStubVariables($fieldsValidation, $laravelDataFacadeAdded)
     {
-        
+
         return [
             'NAMESPACE' => 'App\\Data\\' . $this->getSingularClassName($this->argument('name')),
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')) . 'Data',
             'SINGULAR_VARIABLE' => lcfirst($this->argument('name')),
             'FIELDS' => $fieldsValidation,
-            'FACADE'=> $laravelDataFacadeAdded
+            'FACADE' => $laravelDataFacadeAdded
         ];
     }
 

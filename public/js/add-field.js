@@ -89,7 +89,7 @@ $('#addFieldForm').on('submit', function(e){
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".table_name_div").css("display", "none"); // display clone div for table name
         $(".character_div").css("display", "none"); // hide clone div for varchar
-        $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
+        // $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
 
         $(".cloned_input").remove();

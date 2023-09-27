@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class MakeLaravelDataCommand extends Command
 {
 
-    const INDENT = '     ';
+    const INDENT = '        ';
 
     /**
      * The name and signature of the console command.
@@ -235,9 +235,12 @@ class MakeLaravelDataCommand extends Command
             }
 
 
+            if($validate == ''){
+                $string = "\n" . '' . self::INDENT . $validate.$variableAdd;
+            }else{
 
-
-            $string = "\n" . '' . self::INDENT . $validate . "\n" . self::INDENT . $variableAdd;
+                $string = "\n" . '' . self::INDENT . $validate . "\n" . self::INDENT . $variableAdd;
+            }
 
             return $string;
         }

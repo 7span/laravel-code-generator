@@ -44,20 +44,11 @@ $('#addFieldForm').on('submit', function(e){
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
         } else if (column_type == 'string') {
             var character_limit = $("input[name='character_limit']").val();
-            var character_limit_minimum = $("input[name='character_limit_minimum']").val();
-
-            console.log('character_limit_minimum_add'+character_limit_minimum);
-            var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit':'" + character_limit + "', 'character_limit_minimum':'" + character_limit_minimum + "' }";
+          
+            var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit':'" + character_limit + "' }";
             
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
 
-
-            // var character_limit_minimum = $("input[name='character_limit_minimum']").val();
-            
-
-            // var minvalue = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit_minimum':'" + character_limit_minimum + "'}";
-          
-            // $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + minvalue + '" class="added_input" style="display:none" />')
         } else if (column_type == 'foreignKey') {
             var table_name = $("input[name='table_name']").val();
 
@@ -89,9 +80,7 @@ $('#addFieldForm').on('submit', function(e){
         $(".possible").css("display", "none"); // hide clone div for enum
         $(".table_name_div").css("display", "none"); // display clone div for table name
         $(".character_div").css("display", "none"); // hide clone div for varchar
-        // $(".character_div_minimum").css("display", "none"); // hide clone div for varchar
         $(".decimal_div").css("display", "none"); // hide clone div for decimal/double/float
-
         $(".cloned_input").remove();
     }
 

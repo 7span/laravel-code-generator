@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
-
+use Illuminate\Support\Facades\Log;
 
 class MakeLaravelDataCommand extends Command
 {
@@ -115,142 +115,134 @@ class MakeLaravelDataCommand extends Command
     public function makeValidationFormat($fieldName, $type, $validation, $charLimit,  $tableName)
     {
 
-       $checkDataType = ['enum', 'foreignKey', 'uuid', 'double'];
+        $checkDataType = ['enum', 'foreignKey', 'uuid'];
 
-    
-       if(!in_array($type, $checkDataType)) {
 
-        $dataTypeWithoutString = [
-            'integer',
-            'bigInteger',
-            'mediumInteger',
-            'tinyInteger',
-            'smallInteger',
-            'unsignedBigInteger',
-            'unsignedInteger',
-            'unsignedMediumInteger',
-            'unsignedSmallInteger',
-            'unsignedTinyInteger',
-            'boolean',
-            'decimal',
-            'double',
-            'float',
-            'enum',
-            'uuid',
-            'date',
-            'foreignKey'
-        ];
+        if (!in_array($type, $checkDataType)) {
 
-        // public ?DateTime $created_at
-        $validate = '';
+            $dataTypeWithoutString = [
+                'integer',
+                'bigInteger',
+                'mediumInteger',
+                'tinyInteger',
+                'smallInteger',
+                'unsignedBigInteger',
+                'unsignedInteger',
+                'unsignedMediumInteger',
+                'unsignedSmallInteger',
+                'unsignedTinyInteger',
+                'boolean',
+                'enum',
+                'uuid',
+                'date',
+                'foreignKey'
+            ];
 
-        $optionalSymbol = '';
-        $charLimit = !empty($charLimit) ? $charLimit : '';
-        
-        if (!in_array($type, $dataTypeWithoutString)) {
-            $dataType = 'string';
-           // $charLimit = !empty($charLimit) ? $charLimit : '';
-        } else {
-            if ($type == 'date') {
-                $dataType = 'DateTime';
-            } elseif ($type == 'decimal') {
+            // public ?DateTime $created_at
+            $validate = '';
+
+            $optionalSymbol = '';
+            $charLimit = !empty($charLimit) ? $charLimit : '';
+
+            if (!in_array($type, $dataTypeWithoutString)) {
                 $dataType = 'string';
-              
-            }elseif ($type == 'float') {
-                $dataType = 'string';
-              
-            } elseif($type == 'boolean'){
-                $dataType = 'bool';
-            } 
-            else {
-                $dataType = 'int';
-              //  $charLimit = !empty($charLimit) ? '11' : $charLimit;
-            }
-        }
-
-        if ($validation == 'optional') {
-            $optionalSymbol = '?';
-        }
-
-        if ($validation == 'required') {
-            if (!empty($charLimit)) {
-                $validate = "#[Required, Max($charLimit)]";
-            } elseif ($type == 'decimal') {
-                $validate = "#[Required, Numeric]";
-            }elseif ($type == 'float') {
-                $validate = "#[Required, Numeric]";
-            } elseif ($type == 'boolean') {
-                $validate = "#[Required, BooleanType]";
-            } elseif ($type == 'date') {
-                $validate = "#[Required, DateFormat('Y-m-d')]";
-            } 
-            else {
-                $validate = "#[Required]";
-            }
-
-            $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
-        } elseif ($validation == 'optional') {
-            if (!empty($charLimit)) {
-                $validate = "#[Max($charLimit)]";
-            } elseif ($type == 'date') {
-                $validate = "#[DateFormat('Y-m-d')]";
-            } elseif ($type == 'boolean') {
-                $validate = "#[BooleanType]";
-            } elseif ($type == 'decimal') {
-                $validate = "#[Numeric]";
-            }elseif ($type == 'float') {
-                $validate = "#[Numeric]";
-            }
-            $variableAdd = 'public ' . $optionalSymbol . $dataType . ' $' . $fieldName . ',' . "\n";
-        } elseif ($validation == 'unique') {
-            if (!empty($charLimit)) {
-
-                $validate = '#[Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . '), Max(' . $charLimit . ')]';
-            } elseif ($type == 'decimal') {
-                $validate = '#[Numeric, Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
-            }else {
-                $validate = '#[Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
-            }
-
-            $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
-        } elseif ($validation == 'email') {
-            if (!empty($charLimit)) {
-                $validate = '#[Email,Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . '), Max(' . $charLimit . ')]';
             } else {
-                $validate = '#[Email,Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
+                if ($type == 'date') {
+                    $dataType = 'DateTime';
+                } elseif ($type == 'boolean') {
+                    $dataType = 'bool';
+                } else {
+                    $dataType = 'int';
+                    //  $charLimit = !empty($charLimit) ? '11' : $charLimit;
+                }
             }
 
-            $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
-        } else {
-            if ($type == 'decimal') {
-                $validate = "#[Numeric]";
-                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
-            }elseif($type == 'float'){
-                $validate = "#[Numeric]";
-                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
-            } elseif ($type == 'date') {
-                $validate = "#[DateFormat('Y-m-d')]";
-                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
-            } else {
+            if ($validation == 'optional') {
+                $optionalSymbol = '?';
+            }
 
-                $validate = "#[Max($charLimit)]";
-                $validate = !empty($charLimit) ? $validate : '';
+            if ($validation == 'required') {
+                if (!empty($charLimit)) {
+                    $validate = "#[Required, Max($charLimit)]";
+                } elseif ($type == 'decimal') {
+                    $validate = "#[Required, Numeric]";
+                } elseif ($type == 'float') {
+                    $validate = "#[Required, Numeric]";
+                } elseif ($type == 'double') {
+                    $validate = "#[Required, Numeric]";
+                } elseif ($type == 'boolean') {
+                    $validate = "#[Required, BooleanType]";
+                } elseif ($type == 'date') {
+                    $validate = "#[Required, DateFormat('Y-m-d')]";
+                } else {
+                    $validate = "#[Required]";
+                }
+
+                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+            } elseif ($validation == 'optional') {
+                if (!empty($charLimit)) {
+                    $validate = "#[Max($charLimit)]";
+                } elseif ($type == 'date') {
+                    $validate = "#[DateFormat('Y-m-d')]";
+                } elseif ($type == 'boolean') {
+                    $validate = "#[BooleanType]";
+                } elseif ($type == 'decimal') {
+                    $validate = "#[Numeric]";
+                } elseif ($type == 'float') {
+                    $validate = "#[Numeric]";
+                } elseif ($type == 'double') {
+                    $validate = "#[Numeric]";
+                }
                 $variableAdd = 'public ' . $optionalSymbol . $dataType . ' $' . $fieldName . ',' . "\n";
+            } elseif ($validation == 'unique') {
+                if (!empty($charLimit)) {
+
+                    $validate = '#[Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . '), Max(' . $charLimit . ')]';
+                } elseif ($type == 'decimal') {
+                    $validate = '#[Numeric, Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
+                } else {
+                    $validate = '#[Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
+                }
+
+                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+            } elseif ($validation == 'email') {
+                if (!empty($charLimit)) {
+                    $validate = '#[Email,Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . '), Max(' . $charLimit . ')]';
+                } else {
+                    $validate = '#[Email,Unique(' . "'$tableName'" . ', ' . "'$fieldName'" . ')]';
+                }
+
+                $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+            } else {
+                if ($type == 'decimal') {
+                    $validate = "#[Numeric]";
+                    $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+                } elseif ($type == 'float') {
+                    $validate = "#[Numeric]";
+                    $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+                } elseif ($type == 'double') {
+                    $validate = "#[Numeric]";
+                    $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+                } elseif ($type == 'date') {
+                    $validate = "#[DateFormat('Y-m-d')]";
+                    $variableAdd = 'public ' . $dataType . ' $' . $fieldName . ',' . "\n";
+                } else {
+
+                    $validate = "#[Max($charLimit)]";
+                    $validate = !empty($charLimit) ? $validate : '';
+                    $variableAdd = 'public ' . $optionalSymbol . $dataType . ' $' . $fieldName . ',' . "\n";
+                }
             }
+
+
+
+
+            $string = "\n" . '' . self::INDENT . $validate . "\n" . self::INDENT . $variableAdd;
+
+            return $string;
         }
 
-
-
-
-        $string = "\n" . '' . self::INDENT . $validate . "\n" . self::INDENT . $variableAdd;
-
-        return $string;
-       }
-      
-       return '';
-
-
-
+        return '';
     }
 
     // Added Dynamically Validation laravel data
@@ -281,6 +273,10 @@ class MakeLaravelDataCommand extends Command
     public function makeLaravelDataClassAdd($fields)
     {
 
+        $checkDataType = ['enum', 'foreignKey', 'uuid'];
+
+
+
         $dataTypes = [
             'integer',
             'bigInteger',
@@ -292,8 +288,6 @@ class MakeLaravelDataCommand extends Command
             'unsignedMediumInteger',
             'unsignedSmallInteger',
             'unsignedTinyInteger',
-            'double',
-            'uuid',
             'foreignKey'
         ];
 
@@ -332,52 +326,75 @@ class MakeLaravelDataCommand extends Command
                 'laravelDataClass' => 'use Spatie\LaravelData\Attributes\Validation\BooleanType;'
             ]
         ];
-
-        foreach ($fields as $key => $value) {
+        
+           
+        foreach ($fields as  $value) {
 
             $jsonString = str_replace("'", '"', $value);
+
             $newArray = json_decode($jsonString, true);
-
+         
             $validation = !empty($newArray['validation']) ? $newArray['validation'] : '';
-            $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
 
+           
+                    
+            $charLimit = !empty($newArray['character_limit']) ? $newArray['character_limit'] : '';
+           
             $type = !empty($newArray['type']) ? $newArray['type'] : '';
 
 
-            if (in_array($type, $dataTypes)) {
-                $charLimit = '11';
-            } else {
+            if (!in_array($type, $checkDataType)) {
+             
+                if (in_array($type, $dataTypes)) {
+                    $charLimit = '11';
+                } else {
+                    if ($type == 'date') {
+                        $charLimit = '';
+                    }
+                }
+            
+                 
+                if ($validation == 'required') {
+                    
+                    $classAddArray['required']['count'] = 1;
+
+                    // Log::info('laravelRequired  ' .$key);
+                }
+                if (!empty($validation) && $validation == 'email') {
+                    $classAddArray['email']['count'] = 1;
+                }
+                if (!empty($charLimit)) {
+                    $classAddArray['max']['count'] = 1;
+                    Log::info('laravelMax');
+                }
+                if ($validation == 'unique') {
+                    $classAddArray['unique']['count'] = 1;
+                    Log::info('laravelunique');
+                }
                 if ($type == 'date') {
-                    $charLimit = '';
+                    $classAddArray['date']['count'] = 1;
+                    $classAddArray['date_format']['count'] = 1;
+                } elseif ($type == 'decimal') {
+                    $classAddArray['numeric']['count'] = 1;
+                } elseif ($type == 'boolean') {
+                    $classAddArray['boolean']['count'] = 1;
+                } elseif ($type == 'float') {
+                    $classAddArray['numeric']['count'] = 1;
+                } elseif ($type == 'double') {
+                    $classAddArray['numeric']['count'] = 1;
                 }
             }
+          
+            $laravelDataFacadeClass = $this->addlaravelDataFacade($classAddArray);
 
-            if (!empty($validation) && $validation == 'required') {
-                $classAddArray['required']['count'] = 1;
-            }
-            if (!empty($validation) && $validation == 'email') {
-                $classAddArray['email']['count'] = 1;
-            }
-            if (!empty($charLimit)) {
-                $classAddArray['max']['count'] = 1;
-            }
-            if ($validation == 'unique') {
-                $classAddArray['unique']['count'] = 1;
-            }
-            if ($type == 'date') {
-                $classAddArray['date']['count'] = 1;
-                $classAddArray['date_format']['count'] = 1;
-            } elseif ($type == 'decimal') {
-                $classAddArray['numeric']['count'] = 1;
-            } elseif($type == 'boolean') {
-                $classAddArray['boolean']['count'] = 1;
-            } elseif($type == 'float') {
-                $classAddArray['numeric']['count'] = 1;
-            }
+           
         }
-
-        $laravelDataFacadeClass = $this->addlaravelDataFacade($classAddArray);
-        return $laravelDataFacadeClass;
+        if(!empty($laravelDataFacadeClass)){
+            return $laravelDataFacadeClass;
+        }else{
+            return '';
+        }
+       
     }
 
 

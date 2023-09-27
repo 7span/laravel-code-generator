@@ -39,22 +39,17 @@ $('#editFieldForm').on('submit', function(e){
             $("input[name='table_fields[" + old_column_name + "]']").remove();
 
             var character_limit = $("input[name='character_limit']").val();
-            var character_limit_minimum = $("input[name='character_limit_minimum']").val();
 
-            console.log('edit_character_minimum' + character_limit_minimum);
             console.log('edit_character' + character_limit);
             
-            var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit':'" + character_limit + "', 'character_limit_minimum':'" + character_limit_minimum + "'}";
+            var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit':'" + character_limit + "'}";
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
 
 
 
            // $("input[name='table_fields[" + old_column_name + "]']").remove();
 
-            var minimum_character_limit = $("input[name='minimum_character_limit']").val();
-
-            var valuemin = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':'', 'character_limit':'" + minimum_character_limit + "'}";
-            $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + valuemin + '" class="added_input" style="display:none" />')
+          
 
 
         } else if (column_type == 'foreignKey') {

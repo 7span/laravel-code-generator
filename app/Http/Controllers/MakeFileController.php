@@ -62,10 +62,7 @@ class MakeFileController extends Controller
         $requestFile = $request->get('request');
        
         $laraveldata = $request->get('laraveldata');
-
-        $notification=$request->get('notification');
        
-
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
@@ -143,10 +140,6 @@ class MakeFileController extends Controller
         if ($laraveldata == 1) {
             // Make a laravel data file
             LaravelDataHelper::laravelData($modelName, $generatedFilesPath);
-        }
-
-        if ($notification == 1) {
-            NotificationHelper::notification($generatedFilesPath);
         }
 
         // Get real path for our folder

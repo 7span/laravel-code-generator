@@ -3,14 +3,6 @@ document.getElementById("migration_fields").addEventListener('click', function()
     addFieldButton.style.display = (this.checked)? "block" : "none";
 });
 
-document.getElementById("notification").addEventListener('click', function() {  
-    let checkbox = document.getElementById("notification");
-    if ( checkbox.checked ) {
-        $("#notificationModal").modal('show');
-    }
-   
-});
-
 if ($(".added_input").length == 0) {
     $('#scope_fields').hide();
     $('#label_scope_fields').hide();

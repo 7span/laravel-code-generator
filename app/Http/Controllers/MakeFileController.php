@@ -15,6 +15,7 @@ use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
 use App\Library\LaravelDataHelper;
+use App\Library\NotificationHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,7 +23,6 @@ class MakeFileController extends Controller
 {
     public function makeFiles(Request $request)
     {
-       
         $validator = Validator::make($request->all(), [
             'model_name' => 'required|max:255',
             'method' => 'required|max:255',
@@ -63,6 +63,9 @@ class MakeFileController extends Controller
        
         $laraveldata = $request->get('laraveldata');
 
+        $notification=$request->get('notification');
+       
+
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
@@ -87,7 +90,7 @@ class MakeFileController extends Controller
         // Get fields of migrations
      
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
-       
+        
        
         // Get table name
         $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
@@ -140,6 +143,10 @@ class MakeFileController extends Controller
         if ($laraveldata == 1) {
             // Make a laravel data file
             LaravelDataHelper::laravelData($modelName, $generatedFilesPath);
+        }
+
+        if ($notification == 1) {
+            NotificationHelper::notification($generatedFilesPath);
         }
 
         // Get real path for our folder

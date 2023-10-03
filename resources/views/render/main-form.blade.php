@@ -53,6 +53,10 @@
       <input type="hidden" name="service" value="0" checked="checked">
       <input type="checkbox" id="service" name="service" value="1" @checked(old('service') ?? 'checked')><label class="light" for="service">Do you want service file?</label><br>
 
+      <input type="hidden" name="notification" value="0" checked="checked">
+      <input type="checkbox" id="notification" name="notification" value="1" @checked(old('notification'))><label class="light" for="notification">Do you want notification file?</label><br>
+
+
       <input type="hidden" name="resource" value="0" checked="checked">
       <input type="checkbox" id="resource" name="resource" value="1" @checked(old('resource') ?? 'checked')><label class="light" for="resource">Do you want resource file?</label><br>
 

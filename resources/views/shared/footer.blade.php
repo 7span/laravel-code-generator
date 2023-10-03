@@ -3,6 +3,7 @@
 <script src="{!! asset('js/add-column-type-change.js') !!}"></script>
 <script src="{!! asset('js/edit-field.js') !!}"></script>
 <script src="{!! asset('js/edit-column-type-change.js') !!}"></script>
+<script src="{!! asset('js/add-notification-field.js') !!}"></script>
 <script src="{!! asset('js/on-edit-or-delete-button.js') !!}"></script>
 <script src="{!! asset('js/add-or-edit-more.js') !!}"></script>
 <script src="{!! asset('js/add-scope.js') !!}"></script>

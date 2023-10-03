@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Notifications;
+
+use Illuminate\Notifications\Notification;
+use NotificationChannels\OneSignal\OneSignalChannel;
+use NotificationChannels\OneSignal\OneSignalMessage;
+
+class $CLASS_NAME$ extends Notification
+{
+    public function __construct(private $pollVote)
+    {
+    }
+
+    public function via($notifiable)
+    {
+        return [OneSignalChannel::class];
+    }
+
+    public function toOneSignal($notifiable)
+    {
+        $data = $DATA$
+
+        return OneSignalMessage::create()
+            ->setSubject(__($SUBJECT$))
+            ->setBody(__($BODY$))
+            ->setData('data', $data);
+    }
+}

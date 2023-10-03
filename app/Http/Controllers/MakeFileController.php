@@ -14,6 +14,7 @@ use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
+use App\Library\NotificationHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -58,6 +59,7 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
+        $notification=$request->get('notification');
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
@@ -124,6 +126,10 @@ class MakeFileController extends Controller
         if($requestFile == 1){
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
+        }
+
+        if ($notification == 1) {
+            NotificationHelper::notification($generatedFilesPath);
         }
 
         // Get real path for our folder

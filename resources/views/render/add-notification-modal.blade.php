@@ -9,7 +9,7 @@
             </div>
             <div class="modal-body">
                 <form role="form" id="addnotificationForm">
-                  
+
                     <div class="form-group">
                         <label class="control-label">Class name</label>
                         <div>
@@ -19,11 +19,12 @@
 
                     <div class="form-group">
                         <label class="control-label">Data</label><p style="color:blue">
+                        <p>Example : ['user_id' => 1];</p>
                         <div>
                             <textarea id="data" name="data" rows="4" cols="50" required=""></textarea>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="control-label">Subject</label><p style="color:blue">
                         <div>
@@ -35,12 +36,12 @@
                         <label class="control-label">Body</label><p style="color:blue">
                         <div>
                             <textarea id="body" name="body" rows="4" cols="50" required=""></textarea>
-                               
-                               
+
+
                         </div>
                     </div>
-                   
-                 
+
+
                     <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>

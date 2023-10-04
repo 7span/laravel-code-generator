@@ -22,8 +22,8 @@ class $CLASS_NAME$ extends Notification
         $data = $DATA$
 
         return OneSignalMessage::create()
-            ->setSubject(__($SUBJECT$))
-            ->setBody(__($BODY$))
+            ->setSubject(__('notification.title'))
+            ->setBody(__('notification.body'))
             ->setData('data', $data);
     }
 }

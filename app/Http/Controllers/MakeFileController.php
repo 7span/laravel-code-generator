@@ -14,6 +14,7 @@ use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
+use App\Library\LanguageHelper;
 use App\Library\NotificationHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -59,13 +60,13 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
-        $notification=$request->get('notification');
+        $notification = $request->get('notification');
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
         $relationAnotherModel = $request->get('relation_another_model');
         $foreignKey = $request->get('foreign_key');
-        
+
         $relationArr = array(
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
@@ -75,7 +76,7 @@ class MakeFileController extends Controller
 
         $includeModel = $request->get('add_model');
         $includeMigration = $request->get('add_migration');
-        
+
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
@@ -129,6 +130,15 @@ class MakeFileController extends Controller
         }
 
         if ($notification == 1) {
+            $titleKey = $this->camelCaseToUnderscore($request->class_name);
+            $bodyKey = $this->camelCaseToUnderscore($request->class_name)."_body";
+
+            $titleValue = $request->subject;
+            $bodyValue = $request->body;
+
+            $command = 'make:language ' ."'" . $titleKey . "'"." '" . $titleValue . "'"." '" . $bodyKey . "'"." '" . $bodyValue . "'";
+
+            \Artisan::call($command);
             NotificationHelper::notification($generatedFilesPath);
         }
 
@@ -139,5 +149,15 @@ class MakeFileController extends Controller
         File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
 
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);
+    }
+
+    function camelCaseToUnderscore($input) {
+        // Use a regular expression to match the CamelCase pattern
+        $pattern = '/(?!^)([A-Z])/';
+        $replacement = '_$1';
+        $underscored = preg_replace($pattern, $replacement, $input);
+
+        // Convert to lowercase
+        return strtolower($underscored);
     }
 }

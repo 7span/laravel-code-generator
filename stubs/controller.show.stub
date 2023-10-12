@@ -1,6 +1,4 @@
     public function show($CLASS_NAME$ $$SINGULAR_VARIABLE$)
     {
-        $$SINGULAR_VARIABLE$Obj = $this->$SINGULAR_VARIABLE$Service->resource($$SINGULAR_VARIABLE$->id);
-
-        return new $CLASS_NAME$Resource($$SINGULAR_VARIABLE$Obj);
+        {{ showMethod }}
     }

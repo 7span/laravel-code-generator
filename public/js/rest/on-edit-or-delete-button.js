@@ -102,8 +102,11 @@ $("body").on("click", ".btn-edit", function () {
 $("body").on("click", ".btn-delete", function () {
     $(this).parents("tr").remove();
     var column_name = $(this).parents("tr").attr("data-column-name");
+    if(column_name == 'deleted_by'){
+        $('#makeFileForm #model_name').after('<input type="text" name="deleted_by" value="1" class="" style="display:none" />');
+    }
     $("input[name='table_fields[" + column_name + "]']").remove();
-
+    
     if ($(".added_input").length == 0) {
         $('#scope_fields').hide();
         $('#label_scope_fields').hide();

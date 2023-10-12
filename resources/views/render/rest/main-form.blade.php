@@ -3,9 +3,41 @@
     <fieldset>
       <label for="name">Model name:</label>
       <input type="text" id="model_name" name="model_name" value="{!! old('model_name') !!}">
+
+      <table class="relation_model">
+        <tr class="relationdata">
+            <td>
+              <input type="text" name="relation_model[]" class="relation_model_name" placeholder="Relation model name">
+            </td>
+            <td>
+              <select name="relation_ship[]" class="relation_ship">
+                  <option value="hasOne">One To One</option>
+                  <option value="hasMany">One To Many</option>
+                  <option value="belongsToMany">Many To Many</option>
+                  <option value="hasOneThrough">Has One Through</option>
+                  <option value="hasManyThrough">Has many Through</option>
+                  <option value="morphOne">One to One(Polymorphic)</option>
+                  <option value="morphMany">One To Many(Polymorphic)</option>
+                  <option value="morphToMany">Many To Many(Polymorphic)</option>
+              </select>
+            </td>
+            <td>
+              <input type="text" name="relation_another_model[]" class="relation_another_model relation_model_name" placeholder="Relational Second model">
+            </td>
+            <td>
+              <input type="text" name="foreign_key[]" class="foreign_key relation_model_name" placeholder="Foreign key">
+            </td>
+            <td>
+              <button name="add_more" id="add_more" class="add_new_row add_more">+</button>
+            </td>
+        </tr>
+      </table>
       <!-- <input type="text" id="model_name" name="model_name" value="Project" required=""> -->
       <span style="color:blue">If possible please enter your model name like, Project OR ProjectCategory.</span><br><br>
       <span style="color:red" class="modelNameError"></span><br><br>
+
+      <input type="checkbox" id="add_model" name="add_model" value="1" @checked(old('add_model') ?? 'checked')><label class="light" for="add_model">Want to include model?</label><br>
+      <input type="checkbox" id="add_migration" name="add_migration" value="1" @checked(old('add_migration') ?? 'checked')><label class="light" for="add_migration">Want to include migration?</label><br>
 
       <input type="hidden" name="soft_delete" value="0" checked="checked">
       <input type="checkbox" id="soft_delete" name="soft_delete" value="1" @checked(old('soft_delete') ?? 'checked')><label class="light" for="soft_delete">Want to include soft delete?</label><br>
@@ -31,7 +63,6 @@
         <li>PaginationTrait.php</li>
         <li>ResourceFilterable.php</li>
       </ul>
-
 
       <label for="name">Which method do you want to include?</label>
 
@@ -76,36 +107,50 @@
                 <th scope="row">auto_increment</th>
                 <td>id</td>
                 <td>required</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="2">
                 <th scope="row">date_time_picker</th>
                 <td>created_at</td>
                 <td>required</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="3">
                 <th scope="row">date_time_picker</th>
                 <td>updated_at</td>
                 <td>required</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="4">
                 <th scope="row">date_time_picker</th>
                 <td>deleted_at</td>
                 <td>optional</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="5">
                 <th scope="row">integer</th>
                 <td>created_by</td>
                 <td>optional</td>
+                <td></td>
+                <td></td>
               </tr>
               <tr data-row="6">
                 <th scope="row">integer</th>
                 <td>updated_by</td>
                 <td>optional</td>
+                <td></td>
+                <td></td>
               </tr>
-              <tr data-row="7">
+              <tr data-row="7" data-column-name="deleted_by">
                 <th scope="row">integer</th>
                 <td>deleted_by</td>
                 <td>optional</td>
+                <td></td>
+                <td><button type='button' class='btn btn-danger btn-delete'><i class='far fa-trash-alt btn-delete'></i></button></td>
               </tr>
             </tbody>
           </table>

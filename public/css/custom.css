@@ -117,15 +117,34 @@
   h4 {
     margin: 2rem 0rem 1rem;
   }
-
-  .table-image {
-    td, th {
+  .relation_model td, th{
+    padding: 10px;
+  }
+  .table-image td, th {
       vertical-align: middle;
-    }
   }
 
   .modal-header .close {
     margin-top: -34px;
+  }
+  .relation_model select {
+    padding: 16px;
+    height: auto;
+    border-radius: 2px;
+  }
+  .relation_model input.relation_model_name,
+  .relation_model select.relation_ship {
+      margin-bottom: 0px;
+  }
+  .relation_model .add_new_row {
+    height: 55px;
+    width: 55px;
+    text-align: center;
+    margin-bottom: 0px;
+    padding:11px 14px;
+  }
+  .relation_model {
+    margin-bottom: 20px;
   }
 
   @media screen and (min-width: 480px) {

@@ -85,8 +85,8 @@ class MakeServiceCommand extends Command
             'NAMESPACE' => 'App\\Services',
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
             // 'USE'               => $use,
-            'SINGULAR_VARIABLE' => Str::singular(strtolower($this->argument('name'))),
-            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
+            'SINGULAR_VARIABLE' => lcfirst($this->argument('name')),
+            'PLURAL_VARIABLE' => lcfirst(Str::plural($this->argument('name'))),
         ];
     }
 

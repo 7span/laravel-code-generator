@@ -11,7 +11,21 @@ if ($(".added_input").length == 0) {
     $('#scope_fields').show();
     $('#label_scope_fields').show();
 }
-
+$(document).on('click','.add_more',function(e){
+    e.preventDefault();
+    var cloneObj = $('.relationdata').clone();
+    cloneObj.find('.add_new_row').removeClass('add_more');
+    cloneObj.find('.add_new_row').addClass('remove_row');
+    cloneObj.addClass('clonerelation');
+    cloneObj.removeClass('relationdata');
+    cloneObj.find('.relation_model_name').val('');
+    cloneObj.find('.add_new_row').text('-');
+    $('.relation_model').append(cloneObj);
+});
+$(document).on('click','.remove_row',function(e){
+    e.preventDefault();
+    $(this).closest('tr').remove();
+});
 $('#makeFileForm').on('submit',function(e){
     e.preventDefault();
 

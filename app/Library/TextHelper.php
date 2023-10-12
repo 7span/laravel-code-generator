@@ -23,7 +23,7 @@ class TextHelper
 
                 // $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
                 $null_or_not_null = !in_array('required',$validation) ?  '->nullable()' : '';
-
+            
                 if ($fieldType == 'enum') {
                     $pVal = '';
                     $length = count(explode(',', $possibleValues));

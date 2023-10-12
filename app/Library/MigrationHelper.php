@@ -9,7 +9,7 @@ class MigrationHelper
 {
     const INDENT = '    ';
 
-    public static function makeMigration($tableName, $migrationText, $generatedFilesPath, $softDelete)
+    public static function makeMigration($tableName, $migrationText, $generatedFilesPath, $softDelete, $deletedBy = '')
     {
         // Make migration file using command
         \Artisan::call('make:migration create_' . $tableName . '_table');
@@ -26,7 +26,10 @@ class MigrationHelper
 
         $stringToReplace = '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();';
         $replaceWith = $softDelete == "1" ? '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();' : '$table->timestamps();';
-        $replaceWith = $migrationText. PHP_EOL . self::INDENT . self::INDENT . self::INDENT .$replaceWith;
+        if(empty($deletedBy)){
+            $deleted_by = "deleted_by";
+            $replaceWith .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$'."table->integer('".$deleted_by."')->nullable();";
+        }
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Move migration file to Generated_files

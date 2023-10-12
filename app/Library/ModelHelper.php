@@ -23,9 +23,12 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$isForGraphql = false)
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationArr = '')
     {
-
+        $relationModel =  $relationArr['relationModel'];
+        $relationShip =  $relationArr['relationShip'];
+        $relationAnotherModel =  $relationArr['relationAnotherModel'];
+        $foreignKeyArr =  $relationArr['foreignKey'];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
@@ -35,18 +38,19 @@ class ModelHelper
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
 
-        if($isForGraphql){
-            $useText = "use App\Traits\BaseModel;";
-            TextHelper::replaceStringInFile($filename, $useText, "");
+        $stringToReplace = '{{ softdelete }}';
+        $replaceText = $softDelete == "1" ? "use Illuminate\Database\Eloquent\SoftDeletes;" : '';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
-            $useText = "use App\Traits\BootModel;";
-            TextHelper::replaceStringInFile($filename, $useText, "");
-
-            $useText = "use BaseModel, BootModel,";
-            TextHelper::replaceStringInFile($filename, $useText, "use ");
-        }
+        $stringToReplace = '{{ uses }}';
+        $replaceText = "use BaseModel, BootModel, HasFactory".($softDelete == "1" ? ", SoftDeletes;" : ';');
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
         // Replace the content of file as per our need
+
+        if(empty($deletedBy)){
+            $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'deleted_by',";
+        }
         $stringToReplace = 'fillable = [';
         $replaceWith = 'fillable = [' . $fillableText;
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
@@ -71,9 +75,9 @@ class ModelHelper
             foreach ($scopeFields as $key => $scopeField) {
                 $newScopeField = str_replace(' ', '', ucwords(str_replace('_', ' ', $scopeField)));
                 if ($key == 0) {
-                    $scopesText .= 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value);' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
+                    $scopesText .= 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value);' . PHP_EOL . self::INDENT . '}' . PHP_EOL;
                 } else {
-                    $scopesText .= self::INDENT . 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value);' . PHP_EOL . self::INDENT . '}' . PHP_EOL . PHP_EOL;
+                    $scopesText .= self::INDENT . 'public function scope' . $newScopeField . '($' . 'query, ' . '$' . 'value)' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return  ' . '$' . "query->where('" . $scopeField . "', " . '$' . 'value);' . PHP_EOL . self::INDENT . '}' . PHP_EOL;
                 }
 
                 if (array_key_last($scopeFields) != $key) {
@@ -89,7 +93,82 @@ class ModelHelper
 
             $stringToReplace = '{{ scopes }}';
             TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
+        } else {
+            $stringToReplace = '{{ scopes }}';
+            TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
         }
+        // $bootTrait = '';
+        // if (empty($trait)) {
+        //     $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+        // }
+
+        // $stringToReplace = '{{ bootTrait }}';
+        // TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
+
+        $mainModel = lcfirst($modelName);
+        $relationData = '';
+        if(!empty($relationModel)){
+            foreach($relationModel as $rkey => $val){
+                if(!empty($val)){
+                    $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
+                    $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
+                    $foreignKey = isset($foreignKeyArr[$rkey]) ? $foreignKeyArr[$rkey] : '';
+
+                    $modelname = ucfirst($val);
+                    $secondModel = $modelRelationName = lcfirst($val);
+
+                    if(in_array($relationShipVal, ['hasMany', 'belongsToMany', 'hasManyThrough', 'morphMany', 'morphToMany'])){
+                        $modelRelationName = Str::plural($modelRelationName);
+                    }
+
+                    $secondArg = '';
+                    if($relationShipVal == 'belongsToMany'){
+                        $secondArg = ", '".$secondModel.'_'.$mainModel."'";
+                    }
+                    if($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough'){
+
+                        if(empty($relationShipSecondModel)){
+                            continue;
+                        }
+
+                        $secondModel = lcfirst($relationShipSecondModel);
+
+                        if($relationShipVal == 'hasOneThrough'){
+                            $modelRelationName .= ucfirst($secondModel);
+                        }
+
+                        if($relationShipVal == 'hasManyThrough'){
+                            $modelRelationName = Str::plural(lcfirst($secondModel));
+                        }
+
+                        $modelname = ucfirst($secondModel);
+                        $secondArg = ucfirst($val);
+
+                        if(!empty($foreignKey)){
+                            $mainModelId = $tableName = strtolower(preg_replace('/\B([A-Z])/', '_$1', $modelName)) . "_id";
+                            $secondArg = ", ".ucfirst($val)."::class, '".$mainModelId."', '".$foreignKey."'";
+                        }else{
+                            $secondArg = ", ".ucfirst($val)."::class";
+                        }
+                    }
+                    if($relationShipVal == 'morphMany' || $relationShipVal == 'morphToMany'){
+                        $secondArg = ", '".lcfirst($val)."able'";
+                    }
+                    if($relationShipVal == 'morphOne'){
+                        $secondArg = ", '".lcfirst($val)."able'";
+                    }
+
+                    $newintend = '';
+                    if($rkey != 0){
+                        $newintend = self::INDENT;
+                    }
+                    $relationData .= $newintend.'public function '.$modelRelationName.'()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '('.$modelname.'::class'.$secondArg.');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
+                }
+            }
+        }
+        $stringToReplace = '{{ relation }}';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $relationData);
+
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));

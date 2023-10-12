@@ -5,19 +5,18 @@ namespace {{ namespace }};
 use App\Traits\BaseModel;
 use App\Traits\BootModel;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+{{ softdelete }}
 
 class {{ class }} extends Model
 {
-    use BaseModel, BootModel, HasFactory, SoftDeletes;
+    {{ uses }}
 
     protected $table = '';
 
     public $fillable = [
         'created_by',
-        'updated_by',
-        'deleted_by'
+        'updated_by'
     ];
 
     protected $casts = [
@@ -31,19 +30,12 @@ class {{ class }} extends Model
     public $queryable = [
         'id'
     ];
-    
+
     protected $relationship = [];
 
     protected $scopedFilters = [];
 
     {{ scopes }}
 
-    public static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $model->created_by = auth()->id();
-            $model->updated_by = auth()->id();
-        });
-    }
+    {{ relation }}
 }

@@ -2,15 +2,21 @@
 
 namespace $NAMESPACE$;
 
-use App\Services\$CLASS_NAME$Service;
+use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
+{{ service }}
 use App\Http\Controllers\Controller;
-use App\Http\Requests\$CLASS_NAME$\Request as $CLASS_NAME$Request;
+{{ request }}
+use App\Models\$MODEL_NAME$;
+
 
 class $CLASS_NAME$Controller extends Controller
 {
-    private $$SINGULAR_VARIABLE$Service;
+    use ApiResponser;
+    
+    {{ singularService }}
 
     public function __construct()
     {
-        $this->$SINGULAR_VARIABLE$Service = new $CLASS_NAME$Service;
+        {{ serviceObj }}
     }

@@ -89,10 +89,24 @@ class MakeQueryController extends Controller
         }
 
         $queryObj = $request->get('query_obj');
+        $queryName = $request->get('query_name');
+        $queryText = $request->get('query_text');
+
+        if(empty($queryObj) && empty($queryName)){
+            $foramt_error = ['format' => "Please Enter either object or text."];
+            return response()->json($foramt_error, 422);
+        }
+
+
+        if(!empty($queryText) && empty($queryName)){
+            $error = ['format' => "Please Enter query name."];
+            return response()->json($error, 422);
+        }
+
         if(!empty($queryObj)){
 
-            if(!(strpos($queryObj,'{') && strpos($queryObj,'}'))){
-                $foramt_error = ['format' => "Opening/Closing curlybrecket is missing."];
+            if((!strpos($queryObj,'{') || !strpos($queryObj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
                 return response()->json($foramt_error, 422);
             }
 

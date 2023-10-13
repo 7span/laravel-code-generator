@@ -15,7 +15,7 @@
         <label for="typeText">Enter type text</label>
         <!-- <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea> -->
         <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)">id: int,name: String</textarea>
-        <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button>
+        {{-- <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button> --}}
     </div>
 
     <!-- <button type="button" class="btn btn-warning" id="editTypeFieldModal" data-toggle="modal" data-target="#editTypeFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->

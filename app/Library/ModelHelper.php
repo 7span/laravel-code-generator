@@ -25,15 +25,14 @@ class ModelHelper
 
     public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationArr = '')
     {
-        $relationModel =  $relationArr['relationModel'];
-        $relationShip =  $relationArr['relationShip'];
-        $relationAnotherModel =  $relationArr['relationAnotherModel'];
-        $foreignKeyArr =  $relationArr['foreignKey'];
+        $relationModel =  isset($relationArr['relationModel']) ? $relationArr['relationModel'] : [];
+        $relationShip =  isset($relationArr['relationShip']) ? $relationArr['relationShip'] : [];
+        $relationAnotherModel =  isset($relationArr['relationAnotherModel']) ? $relationArr ['relationAnotherModel'] : [];
+        $foreignKeyArr =  isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
         $filename = base_path('app/Models/' . $modelName . '.php');
-
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);

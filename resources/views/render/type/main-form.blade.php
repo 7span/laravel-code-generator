@@ -50,7 +50,7 @@
             <div class="form-group ">
                 <label for="name">Type name:</label>
                 <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
-                <input type="text" id="type_name" name="type_name" value="Project" required="">
+                <input type="text" id="type_name" name="type_name" value="">
                 <span style="color:blue">If possible please enter your type name like  Project,Category.</span>
                 <span style="color:red" class="typeNameError"></span><br>
             </div>
@@ -62,7 +62,7 @@
             <div class="form-group">
                 <label for="typeText">Enter type text</label>
                 <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
-                <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button>
+                {{-- <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button> --}}
             </div>
 
             <div class="form-group">

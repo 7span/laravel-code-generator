@@ -44,11 +44,13 @@ class MakeTypeController extends Controller
     public function store(Request $request)
     {
         // $validator = Validator::make($request->all(), [
-        //     'type_name' => 'required|max:255',
-        //     'type_text' => 'required|max:255',
+        //     'type_name' => 'required_if:type_obj,nullable',
+        //     'type_text' => 'required_if:type_name,present',
+        //     'type_obj' => 'required_if:type_name,nullable'
         // ], [
         //     'type_name.required' => 'Please enter your type name.',
         //     'type_text.required' => 'Please enter type text.',
+        //     'type_obj.requied' => 'Please enter type object'
         // ]);
 
         // if ($validator->fails()) {
@@ -64,10 +66,24 @@ class MakeTypeController extends Controller
             Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
         $typeobj = $request->get('type_obj');
-        if(!empty($typeobj)){
+        $typeName = $request->get('type_name');
+        $typeText = $request->get('type_text');
 
-            if(!(strpos($typeobj,'{') && strpos($typeobj,'}'))){
-                $foramt_error = ['format' => "Opening/Closing curlybrecket is missing."];
+        if(empty($typeObj) && empty($typeName)){
+            $foramt_error = ['format' => "Please Enter either object or text."];
+            return response()->json($foramt_error, 422);
+        }
+
+
+        if(!empty($typeText) && empty($typeName)){
+            $error = ['format' => "Please Enter type name."];
+            return response()->json($error, 422);
+        }
+
+
+        if(!empty($typeobj)){
+            if((!strpos($typeobj,'{') || !strpos($typeobj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
                 return response()->json($foramt_error, 422);
             }
 

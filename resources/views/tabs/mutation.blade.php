@@ -3,15 +3,19 @@
     <div class="form-group">
         <label for="name">Folder name:</label>
         <input type="text" id="folder_name" name="folder_name" value="{!! old('mutation_name') !!}">
-        <span style="color:blue">If possible please enter your folder name like, Project, Page.</span>
         <span style="color:red" class="folderNameError"></span><br>
+
+        <span style="color:blue">If possible please enter your folder name like, Project, Page.</span>
+
     </div>
     <div class="form-group">
         <label for="name">Mutation name:</label>
         <input type="text" id="mutation_name" name="mutation_name" value="{!! old('mutation_name') !!}">
+        <span style="color:red" class="queryNameError"></span><br>
+
         <p>Note : If you enter mutation name then it will update mutation name globally</p>
         <span style="color:blue">If possible please enter your mutation name like, Upsert.Delete. It will create mutation foldername/mutationame</span>
-        <span style="color:red" class="queryNameError"></span><br>
+
     </div>
 
     <div class="form-group">
@@ -102,6 +106,7 @@
                     alert(response.file_path);
                     // window.location.href = "file://" + response.file_path;
                     window.location.href = response.file_path;
+                    $('#makeMutationFileForm')[0].reset();
                 }
             },
             complete: function(){

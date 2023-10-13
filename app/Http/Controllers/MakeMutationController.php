@@ -22,6 +22,8 @@ class MakeMutationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'folder_name' => 'required|max:255',
+            'mutation_name' => 'required',
+            'mutation_text' => 'required'
         ], [
             'folder_name.required' => 'Please enter folder name.',
         ]);

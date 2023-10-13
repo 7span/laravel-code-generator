@@ -9,7 +9,7 @@ class $CLASS_NAME$Service
 {
     use  PaginationTrait;
 
-    private $this->$SINGULAR_VARIABLE$Obj;
+    private $$SINGULAR_VARIABLE$Obj;
 
     public function __construct()
     {

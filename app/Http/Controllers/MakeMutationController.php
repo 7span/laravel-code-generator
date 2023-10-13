@@ -52,8 +52,8 @@ class MakeMutationController extends Controller
         $aliasArr = [];
         if(!empty($mutationObj)){
 
-            if(!(strpos($mutationObj,'{') && strpos($mutationObj,'}'))){
-                $foramt_error = ['format' => "Opening/Closing curlybrecket is missing."];
+            if((!strpos($mutationObj,'{') || !strpos($mutationObj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
                 return response()->json($foramt_error, 422);
             }
 

@@ -3,12 +3,25 @@ $('#editFieldForm').on('submit', function(e){
 
     var column_type = $('#edit_column_type').find(":selected").val();
 
+    let names = [];
+
+    jQuery('#myTable > tbody > tr').each(function(index, value) {
+        names.push($('td:eq(0)', this).text());
+    });
+
+
     if (column_type == "blank") {
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Please select any one data type.</span>")
     } else {
         var which_row = $("#tr_row_for_edit").attr('data-row');
         var old_column_name = $('.table tbody tr[data-row="' + which_row + '"]').attr('data-column-name');
         var column_name = $("input[name='edit_column_name']").val();
+
+        if($.inArray(column_name,names) != -1){
+            $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
+            return true;
+        }
+
         var column_validation = $('#edit_column_validation').val().join('|');
 
         $('.table tbody tr[data-row="' + which_row + '"]').attr('data-column-type', column_type).attr('data-column-name', column_name).attr('data-column-validation', column_validation);;

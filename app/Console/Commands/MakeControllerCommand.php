@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Library\TextHelper;
-use Str;
+use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
@@ -158,15 +158,14 @@ class MakeControllerCommand extends Command
 
         foreach ($methods as $method) {
             \Log::info('method--' . $method);
+            $className = $stubVariables['CLASS_NAME'];
             if ($method == 'show') {
-                $className = $stubVariables['CLASS_NAME'];
                 $string_to_replace = 'use App\Http\Controllers\Controller;';
                 
                 $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Resource as ' . $className . 'Resource;';
                 $replace_with = ($resource == '1') ? $replace_with : $string_to_replace;
                 $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
             } elseif ($method == 'index') {
-                $className = $stubVariables['CLASS_NAME'];
                 $string_to_replace = 'use App\Http\Controllers\Controller;';
                 $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Collection as ' . $className . 'Collection;';
                 $replace_with = ($resource == '1') ? $replace_with : $string_to_replace;
@@ -191,28 +190,28 @@ class MakeControllerCommand extends Command
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             $stringToReplace = '{{ indexMethod }}';
-            $resourceExist = ($resource == '1') ? 'return new '.$className.'Collection($'.$stubVariables['PLURAL_VARIABLE'].');' : 'return $'.$stubVariables['PLURAL_VARIABLE'].";";
-            $replaceText = "".($service == "1" ? '$'.$stubVariables['PLURAL_VARIABLE'].' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->collection($request->all());'.PHP_EOL . self::INDENT . self::INDENT .$resourceExist : '');
+            $resourceExist = ($resource == '1') ? 'return $this->collection(new '.$className.'Collection($'.Str::plural($stubVariables['SINGULAR_VARIABLE']).'));' : 'return $this->success($'.Str::plural($stubVariables['SINGULAR_VARIABLE']).");";
+            $replaceText = "".($service == "1" ? '$'.Str::plural($stubVariables['SINGULAR_VARIABLE']).' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->collection($request->all());'.PHP_EOL . self::INDENT . self::INDENT .$resourceExist : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             
             $stringToReplace = '{{ storeMethod }}';
             $singluarObj = $singularVariable.'Obj';
             $error = $singularVariable.'Obj["errors"]';
-            $ifRequest = ($requestFile == "1" ? '$request->validated()' : '');
+            $ifRequest = ($requestFile == "1" ? '$request->all()' : '');
             $replaceText = "".($service == "1" ? $singluarObj .' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->store('.$ifRequest.');'.PHP_EOL . self::INDENT . self::INDENT .'return isset('.$error.') ? $this->error('.$singluarObj.') : $this->success('.$singluarObj.');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
 
             $stringToReplace = '{{ showMethod }}';
             $id = $singularVariable.'->id';
-            $resourceViewExist = ($resource == '1') ? 'return new '.$className.'Resource('.$singluarObj.');' : 'return '.$singularVariable.'Obj;';
+            $resourceViewExist = ($resource == '1') ? 'return $this->resource(new '.$className.'Resource('.$singluarObj.'));' : 'return $this->success('.$singularVariable.'Obj);';
             $replaceText = "".($service == "1" ? $singularVariable.'Obj = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->resource('.$id.');'.PHP_EOL . self::INDENT . self::INDENT .$resourceViewExist : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             $stringToReplace = '{{ updateMethod }}';
             
-            $ifUpdateRequest = ($requestFile == "1" ? ', $request->validated()' : '');
+            $ifUpdateRequest = ($requestFile == "1" ? ', $request->all()' : '');
             $replaceText = "".($service == "1" ? $singluarObj.' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->update('.$id.''.$ifUpdateRequest.');'.PHP_EOL . self::INDENT . self::INDENT .'return isset('.$error.') ? $this->error('.$singluarObj.') : $this->success('.$singluarObj.');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 

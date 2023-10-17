@@ -1,0 +1,38 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use Closure;
+use App\Services\$SERVICE_CLASSNAME$Service;
+use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\ResolveInfo;
+use Rebing\GraphQL\Support\Facades\GraphQL;
+use Rebing\GraphQL\Support\Query;
+
+class $CLASSNAME$ extends Query
+{
+    protected $attributes = [
+        'name' => '$SERVICE_CLASSNAME_VARIABLE$ detail query',
+    ];
+
+    public function __construct(private $SERVICE_CLASSNAME$Service $$SERVICE_CLASSNAME_VARIABLE$Service)
+    {
+    }
+
+    public function type(): Type
+    {
+        return GraphQL::type('$SERVICE_CLASSNAME_VARIABLE$');
+    }
+
+    public function args(): array
+    {
+        return [
+            'id' => ['name' => 'id', 'type' => Type::int(), 'rules' => ['required']],
+        ];
+    }
+
+    public function resolve($root, $args, $context, ResolveInfo $resolveInfo, Closure $getSelectFields)
+    {
+        return $this->$SERVICE_CLASSNAME_VARIABLE$Service->resource($args['id'], $args);
+    }
+}

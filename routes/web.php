@@ -18,8 +18,20 @@ use App\Http\Controllers\MakeMutationController;
 */
 
 Route::get('/', function () {
-    return view('make-files');
-});
+    return view('rest');
+})->name('rest');
+
+Route::get('graphql-type', function () {
+    return view('type');
+})->name('graphql-type');
+
+Route::get('graphql-mutation', function () {
+    return view('mutation');
+})->name('graphql-mutation');
+
+Route::get('graphql-query', function () {
+    return view('query');
+})->name('graphql-query');
 
 Route::post('make-files', [MakeFileController::class, 'store']);
 

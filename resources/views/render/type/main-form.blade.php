@@ -1,4 +1,7 @@
-<b><span style="color:red">Please enter either obejct or text.</span></b>
+<b>
+    <span style="color:red">Please enter either whole Type object to the left side OR enter Type name and Type text in
+        the
+        right side to generate the Type file.</span></b>
 
 <form id="makeTypeFileForm">
     @csrf
@@ -9,13 +12,13 @@
             <div class="form-group">
                 <label for="name">Type Object:</label>
                 <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
-                <textarea class="form-control container" id="type_obj" name="type_obj" rows="3"  cols="50"></textarea>
+                <textarea class="form-control container" id="type_obj" name="type_obj" rows="3" cols="50"></textarea>
                 <span style="color:red" class="typeObjectError"></span><br>
             </div>
 
             <div class="form-group">
                 <label for="name">Type Object Snippet :</label>
-                <textarea class="form-control container"  rows="7"  cols="50" disabled>
+                <textarea class="form-control container" rows="7" cols="50" disabled>
                     type FormField {
                         id: Int
                         name: String
@@ -27,8 +30,9 @@
             </div>
 
             <div class="form-group">
-                <label for="name">Type Input Object Snippet : <span style="color:red">("!" is used for field required or not)</span></label>
-                <textarea class="form-control container" rows="7"  cols="50" disabled>
+                <label for="name">Type Input Object Snippet : <span style="color:red">("!" is used for field
+                        required or not)</span></label>
+                <textarea class="form-control container" rows="7" cols="50" disabled>
                     type FormFieldInput {
                         id: Int
                         name: String!
@@ -40,10 +44,12 @@
             </div>
         </div>
 
-        <div class = "vertical" style="border-left: 6px solid gray;
+        <div class = "vertical"
+            style="border-left: 6px solid gray;
         height: 700px;
         position:absolute;
-        left: 50%;"></div>
+        left: 50%;">
+        </div>
 
         <div class="col-md-6">
 
@@ -51,23 +57,28 @@
                 <label for="name">Type name:</label>
                 <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
                 <input type="text" id="type_name" name="type_name" value="">
-                <span style="color:blue">If possible please enter your type name like  Project,Category.</span>
+                <span style="color:blue">If possible please enter your type name like Project,Category.</span>
                 <span style="color:red" class="typeNameError"></span><br>
             </div>
 
 
-            <input type="String" name="type_fields[name]" value="{'field':name', 'alias':name', 'type':'String', 'description':'name of xyz'}" class="added_type_input" style="display:none">
-            <input type="int" name="type_fields[id]" value="{'field':id', 'alias':id', 'type':'int', 'description':'id of xyz'}" class="added_type_input" style="display:none">
+            <input type="String" name="type_fields[name]"
+                value="{'field':name', 'alias':name', 'type':'String', 'description':'name of xyz'}"
+                class="added_type_input" style="display:none">
+            <input type="int" name="type_fields[id]"
+                value="{'field':id', 'alias':id', 'type':'int', 'description':'id of xyz'}" class="added_type_input"
+                style="display:none">
 
             <div class="form-group">
                 <label for="typeText">Enter type text</label>
-                <textarea class="form-control container" id="typeText" name="type_text" rows="3"  cols="50" (focus)="func()" (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
+                <textarea class="form-control container" id="typeText" name="type_text" rows="3" cols="50" (focus)="func()"
+                    (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
                 {{-- <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button> --}}
             </div>
 
             <div class="form-group">
                 <label for="name">Type Text Snippet :</label>
-                <textarea class="form-control container" rows="3"  cols="50" disabled>
+                <textarea class="form-control container" rows="3" cols="50" disabled>
                     id: int,name: String
                 </textarea>
             </div>

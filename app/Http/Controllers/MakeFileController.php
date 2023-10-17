@@ -14,6 +14,8 @@ use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
+use App\Library\LanguageHelper;
+use App\Library\NotificationHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -58,6 +60,7 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
+        $notification = $request->get('notification');
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
@@ -128,6 +131,19 @@ class MakeFileController extends Controller
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
         }
 
+        if ($notification == 1) {
+            $titleKey = $this->camelCaseToUnderscore($request->class_name);
+            $bodyKey = $this->camelCaseToUnderscore($request->class_name)."_body";
+
+            $titleValue = $request->subject;
+            $bodyValue = $request->body;
+
+            $command = 'make:language ' ."'" . $titleKey . "'"." '" . $titleValue . "'"." '" . $bodyKey . "'"." '" . $bodyValue . "'";
+
+            \Artisan::call($command);
+            NotificationHelper::notification($generatedFilesPath);
+        }
+
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);
 
@@ -135,5 +151,15 @@ class MakeFileController extends Controller
         File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
 
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);
+    }
+
+    function camelCaseToUnderscore($input) {
+        // Use a regular expression to match the CamelCase pattern
+        $pattern = '/(?!^)([A-Z])/';
+        $replacement = '_$1';
+        $underscored = preg_replace($pattern, $replacement, $input);
+
+        // Convert to lowercase
+        return strtolower($underscored);
     }
 }

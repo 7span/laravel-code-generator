@@ -1,3 +1,13 @@
+<script src="{!! asset('js/make-file.js') !!}"></script>
+<script src="{!! asset('js/add-field.js') !!}"></script>
+<script src="{!! asset('js/add-column-type-change.js') !!}"></script>
+<script src="{!! asset('js/edit-field.js') !!}"></script>
+<script src="{!! asset('js/edit-column-type-change.js') !!}"></script>
+<script src="{!! asset('js/add-notification-field.js') !!}"></script>
+<script src="{!! asset('js/on-edit-or-delete-button.js') !!}"></script>
+<script src="{!! asset('js/add-or-edit-more.js') !!}"></script>
+<script src="{!! asset('js/add-scope.js') !!}"></script>
+
 <!-- Generate rest API code js -->
 <script src="{!! asset('js/rest/make-file.js') !!}"></script>
 <script src="{!! asset('js/rest/add-field.js') !!}"></script>
@@ -7,10 +17,6 @@
 <script src="{!! asset('js/rest/on-edit-or-delete-button.js') !!}"></script>
 <script src="{!! asset('js/rest/add-or-edit-more.js') !!}"></script>
 <script src="{!! asset('js/rest/add-scope.js') !!}"></script>
-
-
-
-
 
 <!-- Generate type js -->
 <script src="{!! asset('js/type/make-type.js') !!}"></script>

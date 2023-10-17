@@ -1,7 +1,7 @@
-var addFieldButton = document.getElementById("addFieldButton");
-document.getElementById("migration_fields").addEventListener('click', function() {
-    addFieldButton.style.display = (this.checked)? "block" : "none";
-});
+// var addFieldButton = document.getElementById("addFieldButton");
+// document.getElementById("migration_fields").addEventListener('click', function() {
+//     addFieldButton.style.display = (this.checked)? "block" : "none";
+// });
 
 $('#makeTypeFileForm').on('submit',function(e){
     // alert('Hi');

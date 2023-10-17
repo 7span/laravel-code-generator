@@ -69,32 +69,32 @@ class MakeTypeController extends Controller
         $typeName = $request->get('type_name');
         $typeText = $request->get('type_text');
 
-        if(empty($typeObj) && empty($typeName)){
+        if (empty($typeobj) && empty($typeName)) {
             $foramt_error = ['format' => "Please Enter either object or text."];
             return response()->json($foramt_error, 422);
         }
 
 
-        if(!empty($typeText) && empty($typeName)){
+        if (!empty($typeText) && empty($typeName)) {
             $error = ['format' => "Please Enter type name."];
             return response()->json($error, 422);
         }
 
 
-        if(!empty($typeobj)){
-            if((!strpos($typeobj,'{') || !strpos($typeobj,'}'))){
+        if (!empty($typeobj)) {
+            if ((!strpos($typeobj, '{') || !strpos($typeobj, '}'))) {
                 $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
                 return response()->json($foramt_error, 422);
             }
 
-            $typeobj = explode('{',$typeobj);
-            $typeKeyword = ucfirst(trim(explode(' ',$typeobj[0])[0]));
-            if(empty($typeKeyword) || $typeKeyword != 'Type'){
+            $typeobj = explode('{', $typeobj);
+            $typeKeyword = ucfirst(trim(explode(' ', $typeobj[0])[0]));
+            if (empty($typeKeyword) || $typeKeyword != 'Type') {
                 $foramt_error = ['format' => "Please Enter valid type format."];
                 return response()->json($foramt_error, 422);
             }
 
-            $typeName = trim(str_replace('type','', $typeobj[0]));
+            $typeName = trim(str_replace('type', '', $typeobj[0]));
             $typeName = ucfirst($typeName);
             $typeTexts = TypeHelper::getTypeFields($typeobj[1]);
         } else {
@@ -103,8 +103,8 @@ class MakeTypeController extends Controller
             $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
         }
 
-        if(!str_contains($typeName,'Input')){
-            $typeName = $typeName.'Type';
+        if (!str_contains($typeName, 'Input')) {
+            $typeName = $typeName . 'Type';
         }
 
         $typeTexts = explode(',', $typeTexts);
@@ -119,7 +119,7 @@ class MakeTypeController extends Controller
         }
 
 
-        $modelName = str_replace('Type','',str_replace('Input','',$typeName));
+        $modelName = str_replace('Type', '', str_replace('Input', '', $typeName));
         // Get table name
         $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
         $scope = '';
@@ -127,17 +127,17 @@ class MakeTypeController extends Controller
         // Make model and move it to Generated_files
 
         $tempFields = "";
-        foreach($fields as $field){
-            $tempFields .= "'".$field."',";
+        foreach ($fields as $field) {
+            $tempFields .= "'" . $field . "',";
         }
 
-        ModelHelper::makeModel($modelName, $tableName, $tempFields, $generatedFilesPath, $scope, $softDelete,true);
+        ModelHelper::makeModel($modelName, $tableName, $tempFields, $generatedFilesPath, $scope, $softDelete, true);
 
         // Get replaceable text
-        $filename = TypeHelper::makeType($typeName, implode(',',$fields),implode(',',$dataTypes));
+        $filename = TypeHelper::makeType($typeName, implode(',', $fields), implode(',', $dataTypes));
 
         // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('Type','',str_replace('Input','',$typeName))));
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . str_replace('Type', '', str_replace('Input', '', $typeName))));
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

@@ -14,6 +14,10 @@
         <p>Using this file generator you can generate the REST API files as well as GraphQL types, query and mutation.
         </p>
 
+        <p style="color:red">To use this CRUD generator you first need to install <a
+                href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we
+            are using it in our BaseModel.php file.</p>
+
         <ul class="nav nav-tabs">
             @php
                 $activeRoute = Route::currentRouteName();
@@ -33,11 +37,6 @@
             </li>
         </ul>
         <div class="tab-content">
-            <br>
-            <p style="color:red">To use this CRUD generator you first need to install <a
-                    href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we
-                are using it in our BaseModel.php file.</p>
-
             @yield('content')
         </div>
     </div>

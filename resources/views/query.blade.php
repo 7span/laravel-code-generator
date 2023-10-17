@@ -103,6 +103,7 @@
                         alert(response.file_path);
                         // window.location.href = "file://" + response.file_path;
                         window.location.href = response.file_path;
+                        $('#makeQueryFileForm')[0].reset();
                     }
                 },
                 complete: function() {

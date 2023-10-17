@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
-    public function makeFiles(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'model_name' => 'required|max:255',
@@ -39,7 +39,7 @@ class MakeFileController extends Controller
         $modelName = ModelHelper::getModelName($request->get('model_name'));
 
         // Path for generated files
-        $generatedFilesPath = $modelName.'_'. date('Y_m_d_His', time());
+        $generatedFilesPath = $modelName . '_' . date('Y_m_d_His', time());
 
         // Get methods which is selected
         $methods = $request->get('method');
@@ -66,12 +66,14 @@ class MakeFileController extends Controller
         $relationShip = $request->get('relation_ship');
         $relationAnotherModel = $request->get('relation_another_model');
         $foreignKey = $request->get('foreign_key');
+        $localKey = $request->get('local_key');
 
         $relationArr = array(
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
             'relationAnotherModel' => $relationAnotherModel,
-            'foreignKey' => $foreignKey
+            'foreignKey' => $foreignKey,
+            'localKey' => $localKey
         );
 
         $includeModel = $request->get('add_model');
@@ -93,38 +95,38 @@ class MakeFileController extends Controller
         // Get replaceable text
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
 
-        if($includeModel == 1){
+        if ($includeModel == 1) {
             // Make model and move it to Generated_files
-            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete,$deletedBy, $trait, $relationArr);
+            ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete, $deletedBy, $trait, $relationArr);
         }
         // Make controller and move it to Generated_files
         ControllerHelper::makeController($modelName, $generatedFilesPath, $adminCrud, implode(',', $methods), $service, $resource, $requestFile);
 
-        if($trait == 1){
+        if ($trait == 1) {
             // Make folder in Generated_files and copy traits files into it
             Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
 
-            File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath.'/Traits'));
+            File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath . '/Traits'));
         }
 
-        if($includeMigration == 1){
+        if ($includeMigration == 1) {
             // Make migration and move it to Generated_files
             MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
         }
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);
 
-        if($service == 1){
+        if ($service == 1) {
             // Make service file and move it to Generated_files
             ServiceHelper::makeServiceFile($modelName, $generatedFilesPath, implode(',', $methods));
         }
 
-        if($resource == 1){
+        if ($resource == 1) {
             // Make resource files and move it to Generated_files
             ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
         }
 
-        if($requestFile == 1){
+        if ($requestFile == 1) {
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
         }

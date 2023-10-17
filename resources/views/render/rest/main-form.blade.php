@@ -1,6 +1,4 @@
 <form id="makeFileForm">
-  <h2>Generate files</h2>
-  <span style="color:red">To use this CRUD generator you first need to install <a href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we are using it in our BaseModel.php file.</span><br><br>
     @csrf
     <fieldset>
       <label for="name">Model name:</label>
@@ -28,6 +26,9 @@
             </td>
             <td>
               <input type="text" name="foreign_key[]" class="foreign_key relation_model_name" placeholder="Foreign key">
+            </td>
+            <td>
+              <input type="text" name="local_key[]" class="local_key relation_model_name" placeholder="Local key">
             </td>
             <td>
               <button name="add_more" id="add_more" class="add_new_row add_more">+</button>
@@ -163,5 +164,5 @@
         </div>
       </div>
     </fieldset>
-    <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate code files</i></button>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate REST API files</i></button>
 </form>

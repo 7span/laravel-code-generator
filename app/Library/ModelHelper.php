@@ -23,17 +23,16 @@ class ModelHelper
         return $modelName;
     }
 
-    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationArr = '')
+    public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete, $deletedBy = '', $trait = '', $relationArr = '')
     {
-        $relationModel =  $relationArr['relationModel'];
-        $relationShip =  $relationArr['relationShip'];
-        $relationAnotherModel =  $relationArr['relationAnotherModel'];
-        $foreignKeyArr =  $relationArr['foreignKey'];
+        $relationModel =  isset($relationArr['relationModel']) ? $relationArr['relationModel'] : [];
+        $relationShip =  isset($relationArr['relationShip']) ? $relationArr['relationShip'] : [];
+        $relationAnotherModel =  isset($relationArr['relationAnotherModel']) ? $relationArr['relationAnotherModel'] : [];
+        $foreignKeyArr =  isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
         $filename = base_path('app/Models/' . $modelName . '.php');
-
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
@@ -43,12 +42,12 @@ class ModelHelper
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
         $stringToReplace = '{{ uses }}';
-        $replaceText = "use BaseModel, BootModel, HasFactory".($softDelete == "1" ? ", SoftDeletes;" : ';');
+        $replaceText = "use BaseModel, BootModel, HasFactory" . ($softDelete == "1" ? ", SoftDeletes;" : ';');
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
         // Replace the content of file as per our need
-        
-        if(empty($deletedBy)){
+
+        if (empty($deletedBy)) {
             $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'deleted_by',";
         }
         $stringToReplace = 'fillable = [';
@@ -105,70 +104,81 @@ class ModelHelper
         // $stringToReplace = '{{ bootTrait }}';
         // TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
 
-        $mainModel = lcfirst($modelName);    
+        $mainModel = lcfirst($modelName);
         $relationData = '';
-        if(!empty($relationModel)){
-            foreach($relationModel as $rkey => $val){
-                if(!empty($val)){
+        if (!empty($relationModel)) {
+            foreach ($relationModel as $rkey => $val) {
+                if (!empty($val)) {
                     $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
                     $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
+                    $localKey = isset($localKey[$rkey]) ? $localKey[$rkey] : '';
+                    $secondArg = '';
                     $foreignKey = isset($foreignKeyArr[$rkey]) ? $foreignKeyArr[$rkey] : '';
 
                     $modelname = ucfirst($val);
                     $secondModel = $modelRelationName = lcfirst($val);
 
-                    if(in_array($relationShipVal, ['hasMany', 'belongsToMany', 'hasManyThrough', 'morphMany', 'morphToMany'])){
+                    if (in_array($relationShipVal, ['hasMany', 'belongsToMany', 'hasManyThrough', 'morphMany', 'morphToMany'])) {
                         $modelRelationName = Str::plural($modelRelationName);
                     }
 
                     $secondArg = '';
-                    if($relationShipVal == 'belongsToMany'){
-                        $secondArg = ", '".$secondModel.'_'.$mainModel."'";
+                    if ($relationShipVal == 'belongsToMany') {
+                        $secondArg = ", '" . $secondModel . '_' . $mainModel . "'";
                     }
-                    if($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough'){
+                    if ($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany') {
+                        $modelRelationName = $modelRelationName . 's';
+                        if (!empty($foreignKey))
+                            $secondArg .= ", '" . $foreignKey . "'";
+                        if (!empty($localKey))
+                            $secondArg .= ", '" . $localKey . "'";
+                    }
 
-                        if(empty($relationShipSecondModel)){
+
+                    if ($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough') {
+
+                        if (empty($relationShipSecondModel)) {
                             continue;
                         }
 
                         $secondModel = lcfirst($relationShipSecondModel);
-                        
-                        if($relationShipVal == 'hasOneThrough'){
+
+                        if ($relationShipVal == 'hasOneThrough') {
                             $modelRelationName .= ucfirst($secondModel);
                         }
 
-                        if($relationShipVal == 'hasManyThrough'){
+                        if ($relationShipVal == 'hasManyThrough') {
                             $modelRelationName = Str::plural(lcfirst($secondModel));
                         }
 
                         $modelname = ucfirst($secondModel);
                         $secondArg = ucfirst($val);
-                        
-                        if(!empty($foreignKey)){
+
+                        if (!empty($foreignKey)) {
                             $mainModelId = $tableName = strtolower(preg_replace('/\B([A-Z])/', '_$1', $modelName)) . "_id";
-                            $secondArg = ", ".ucfirst($val)."::class, '".$mainModelId."', '".$foreignKey."'";
-                        }else{
-                            $secondArg = ", ".ucfirst($val)."::class";
+                            $secondArg = ", " . ucfirst($val) . "::class, '" . $mainModelId . "', '" . $foreignKey . "'";
+                        } else {
+                            $secondArg = ", " . ucfirst($val) . "::class";
                         }
                     }
-                    if($relationShipVal == 'morphMany' || $relationShipVal == 'morphToMany'){
-                        $secondArg = ", '".lcfirst($val)."able'";
+                    if ($relationShipVal == 'morphMany' || $relationShipVal == 'morphToMany') {
+                        $secondArg = ", '" . lcfirst($val) . "able'";
                     }
-                    if($relationShipVal == 'morphOne'){
-                        $secondArg = ", '".lcfirst($val)."able'";
+                    if ($relationShipVal == 'morphOne') {
+                        $secondArg = ", '" . lcfirst($val) . "able'";
                     }
-                    
+
                     $newintend = '';
-                    if($rkey != 0){
+                    if ($rkey != 0) {
                         $newintend = self::INDENT;
                     }
-                    $relationData .= $newintend.'public function '.$modelRelationName.'()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '('.$modelname.'::class'.$secondArg.');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
+                    $relationData .= $newintend . 'public function ' . $modelRelationName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '(' . $modelname . '::class' . $secondArg . ');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
                 }
-            }   
+            }
         }
         $stringToReplace = '{{ relation }}';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $relationData);
-       
+
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));

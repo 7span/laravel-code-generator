@@ -1,0 +1,150 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use File;
+use App\Library\ZipHelper;
+use Illuminate\Support\Str;
+use App\Library\TypeHelper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use App\Library\ModelHelper;
+use Illuminate\Support\Pluralizer;
+
+class MakeTypeController extends Controller
+{
+    public function fieldsAndDatatypes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type_text' => 'required|max:255',
+        ], [
+            'type_text.required' => 'Please enter type text.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->messages(), 422);
+        }
+
+        $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
+        $typeTexts = explode(',', $typeTexts);
+
+        $fields = [];
+        $dataTypes = [];
+
+        foreach ($typeTexts as $typeText) {
+            $splitTypeText = explode(': ', $typeText);
+            array_push($fields, $splitTypeText[0]);
+            array_push($dataTypes, $splitTypeText[1]);
+        }
+
+        return response()->json(['fields' => $fields, 'dataTypes' => $dataTypes]);
+    }
+
+    public function store(Request $request)
+    {
+        // $validator = Validator::make($request->all(), [
+        //     'type_name' => 'required_if:type_obj,nullable',
+        //     'type_text' => 'required_if:type_name,present',
+        //     'type_obj' => 'required_if:type_name,nullable'
+        // ], [
+        //     'type_name.required' => 'Please enter your type name.',
+        //     'type_text.required' => 'Please enter type text.',
+        //     'type_obj.requied' => 'Please enter type object'
+        // ]);
+
+        // if ($validator->fails()) {
+        //     return response()->json($validator->messages(), 422);
+        // }
+
+        // Path for generated files
+        $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
+
+        // Check if Generated_files folder exit otherwise create it
+        $storage = Storage::disk('local')->exists($generatedFilesPath);
+        if ($storage == false) {
+            Storage::disk('local')->makeDirectory($generatedFilesPath);
+        }
+        $typeobj = $request->get('type_obj');
+        $typeName = $request->get('type_name');
+        $typeText = $request->get('type_text');
+
+        if(empty($typeObj) && empty($typeName)){
+            $foramt_error = ['format' => "Please Enter either object or text."];
+            return response()->json($foramt_error, 422);
+        }
+
+
+        if(!empty($typeText) && empty($typeName)){
+            $error = ['format' => "Please Enter type name."];
+            return response()->json($error, 422);
+        }
+
+
+        if(!empty($typeobj)){
+            if((!strpos($typeobj,'{') || !strpos($typeobj,'}'))){
+                $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
+                return response()->json($foramt_error, 422);
+            }
+
+            $typeobj = explode('{',$typeobj);
+            $typeKeyword = ucfirst(trim(explode(' ',$typeobj[0])[0]));
+            if(empty($typeKeyword) || $typeKeyword != 'Type'){
+                $foramt_error = ['format' => "Please Enter valid type format."];
+                return response()->json($foramt_error, 422);
+            }
+
+            $typeName = trim(str_replace('type','', $typeobj[0]));
+            $typeName = ucfirst($typeName);
+            $typeTexts = TypeHelper::getTypeFields($typeobj[1]);
+        } else {
+            // Get model name
+            $typeName = TypeHelper::getTypeName($request->get('type_name'));
+            $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
+        }
+
+        if(!str_contains($typeName,'Input')){
+            $typeName = $typeName.'Type';
+        }
+
+        $typeTexts = explode(',', $typeTexts);
+
+        $fields = [];
+        $dataTypes = [];
+
+        foreach ($typeTexts as $typeText) {
+            $splitTypeText = explode(': ', $typeText);
+            array_push($fields, $splitTypeText[0]);
+            array_push($dataTypes, $splitTypeText[1]);
+        }
+
+
+        $modelName = str_replace('Type','',str_replace('Input','',$typeName));
+        // Get table name
+        $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
+        $scope = '';
+        $softDelete = 1;
+        // Make model and move it to Generated_files
+
+        $tempFields = "";
+        foreach($fields as $field){
+            $tempFields .= "'".$field."',";
+        }
+
+        ModelHelper::makeModel($modelName, $tableName, $tempFields, $generatedFilesPath, $scope, $softDelete,true);
+
+        // Get replaceable text
+        $filename = TypeHelper::makeType($typeName, implode(',',$fields),implode(',',$dataTypes));
+
+        // Move the file to Generated_files
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('Type','',str_replace('Input','',$typeName))));
+
+        // Get real path for our folder
+        ZipHelper::makeZip($generatedFilesPath);
+
+        // Delete the generated folder from the storage
+        File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
+
+        return response()->json(['file_path' => $generatedFilesPath . '.zip']);
+    }
+}

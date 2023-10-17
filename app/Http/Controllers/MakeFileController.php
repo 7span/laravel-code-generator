@@ -12,15 +12,17 @@ use App\Library\RouteHelper;
 use App\Library\RequestHelper;
 use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
+use App\Library\LanguageHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
 use App\Library\LaravelDataHelper;
+use App\Library\NotificationHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
-    public function makeFiles(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'model_name' => 'required|max:255',
@@ -38,7 +40,7 @@ class MakeFileController extends Controller
         $modelName = ModelHelper::getModelName($request->get('model_name'));
 
         // Path for generated files
-        $generatedFilesPath = $modelName.'_'. date('Y_m_d_His', time());
+        $generatedFilesPath = $modelName . '_' . date('Y_m_d_His', time());
 
         // Get methods which is selected
         $methods = $request->get('method');
@@ -59,19 +61,23 @@ class MakeFileController extends Controller
         $service = $request->get('service');
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
-       
-        $laraveldata = $request->get('laraveldata');
-       
+
+        $laravelData = $request->get('laraveldata');
+
+        $notification = $request->get('notification');
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
         $relationAnotherModel = $request->get('relation_another_model');
         $foreignKey = $request->get('foreign_key');
+        $localKey = $request->get('local_key');
+
         $relationArr = array(
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
             'relationAnotherModel' => $relationAnotherModel,
-            'foreignKey' => $foreignKey
+            'foreignKey' => $foreignKey,
+            'localKey' => $localKey
         );
 
         $includeModel = $request->get('add_model');
@@ -84,18 +90,14 @@ class MakeFileController extends Controller
         }
 
         // Get fields of migrations
-     
         $fields = $request->get('table_fields') != null ? array_reverse($request->get('table_fields')) : [];
-        
-       
+
         // Get table name
         $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
 
-      
-
         // Get replaceable text
         $replaceableText = TextHelper::getReplaceableText($fields, $tableName);
-        
+
         if ($includeModel == 1) {
             // Make model and move it to Generated_files
             ModelHelper::makeModel($modelName, $tableName, $replaceableText[2], $generatedFilesPath, $scope, $softDelete, $deletedBy, $trait, $relationArr);
@@ -127,18 +129,29 @@ class MakeFileController extends Controller
             ResourceHelper::makeResourceFiles($modelName, $methods, $generatedFilesPath);
         }
 
-
         // Need 0 to 1 before push code in my branch
-
         if ($requestFile == 1) {
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
         }
 
 
-        if ($laraveldata == 1) {
+        if ($laravelData == 1) {
             // Make a laravel data file
             LaravelDataHelper::laravelData($modelName, $generatedFilesPath);
+        }
+
+        if ($notification == 1) {
+            $titleKey = $this->camelCaseToUnderscore($request->class_name);
+            $bodyKey = $this->camelCaseToUnderscore($request->class_name) . "_body";
+
+            $titleValue = $request->subject;
+            $bodyValue = $request->body;
+
+            $command = 'make:language ' . "'" . $titleKey . "'" . " '" . $titleValue . "'" . " '" . $bodyKey . "'" . " '" . $bodyValue . "'";
+
+            \Artisan::call($command);
+            NotificationHelper::notification($generatedFilesPath);
         }
 
         // Get real path for our folder
@@ -147,9 +160,20 @@ class MakeFileController extends Controller
         // Delete the generated folder from the storage
 
         // $storagepath = storage_path('app/' . $generatedFilesPath);
-    
+
         File::deleteDirectory(storage_path('app/' . $generatedFilesPath));
 
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);
+    }
+
+    function camelCaseToUnderscore($input)
+    {
+        // Use a regular expression to match the CamelCase pattern
+        $pattern = '/(?!^)([A-Z])/';
+        $replacement = '_$1';
+        $underscored = preg_replace($pattern, $replacement, $input);
+
+        // Convert to lowercase
+        return strtolower($underscored);
     }
 }

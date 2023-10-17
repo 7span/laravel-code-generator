@@ -1,0 +1,7 @@
+<?php
+
+
+return [
+    '$TITLE$' => '$TITLE_VALUE$',
+    '$BODY$' => '$BODY_VALUE$'
+];

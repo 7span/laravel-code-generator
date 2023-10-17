@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeFileController extends Controller
 {
-    public function makeFiles(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'model_name' => 'required|max:255',
@@ -63,7 +63,7 @@ class MakeFileController extends Controller
         $relationShip = $request->get('relation_ship');
         $relationAnotherModel = $request->get('relation_another_model');
         $foreignKey = $request->get('foreign_key');
-        
+
         $relationArr = array(
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
@@ -73,7 +73,7 @@ class MakeFileController extends Controller
 
         $includeModel = $request->get('add_model');
         $includeMigration = $request->get('add_migration');
-        
+
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);

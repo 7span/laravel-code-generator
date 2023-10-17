@@ -13,7 +13,7 @@
                         <label class="control-label">Field data type</label>
                         <div>
                             <select id="edit_column_type" class="form-control" name="edit_column_type">
-                                @include('render.column-type-options')
+                                @include('render.rest.column-type-options')
                             </select>
                         </div>
                     </div>

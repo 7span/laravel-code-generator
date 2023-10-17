@@ -3,6 +3,16 @@ $('#addFieldForm').on('submit', function(e){
 
     var column_type = $('#column_type').find(":selected").val();
     var column_name = $("input[name='column_name']").val().replace(/[^\w\s]/gi, "");
+    let names = [];
+
+    jQuery('#myTable > tbody > tr').each(function(index, value) {
+        names.push($('td:eq(0)', this).text());
+    });
+
+    if($.inArray(column_name,names) != -1){
+        $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
+        return true;
+    }
     var column_validation = $('#column_validation').val().join("|");
 
     let names = [];

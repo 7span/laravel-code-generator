@@ -25,15 +25,14 @@ class ModelHelper
 
     public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete,$deletedBy = '', $trait = '', $relationArr = '')
     {
-        $relationModel =  $relationArr['relationModel'];
-        $relationShip =  $relationArr['relationShip'];
-        $relationAnotherModel =  $relationArr['relationAnotherModel'];
-        $foreignKeyArr =  $relationArr['foreignKey'];
+        $relationModel =  isset($relationArr['relationModel']) ? $relationArr['relationModel'] : [];
+        $relationShip =  isset($relationArr['relationShip']) ? $relationArr['relationShip'] : [];
+        $relationAnotherModel =  isset($relationArr['relationAnotherModel']) ? $relationArr ['relationAnotherModel'] : [];
+        $foreignKeyArr =  isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
         $filename = base_path('app/Models/' . $modelName . '.php');
-
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
@@ -47,7 +46,7 @@ class ModelHelper
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
         // Replace the content of file as per our need
-        
+
         if(empty($deletedBy)){
             $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'deleted_by',";
         }
@@ -105,7 +104,7 @@ class ModelHelper
         // $stringToReplace = '{{ bootTrait }}';
         // TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
 
-        $mainModel = lcfirst($modelName);    
+        $mainModel = lcfirst($modelName);
         $relationData = '';
         if(!empty($relationModel)){
             foreach($relationModel as $rkey => $val){
@@ -132,7 +131,7 @@ class ModelHelper
                         }
 
                         $secondModel = lcfirst($relationShipSecondModel);
-                        
+
                         if($relationShipVal == 'hasOneThrough'){
                             $modelRelationName .= ucfirst($secondModel);
                         }
@@ -143,7 +142,7 @@ class ModelHelper
 
                         $modelname = ucfirst($secondModel);
                         $secondArg = ucfirst($val);
-                        
+
                         if(!empty($foreignKey)){
                             $mainModelId = $tableName = strtolower(preg_replace('/\B([A-Z])/', '_$1', $modelName)) . "_id";
                             $secondArg = ", ".ucfirst($val)."::class, '".$mainModelId."', '".$foreignKey."'";
@@ -157,18 +156,18 @@ class ModelHelper
                     if($relationShipVal == 'morphOne'){
                         $secondArg = ", '".lcfirst($val)."able'";
                     }
-                    
+
                     $newintend = '';
                     if($rkey != 0){
                         $newintend = self::INDENT;
                     }
                     $relationData .= $newintend.'public function '.$modelRelationName.'()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '('.$modelname.'::class'.$secondArg.');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
                 }
-            }   
+            }
         }
         $stringToReplace = '{{ relation }}';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $relationData);
-       
+
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));

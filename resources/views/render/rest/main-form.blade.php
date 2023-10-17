@@ -28,6 +28,9 @@
               <input type="text" name="foreign_key[]" class="foreign_key relation_model_name" placeholder="Foreign key">
             </td>
             <td>
+              <input type="text" name="local_key[]" class="local_key relation_model_name" placeholder="Local key">
+            </td>
+            <td>
               <button name="add_more" id="add_more" class="add_new_row add_more">+</button>
             </td>
         </tr>

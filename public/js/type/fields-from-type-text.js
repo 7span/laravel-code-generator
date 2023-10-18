@@ -1,7 +1,4 @@
 function handleFixTypeButtonClick(){
-    // alert('hi');
-    // e.preventDefault();
-
     $('.loading').show();
 
     btn = document.getElementById('fixTypeButton');

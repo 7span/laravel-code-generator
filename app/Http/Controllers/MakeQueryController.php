@@ -92,34 +92,34 @@ class MakeQueryController extends Controller
         $queryName = $request->get('query_name');
         $queryText = $request->get('query_text');
 
-        if(empty($queryObj) && empty($queryName)){
+        if (empty($queryObj) && empty($queryName)) {
             $foramt_error = ['format' => "Please Enter either object or text."];
             return response()->json($foramt_error, 422);
         }
 
 
-        if(!empty($queryText) && empty($queryName)){
+        if (!empty($queryText) && empty($queryName)) {
             $error = ['format' => "Please Enter query name."];
             return response()->json($error, 422);
         }
 
-        if(!empty($queryObj)){
+        if (!empty($queryObj)) {
 
-            if((!strpos($queryObj,'{') || !strpos($queryObj,'}'))){
+            if ((!strpos($queryObj, '{') || !strpos($queryObj, '}'))) {
                 $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
                 return response()->json($foramt_error, 422);
             }
 
-            $queryObj = explode('{',$queryObj);
-            $queryObjData = explode('(',$queryObj[1]);
+            $queryObj = explode('{', $queryObj);
+            $queryObjData = explode('(', $queryObj[1]);
 
             $queryKeyword = ucfirst(trim($queryObj[0]));
-            if(empty($queryKeyword) || $queryKeyword != 'Query'){
+            if (empty($queryKeyword) || $queryKeyword != 'Query') {
                 $foramt_error = ['format' => "Please Enter valid query format."];
                 return response()->json($foramt_error, 422);
             }
 
-            if(empty($queryObjData[1])){
+            if (empty($queryObjData[1])) {
                 $foramt_error = ['format' => "Please Enter valid query format."];
                 return response()->json($foramt_error, 422);
             }
@@ -144,30 +144,29 @@ class MakeQueryController extends Controller
             array_push($dataTypes, $splitTypeText[1]);
         }
 
-        $collectionQueryName = $queryName.'CollectionQuery';
+        $collectionQueryName = $queryName . 'CollectionQuery';
 
         // Get replaceable text
-        $filename = TypeHelper::makeQueryCollection($collectionQueryName, implode(',',$fields),implode(',',$dataTypes));
-            // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('CollectionQuery','',$collectionQueryName)));
+        $filename = TypeHelper::makeQueryCollection($collectionQueryName, implode(',', $fields), implode(',', $dataTypes));
+        // Move the file to Generated_files
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . str_replace('CollectionQuery', '', $collectionQueryName)));
 
 
-        $queryName = $queryName.'ResourceQuery';
+        $queryName = $queryName . 'ResourceQuery';
 
         // Get replaceable text
-        $filename = TypeHelper::makeQuery($queryName, implode(',',$fields),implode(',',$dataTypes));
+        $filename = TypeHelper::makeQuery($queryName, implode(',', $fields), implode(',', $dataTypes));
 
         // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' .str_replace('ResourceQuery','',$queryName)).'/'.$queryName.'.php');
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . str_replace('ResourceQuery', '', $queryName)) . '/' . $queryName . '.php');
 
 
-        $modelName = str_replace('CollectionQuery','',str_replace('ResourceQuery','',$queryName));
+        $modelName = str_replace('CollectionQuery', '', str_replace('ResourceQuery', '', $queryName));
 
         // Make service file and move it to Generated_files
         ServiceHelper::makeQraphqlServiceFile($modelName, $generatedFilesPath);
 
-        File::copy(base_path('app/Traits/PaginationTrait.php'),storage_path('app/' . $generatedFilesPath . '/Traits/PaginationTrait.php'));
-        File::copy(base_path('app/Traits/SelectFieldTrait.php'),storage_path('app/' . $generatedFilesPath . '/Traits/SelectFieldTrait.php'));
+        File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath . '/Traits'));
 
         // Get real path for our folder
         ZipHelper::makeZip($generatedFilesPath);

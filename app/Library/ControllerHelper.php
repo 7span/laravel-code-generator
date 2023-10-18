@@ -9,10 +9,6 @@ class ControllerHelper
 {
     public static function makeController($modelName, $generatedFilesPath, $adminCrud, $methods, $service = '', $resource = '', $requestFile = '')
     {
-<<<<<<< HEAD
-=======
-
->>>>>>> 168d9e612a258b3273102617bf0c3fe034cdc270
         // Make API controller using command and move it to Generated_files
         \Artisan::call('make:controller ' . $modelName . " --methods='" . $methods . "' --service='" . $service . "' --resource='" . $resource . "' --requestFile='" . $requestFile . "'");
         Storage::disk('local')->makeDirectory($generatedFilesPath . '/Http/Controllers/API/V1');

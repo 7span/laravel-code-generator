@@ -5,11 +5,8 @@
 <body>
     <div class="loading" style="display:none">Loading&#8230;</div>
     <div class="container">
-        {{-- @include('render.main-form') <!-- Main generate form --> --}}
-        {{-- @include('render.add-field-modal') <!-- Add field modal --> --}}
+        
         @include('render.add-notification-modal') <!-- Add field modal -->
-        {{-- @include('render.edit-field-modal') <!-- Edit field modal --> --}}
-        {{-- @include('render.add-scope-field-modal') <!-- Add scope field modal --> --}}
         <h2>Generate files</h2>
         <p>Using this file generator you can generate the REST API files as well as GraphQL types, query and mutation.
         </p>

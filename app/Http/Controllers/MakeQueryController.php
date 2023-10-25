@@ -8,6 +8,9 @@ use App\Library\ZipHelper;
 use App\Library\TypeHelper;
 use Illuminate\Support\Facades\Storage;
 use App\Library\ServiceHelper;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class MakeQueryController extends Controller
 {
@@ -79,6 +82,21 @@ class MakeQueryController extends Controller
     public function store(Request $request)
     {
 
+        // dd($request);
+        $rules = array('query_name' => 'required', 'query_text' => 'required');
+        $validator = Validator::make($request->all(), $rules);
+
+        // Validate the input and return correct response
+        if ($validator->fails()) {
+            // dd(3);
+            return response()->json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
+
+
         // Path for generated files
         $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
 
@@ -88,60 +106,81 @@ class MakeQueryController extends Controller
             Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
 
-        $queryObj = $request->get('query_obj');
+        // $queryObj = $request->get('query_obj');
         $queryName = $request->get('query_name');
         $queryText = $request->get('query_text');
 
-        if (empty($queryObj) && empty($queryName)) {
-            $foramt_error = ['format' => "Please Enter either object or text."];
-            return response()->json($foramt_error, 422);
-        }
+        // if ($request->get('query_name')) {
+        //     $error = ['format' => "Please Enter query name."];
+        //     return response()->json($error, 422);
+        // }
+
+        // if (empty($queryObj) && empty($queryName)) {
+        //     $foramt_error = ['format' => "Please Enter either object or text."];
+        //     return response()->json($foramt_error, 422);
+        // }
 
 
-        if (!empty($queryText) && empty($queryName)) {
-            $error = ['format' => "Please Enter query name."];
-            return response()->json($error, 422);
-        }
+        // if (!empty($queryText) && empty($queryName)) {
+        //     $error = ['format' => "Please Enter query name."];
+        //     return response()->json($error, 422);
+        // }
 
-        if (!empty($queryObj)) {
+        // if (!empty($queryText)) {
 
-            if ((!strpos($queryObj, '{') || !strpos($queryObj, '}'))) {
-                $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
-                return response()->json($foramt_error, 422);
-            }
+        //     // if ((!strpos($queryText, '{') || !strpos($queryText, '}'))) {
+        //     //     $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
+        //     //     return response()->json($foramt_error, 422);
+        //     // }
 
-            $queryObj = explode('{', $queryObj);
-            $queryObjData = explode('(', $queryObj[1]);
+        //     $queryText = explode('{', $queryText);
+        //     $queryTextData = explode('(', $queryText[1]);
 
-            $queryKeyword = ucfirst(trim($queryObj[0]));
-            if (empty($queryKeyword) || $queryKeyword != 'Query') {
-                $foramt_error = ['format' => "Please Enter valid query format."];
-                return response()->json($foramt_error, 422);
-            }
+        //     $queryKeyword = ucfirst(trim($queryText[0]));
+        //     if (empty($queryKeyword) || $queryKeyword != 'Query') {
+        //         $foramt_error = ['format' => "Please Enter valid query format."];
+        //         return response()->json($foramt_error, 422);
+        //     }
 
-            if (empty($queryObjData[1])) {
-                $foramt_error = ['format' => "Please Enter valid query format."];
-                return response()->json($foramt_error, 422);
-            }
+        //     if (empty($queryTextData[1])) {
+        //         $foramt_error = ['format' => "Please Enter valid query format."];
+        //         return response()->json($foramt_error, 422);
+        //     }
 
 
-            $queryName = trim(preg_replace('/\s\s+/', '', $queryObjData[0]));
-            $queryTexts = TypeHelper::getQueryFields($queryObjData[1]);
-        } else {
-            // Get model name
-            $queryName = TypeHelper::getTypeName($request->get('query_name'));
-            $queryTexts = trim(preg_replace('/\s\s+/', '', $request->get('query_text')));
-        }
+        //     $queryName = trim(preg_replace('/\s\s+/', '', $queryTextData[0]));
+        //     $queryTexts = TypeHelper::getQueryFields($queryTextData[1]);
+        // }
+        // $pattern = '/^[a-zA-Z0-9_]+:[0-9]+(,[a-zA-Z0-9_]+:[0-9]+)*(\.[a-zA-Z]+:[a-zA-Z0-9_]+)?$/';
+
+        // global $pattern;
+        // dd($request->get('query_text'));
+
+
+        // if (preg_match($pattern, $queryTexts)) {
+        //     echo "Valid key-value pairs.";
+        // } else {
+        //     echo "Invalid key-value pairs.";
+        // }
+
+        // die();
+        // Get model name
+        // $queryName = TypeHelper::getTypeName($request->get('query_name'));
+        $queryTexts = trim(preg_replace('/\s\s+/', '', $request->get('query_text')));
+
         $queryTexts = explode(',', $queryTexts);
 
 
         $fields = [];
         $dataTypes = [];
 
+
         foreach ($queryTexts as $typeText) {
+            // dd($typeText);
             $splitTypeText = explode(': ', $typeText);
-            array_push($fields, $splitTypeText[0]);
-            array_push($dataTypes, $splitTypeText[1]);
+            Log::info($splitTypeText);
+            array_push($fields, $splitTypeText[0] ?? '');
+            array_push($dataTypes, $splitTypeText[1] ?? '');
         }
 
         $collectionQueryName = $queryName . 'CollectionQuery';

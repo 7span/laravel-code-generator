@@ -32,7 +32,7 @@ class ModelHelper
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
-        $filename = base_path('app/Models/' . $modelName . '.php');
+        $filename = base_path('app/' . $modelName . '.php');
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);

@@ -31,8 +31,24 @@ $('#makeTypeFileForm').on('submit',function(e){
             $('.loading').hide();
         },
         error: function(response) {
-            response.responseJSON.hasOwnProperty('type_name') ? $('.typeNameError').text(response.responseJSON.type_name[0]) : '';
+            if (!response.responseJSON.status) {
 
+                for (const error in response.responseJSON.errors) {
+                    if (Object.hasOwnProperty.call(response.responseJSON.errors, error)) {
+                        const element = response.responseJSON.errors[error];
+                        if (error == 'type_name') {
+                            // typeNameError.style.display = 'block';
+                            $('.typeNameError').text(response.responseJSON.errors[error]);
+                        }
+
+                        if (error == 'type_text') {
+                console.log('test');
+                            // typeTextError.style.display = 'block';
+                            $('.typeTextError').text(response.responseJSON.errors[error]);
+                        }
+                    }
+                }
+            }
             (typeof response.responseJSON.format != undefined) ? $('.typeObjectError').text(response.responseJSON.format) : '';
         },
     });

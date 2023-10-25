@@ -5,15 +5,11 @@
 <body>
     <div class="loading" style="display:none">Loading&#8230;</div>
     <div class="container">
-        
+
         @include('render.add-notification-modal') <!-- Add field modal -->
         <h2>Generate files</h2>
         <p>Using this file generator you can generate the REST API files as well as GraphQL types, query and mutation.
         </p>
-
-        <p style="color:red">To use this CRUD generator you first need to install <a
-                href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we
-            are using it in our BaseModel.php file.</p>
 
         <ul class="nav nav-tabs">
             @php

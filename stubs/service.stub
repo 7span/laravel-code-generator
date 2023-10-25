@@ -2,7 +2,7 @@
 
 namespace $NAMESPACE$;
 
-use App\Models\$CLASS_NAME$;
+use App\$CLASS_NAME$;
 use App\Traits\BaseModel;
 use App\Traits\PaginationTrait;
 

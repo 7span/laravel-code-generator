@@ -23,6 +23,14 @@ class ModelHelper
         return $modelName;
     }
 
+    public static function removeSpecialChar($string)
+    {
+        $string = str_replace(' ', '_', $string);
+        $string = str_replace('-', '_', $string);
+        $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string);
+        return $string;
+    }
+
     public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete, $deletedBy = '', $trait = '', $relationArr = '')
     {
         $relationModel =  isset($relationArr['relationModel']) ? $relationArr['relationModel'] : [];
@@ -115,8 +123,8 @@ class ModelHelper
                     $secondArg = '';
                     $foreignKey = isset($foreignKeyArr[$rkey]) ? $foreignKeyArr[$rkey] : '';
 
-                    $modelname = ucfirst($val);
-                    $secondModel = $modelRelationName = lcfirst($val);
+                    $modelname = ModelHelper::getModelName(ucfirst($val));
+                    $secondModel = $modelRelationName =  ModelHelper::getModelName(lcfirst($val));
 
                     if (in_array($relationShipVal, ['hasMany', 'belongsToMany', 'hasManyThrough', 'morphMany', 'morphToMany'])) {
                         $modelRelationName = Str::plural($modelRelationName);
@@ -127,7 +135,7 @@ class ModelHelper
                         $secondArg = ", '" . $secondModel . '_' . $mainModel . "'";
                     }
                     if ($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany') {
-                        $modelRelationName = $modelRelationName . 's';
+
                         if (!empty($foreignKey))
                             $secondArg .= ", '" . $foreignKey . "'";
                         if (!empty($localKey))

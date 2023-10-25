@@ -7,13 +7,13 @@ use Illuminate\Http\Request;
 {{ service }}
 use App\Http\Controllers\Controller;
 {{ request }}
-use App\Models\$MODEL_NAME$;
+use App\$MODEL_NAME$;
 
 
 class $CLASS_NAME$Controller extends Controller
 {
     use ApiResponser;
-    
+
     {{ singularService }}
 
     public function __construct()

@@ -20,7 +20,7 @@ class TextHelper
                 $fieldType = $val['type'];
                 $validation = explode('|', $val['validation']);
                 $possibleValues = $val['possible_values'];
-
+                $field = str_replace(" ","_",$field);
                 // $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
                 $null_or_not_null = !in_array('required', $validation) ?  '->nullable()' : '';
 

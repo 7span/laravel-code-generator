@@ -8,7 +8,7 @@
 
         @include('render.add-notification-modal') <!-- Add field modal -->
         <h2>Generate files</h2>
-        <p>Using this file generator you can generate the REST API files as well as GraphQL types, query and mutation.
+        <p>Using this file generator you can generate the REST API files as well as GraphQL Type, Query and Mutation.
         </p>
 
         <ul class="nav nav-tabs">

@@ -1,4 +1,9 @@
 <form id="makeFileForm">
+    <div>
+        <p style="color:red">To use this CRUD generator you first need to install <a
+            href="https://github.com/spatie/laravel-query-builder" target="_blank">spatie</a> package, as we
+        are using it in our BaseModel.php file.</p>
+    </div>
     @csrf
     <fieldset>
       <label for="name">Model name:</label>
@@ -54,7 +59,7 @@
       <input type="hidden" name="notification" value="0" checked="checked">
       <input type="checkbox" id="notification" name="notification" value="1" @checked(old('notification'))><label class="light" for="notification">Do you want notification file?</label><br>
 
-      
+
       <input type="hidden" name="resource" value="0" checked="checked">
       <input type="checkbox" id="resource" name="resource" value="1" @checked(old('resource') ?? 'checked')><label class="light" for="resource">Do you want resource file?</label><br>
 

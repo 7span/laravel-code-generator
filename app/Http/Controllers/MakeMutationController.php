@@ -3,24 +3,17 @@
 namespace App\Http\Controllers;
 
 use File;
+use Exception;
 use App\Library\ZipHelper;
-use Illuminate\Support\Str;
 use App\Library\TypeHelper;
 use Illuminate\Http\Request;
+use App\Library\ServiceHelper;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\Library\ServiceHelper;
-use Exception;
-use Illuminate\Support\Facades\Log;
-use PhpParser\Node\Stmt\TryCatch;
 
 class MakeMutationController extends Controller
 {
-    public function fieldsAndDatatypes(Request $request)
-    {
-        //
-    }
-
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -61,26 +54,9 @@ class MakeMutationController extends Controller
             $aliasArr = [];
             if (!empty($mutationObj)) {
 
-                // if ((!strpos($mutationObj, '{') || !strpos($mutationObj, '}'))) {
-                //     $format_error = ['format' => "Opening/Closing curly brackets is missing."];
-                //     return response()->json($format_error, 422);
-                // }
-
-                // $mutationObj = explode('{', $mutationObj);
-
-                // $mutationKeyword = ucfirst(trim($mutationObj[0]));
-                // if (empty($mutationKeyword) || $mutationKeyword != 'Mutation') {
-                //     $format_error = ['format' => "Please Enter valid mutation format."];
-                //     return response()->json($format_error, 422);
-                // }
-                // $mutationObjData = explode('(', $mutationObj[1]);
                 if (empty($mutationName)) {
                     $mutationName = ucfirst(trim(preg_replace('/\s\s+/', '', $mutationObj)));
                 }
-                // if (empty($mutationObjData[1])) {
-                //     $format_error = ['format' => "Please Enter valid mutation format."];
-                //     return response()->json($format_error, 422);
-                // }
                 $mutationTexts = TypeHelper::getMutationFields($mutationObj);
 
                 Log::info($mutationTexts);
@@ -101,7 +77,6 @@ class MakeMutationController extends Controller
                     array_push($aliasArr, $aliasVal);
                 }
             } else {
-                // dd($request->all());
                 $inputName = $request->get('input_name');
                 $required = $request->get('input_is_required');
                 $type = $request->get('input_type');

@@ -16,3 +16,9 @@
 <script src="{!! asset('js/type/add-pre-process.js') !!}"></script>
 <script src="{!! asset('js/type/on-edit-or-delete-type-button.js') !!}"></script>
 <script src="{!! asset('js/type/edit-type-field.js') !!}"></script>
+
+<!-- Generate query js -->
+<script src="{!! asset('js/query/make-query.js') !!}"></script>
+
+<!-- Generate mutation js -->
+<script src="{!! asset('js/mutation/make-mutation.js') !!}"></script>

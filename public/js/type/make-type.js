@@ -1,9 +1,9 @@
 $('#makeTypeFileForm').on('submit',function(e){
-    // alert('Hi');
     e.preventDefault();
 
     $('.loading').show();
-
+    $('.typeNameError').text('');
+    $('.typeTextError').text('');
     $('.typeObjectError').text('');
 
     var typeFields = [];
@@ -23,27 +23,24 @@ $('#makeTypeFileForm').on('submit',function(e){
         data: $('#makeTypeFileForm').serialize(),
         success:function(response){
             if(response.file_path) {
-                alert(response.file_path);
                 window.location.href = response.file_path;
             }
+            $('#makeTypeFileForm')[0].reset();
         },
         complete: function(){
             $('.loading').hide();
         },
         error: function(response) {
+            response.responseJSON.hasOwnProperty('format') ? $('.typeFormatError').text(
+                response.responseJSON.format) : '';
             if (!response.responseJSON.status) {
-
                 for (const error in response.responseJSON.errors) {
                     if (Object.hasOwnProperty.call(response.responseJSON.errors, error)) {
                         const element = response.responseJSON.errors[error];
                         if (error == 'type_name') {
-                            // typeNameError.style.display = 'block';
                             $('.typeNameError').text(response.responseJSON.errors[error]);
                         }
-
                         if (error == 'type_text') {
-                console.log('test');
-                            // typeTextError.style.display = 'block';
                             $('.typeTextError').text(response.responseJSON.errors[error]);
                         }
                     }

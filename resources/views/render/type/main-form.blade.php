@@ -8,7 +8,7 @@
 
     <div class="row">
 
-        <div class="col-md-6">
+        {{-- <div class="col-md-6">
             <div class="form-group">
                 <label for="name">Type Object:</label>
                 <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
@@ -30,8 +30,8 @@
             </div>
 
             <div class="form-group">
-                <label for="name">Type Input Object Snippet : <span style="color:red">("!" is used for field
-                        required or not)</span></label>
+                <label for="name">Type Input Object Snippet : <span style="color:red">( Add "!" if field is
+                        required)</span></label>
                 <textarea class="form-control container" rows="7" cols="50" disabled>
                     type FormFieldInput {
                         id: Int
@@ -49,7 +49,7 @@
         height: 700px;
         position:absolute;
         left: 50%;">
-        </div>
+        </div> --}}
 
         <div class="col-md-6">
 
@@ -58,7 +58,7 @@
                 <!-- <input type="text" id="type_name" name="type_name" value="{!! old('type_name') !!}"> -->
                 <input type="text" id="type_name" name="type_name" value="">
                 <span style="color:blue">If possible please enter your type name like Project,Category.</span>
-                <span style="color:red" class="typeNameError"></span><br>
+                <span style="color:red;" class="typeNameError"></span><br>
             </div>
 
 
@@ -74,6 +74,8 @@
                 <textarea class="form-control container" id="typeText" name="type_text" rows="3" cols="50" (focus)="func()"
                     (blur)="otherFunc()" (keyup)="detectTextarea($event)"></textarea>
                 {{-- <button type="button" id="fixTypeButton" class="btn btn-warning" onclick="handleFixTypeButtonClick()">Fix the type</button> --}}
+                <span style="color:red;" class="typeTextError"></span><br>
+
             </div>
 
             <div class="form-group">
@@ -114,3 +116,55 @@
     </div>
     <button type="submit" class="btn btn-primary"><i class="fas fa-code"> Generate type file</i></button>
 </form>
+
+
+<script type='text/javascript'>
+                console.log('test');
+
+    $('#makeQueryFileForm').on('submit', function(e) {
+        e.preventDefault();
+
+        $('.loading').show();
+        $('.typeObjectError').text();
+        $('.typeNameError').hide();
+        $('.typeTextError').hide();
+
+        $.ajax({
+            url: "/make-type",
+            type: "POST",
+            data: $('#makeQueryFileForm').serialize(),
+            success: function(response) {
+                if (response.file_path) {
+                    // alert(response.file_path);
+                    // window.location.href = "file://" + response.file_path;
+                    window.location.href = response.file_path;
+                    $('#makeQueryFileForm')[0].reset();
+                }
+            },
+            complete: function() {
+                $('.loading').hide();
+            },
+            error: function(response) {
+                console.log('test');
+                if (!response.responseJSON.status) {
+                    for (const error in response.responseJSON.errors) {
+                        if (Object.hasOwnProperty.call(response.responseJSON.errors, error)) {
+                            const element = response.responseJSON.errors[error];
+                            if (error == 'type_name') {
+                                typeNameError.style.display = 'block';
+                                $('.typeNameError').text(response.responseJSON.errors[error]);
+                            }
+
+                            if (error == 'type_text') {
+                                typeTextError.style.display = 'block';
+                                $('.typeTextError').text(response.responseJSON.errors[error]);
+                            }
+                        }
+                    }
+                }
+                (typeof response.responseJSON.format != undefined) ? $('.typeObjectError').text(
+                    response.responseJSON.format): '';
+            },
+        });
+    });
+</script>

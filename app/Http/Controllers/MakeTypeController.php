@@ -50,12 +50,25 @@ class MakeTypeController extends Controller
         // ], [
         //     'type_name.required' => 'Please enter your type name.',
         //     'type_text.required' => 'Please enter type text.',
-        //     'type_obj.requied' => 'Please enter type object'
+        //     'type_obj.required' => 'Please enter type object'
         // ]);
 
         // if ($validator->fails()) {
         //     return response()->json($validator->messages(), 422);
         // }
+
+        $rules = array('type_name' => 'required', 'type_text' => 'required');
+        $validator = Validator::make($request->all(), $rules);
+
+        // Validate the input and return correct response
+        if ($validator->fails()) {
+            // dd(3);
+            return response()->json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
 
         // Path for generated files
         $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
@@ -65,43 +78,43 @@ class MakeTypeController extends Controller
         if ($storage == false) {
             Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
-        $typeobj = $request->get('type_obj');
+
         $typeName = $request->get('type_name');
         $typeText = $request->get('type_text');
 
-        if (empty($typeobj) && empty($typeName)) {
-            $foramt_error = ['format' => "Please Enter either object or text."];
-            return response()->json($foramt_error, 422);
-        }
+        // if (empty($typeObj) && empty($typeName)) {
+        //     $foramt_error = ['format' => "Please Enter either object or text."];
+        //     return response()->json($foramt_error, 422);
+        // }
 
 
-        if (!empty($typeText) && empty($typeName)) {
-            $error = ['format' => "Please Enter type name."];
-            return response()->json($error, 422);
-        }
+        // if (!empty($typeText) && empty($typeName)) {
+        //     $error = ['format' => "Please Enter type name."];
+        //     return response()->json($error, 422);
+        // }
 
 
-        if (!empty($typeobj)) {
-            if ((!strpos($typeobj, '{') || !strpos($typeobj, '}'))) {
-                $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
-                return response()->json($foramt_error, 422);
-            }
+        // if (!empty($typeObj)) {
+        //     if ((!strpos($typeObj, '{') || !strpos($typeObj, '}'))) {
+        //         $foramt_error = ['format' => "Opening/Closing curly brackets is missing."];
+        //         return response()->json($foramt_error, 422);
+        //     }
 
-            $typeobj = explode('{', $typeobj);
-            $typeKeyword = ucfirst(trim(explode(' ', $typeobj[0])[0]));
-            if (empty($typeKeyword) || $typeKeyword != 'Type') {
-                $foramt_error = ['format' => "Please Enter valid type format."];
-                return response()->json($foramt_error, 422);
-            }
+        //     $typeObj = explode('{', $typeObj);
+        //     $typeKeyword = ucfirst(trim(explode(' ', $typeObj[0])[0]));
+        //     if (empty($typeKeyword) || $typeKeyword != 'Type') {
+        //         $foramt_error = ['format' => "Please Enter valid type format."];
+        //         return response()->json($foramt_error, 422);
+        //     }
 
-            $typeName = trim(str_replace('type', '', $typeobj[0]));
-            $typeName = ucfirst($typeName);
-            $typeTexts = TypeHelper::getTypeFields($typeobj[1]);
-        } else {
+        //     $typeName = trim(str_replace('type', '', $typeObj[0]));
+        //     $typeName = ucfirst($typeName);
+        //     $typeTexts = TypeHelper::getTypeFields($typeObj[1]);
+        // } else {
             // Get model name
             $typeName = TypeHelper::getTypeName($request->get('type_name'));
             $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
-        }
+        // }
 
         if (!str_contains($typeName, 'Input')) {
             $typeName = $typeName . 'Type';

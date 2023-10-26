@@ -37,6 +37,7 @@ class ModelHelper
         $relationShip =  isset($relationArr['relationShip']) ? $relationArr['relationShip'] : [];
         $relationAnotherModel =  isset($relationArr['relationAnotherModel']) ? $relationArr['relationAnotherModel'] : [];
         $foreignKeyArr =  isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
+        $localKey =  isset($relationArr['localKey']) ? $relationArr['localKey'] : [];
         // Make model using command
         \Artisan::call('make:model ' . $modelName);
 
@@ -120,7 +121,7 @@ class ModelHelper
                     $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
                     $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
                     $localKey = isset($localKey[$rkey]) ? $localKey[$rkey] : '';
-                    $secondArg = '';
+
                     $foreignKey = isset($foreignKeyArr[$rkey]) ? $foreignKeyArr[$rkey] : '';
 
                     $modelname = ModelHelper::getModelName(ucfirst($val));
@@ -180,7 +181,16 @@ class ModelHelper
                     if ($rkey != 0) {
                         $newintend = self::INDENT;
                     }
-                    $relationData .= $newintend . 'public function ' . $modelRelationName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '(' . $modelname . '::class' . $secondArg . ');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
+                    if (empty($secondArg)) {
+                        if (!empty($foreignKey)) {
+                            $secondArg .= ", '" . $foreignKey . "'";
+                        }
+
+                        if (!empty($localKey)) {
+                            $secondArg .= ", '" . $localKey . "'";
+                        }
+                    }
+                    $relationData .= $newintend . 'public function ' . lcfirst($modelRelationName) . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationShipVal . '(' . $modelname . '::class' . $secondArg . ');' . PHP_EOL . self::INDENT . '}' . PHP_EOL . "\r\n";
                 }
             }
         }

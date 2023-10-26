@@ -20,7 +20,7 @@ class TextHelper
                 $fieldType = $val['type'];
                 $validation = explode('|', $val['validation']);
                 $possibleValues = $val['possible_values'];
-                $field = str_replace(" ","_",$field);
+                $field = str_replace(" ", "_", $field);
                 // $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
                 $null_or_not_null = !in_array('required', $validation) ?  '->nullable()' : '';
 
@@ -57,8 +57,10 @@ class TextHelper
                 if (in_array('required', $validation) && array_key_last($tableFields) != $field) {
                     $ruleText .= '"' . $field . '" => "' . implode('|', $validation) . '",' . PHP_EOL;
                 } elseif (in_array('required', $validation) && array_key_last($tableFields) == $field) {
-                    $ruleText .= self::INDENT . self::INDENT . self::INDENT . '"' . $field . '" => "' . implode('|', $validation) . '"';
+                    $ruleText .= self::INDENT . '"' . $field . '" => "' . implode('|', $validation) . '"';
                 }
+
+                $ruleText = str_replace('unique|', 'unique:' . $tableName . '|', $ruleText);
 
                 $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'" . $field . "',";
             }

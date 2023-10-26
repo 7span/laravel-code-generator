@@ -27,7 +27,7 @@
               </select>
             </td>
             <td>
-              <input type="text" name="relation_another_model[]" class="relation_another_model relation_model_name" placeholder="Relational Second model">
+              <input type="text" name="relation_another_model[]" class="relation_another_model relation_model_name" disabled placeholder="Relational second model">
             </td>
             <td>
               <input type="text" name="foreign_key[]" class="foreign_key relation_model_name" placeholder="Foreign key">

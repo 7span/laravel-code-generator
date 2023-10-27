@@ -2,7 +2,6 @@
 
 namespace App\Library;
 
-// use File;
 use Illuminate\Support\Str;
 use App\Library\TextHelper;
 use Illuminate\Support\Facades\File;

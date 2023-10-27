@@ -79,12 +79,9 @@ class MakeGraphqlServiceCommand extends Command
      */
     public function getStubVariables()
     {
-        // $use = "App\Models" . "\\" . $this->argument('name');
-
         return [
             'NAMESPACE' => 'App\\Services',
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
-            // 'USE'               => $use,
             'SINGULAR_VARIABLE' => Str::singular(strtolower($this->argument('name'))),
             'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
         ];
@@ -108,17 +105,9 @@ class MakeGraphqlServiceCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-        // $contents = file_get_contents($stub);
-
-        // foreach ($stubVariables as $search => $replace)
-        // {
-        //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
-        // }
-
         $main_stub = __DIR__ . '/../../../stubs/graphql/service.stub';
 
         $upperContents = file_get_contents($main_stub);
-        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);

@@ -104,11 +104,9 @@ class MakeTypeCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
         $main_stub = __DIR__ . '/../../../stubs/type.stub';
 
         $upperContents = file_get_contents($main_stub);
-        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
@@ -139,8 +137,6 @@ class MakeTypeCommand extends Command
         $fullContents = $upperContents;
 
         return $fullContents;
-
-
     }
 
     /**

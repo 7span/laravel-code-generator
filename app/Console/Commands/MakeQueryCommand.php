@@ -108,7 +108,6 @@ class MakeQueryCommand extends Command
         $main_stub = __DIR__ . '/../../../stubs/query.stub';
 
         $upperContents = file_get_contents($main_stub);
-        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
@@ -149,10 +148,9 @@ class MakeQueryCommand extends Command
      */
     protected function makeDirectory($path)
     {
-        // if (! $this->files->isDirectory($path)) {
+        if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
-        // }
-
+        }
 
         return $path;
     }

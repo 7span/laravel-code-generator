@@ -109,7 +109,6 @@ class MakeMutationCommand extends Command
         $main_stub = __DIR__ . '/../../../stubs/mutation.stub';
 
         $upperContents = file_get_contents($main_stub);
-        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);

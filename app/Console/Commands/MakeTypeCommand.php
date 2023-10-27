@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Library\TypeHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
-use App\Library\TypeHelper;
 
 class MakeTypeCommand extends Command
 {
@@ -79,10 +79,10 @@ class MakeTypeCommand extends Command
     public function getStubVariables()
     {
         return [
-            'NAMESPACE' => 'App\\GraphQL\\Type\\'.str_replace('Type','',str_replace('Input','',$this->getSingularClassName($this->argument('name')))),
+            'NAMESPACE' => 'App\\GraphQL\\Type\\' . str_replace('Type', '', str_replace('Input', '', $this->getSingularClassName($this->argument('name')))),
             'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
             'TYPENAME' => $this->getSingularClassName($this->argument('name')),
-            'MODELNAME' => str_replace('Type','',str_replace('Input','',$this->getSingularClassName($this->argument('name'))))
+            'MODELNAME' => str_replace('Type', '', str_replace('Input', '', $this->getSingularClassName($this->argument('name')))),
         ];
     }
 
@@ -104,7 +104,6 @@ class MakeTypeCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
         $main_stub = __DIR__ . '/../../../stubs/type.stub';
 
         $upperContents = file_get_contents($main_stub);
@@ -114,24 +113,23 @@ class MakeTypeCommand extends Command
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
 
-        $fields = explode(',',$this->option('fields'));
-        $dataTypes = explode(',',$this->option('types'));
+        $fields = explode(',', $this->option('fields'));
+        $dataTypes = explode(',', $this->option('types'));
         $fieldCount = count($fields);
 
         $temp = 'return [';
-        for($i = 0 ; $i < $fieldCount ; $i++){
-            $temp .= "'".$fields[$i]."' => [
-                    'type' => Type::".str_replace('!','',$dataTypes[$i])."(),
-                    'description' => '".$fields[$i]."',";
+        for ($i = 0; $i < $fieldCount; $i++) {
+            $temp .= "'" . $fields[$i] . "' => [
+                    'type' => Type::" . str_replace('!', '', $dataTypes[$i]) . "(),
+                    'description' => '" . $fields[$i] . "',";
 
             $aliasVal = TypeHelper::camelCaseToSnakeCase($fields[$i]);
-            $temp .= "'alias' => '".$aliasVal."'";
-            if(str_contains($dataTypes[$i],'!')){
+            $temp .= "'alias' => '" . $aliasVal . "'";
+            if (str_contains($dataTypes[$i], '!')) {
                 $temp .= ",'rules' => ['required']";
             }
 
-            $temp .=   " ],";
-
+            $temp .= ' ],';
         }
 
         $search = 'return [';
@@ -139,8 +137,6 @@ class MakeTypeCommand extends Command
         $fullContents = $upperContents;
 
         return $fullContents;
-
-
     }
 
     /**
@@ -150,7 +146,7 @@ class MakeTypeCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Type') . '/' . str_replace('Type','',str_replace('Input','',$this->getSingularClassName($this->argument('name')))).'/'.$this->getSingularClassName($this->argument('name')) . '.php';
+        return base_path('app/GraphQL/Type') . '/' . str_replace('Type', '', str_replace('Input', '', $this->getSingularClassName($this->argument('name')))) . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
     }
 
     /**

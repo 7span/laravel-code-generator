@@ -4,17 +4,16 @@ namespace App\Http\Controllers;
 
 use File;
 use App\Library\ZipHelper;
-use Illuminate\Support\Str;
 use App\Library\TextHelper;
-use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\Library\ModelHelper;
 use App\Library\RouteHelper;
+use Illuminate\Http\Request;
 use App\Library\RequestHelper;
 use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
-use App\Library\LanguageHelper;
 use App\Library\NotificationHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -68,17 +67,16 @@ class MakeFileController extends Controller
         $foreignKey = $request->get('foreign_key');
         $localKey = $request->get('local_key');
 
-        $relationArr = array(
+        $relationArr = [
             'relationShip' => $relationShip,
             'relationModel' => $relationModel,
             'relationAnotherModel' => $relationAnotherModel,
             'foreignKey' => $foreignKey,
-            'localKey' => $localKey
-        );
+            'localKey' => $localKey,
+        ];
 
         $includeModel = $request->get('add_model');
         $includeMigration = $request->get('add_migration');
-
 
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
@@ -133,12 +131,12 @@ class MakeFileController extends Controller
 
         if ($notification == 1) {
             $titleKey = $this->camelCaseToUnderscore($request->class_name);
-            $bodyKey = $this->camelCaseToUnderscore($request->class_name)."_body";
+            $bodyKey = $this->camelCaseToUnderscore($request->class_name) . '_body';
 
             $titleValue = $request->subject;
             $bodyValue = $request->body;
 
-            $command = 'make:language ' ."'" . $titleKey . "'"." '" . $titleValue . "'"." '" . $bodyKey . "'"." '" . $bodyValue . "'";
+            $command = 'make:language ' . "'" . $titleKey . "'" . " '" . $titleValue . "'" . " '" . $bodyKey . "'" . " '" . $bodyValue . "'";
 
             \Artisan::call($command);
             NotificationHelper::notification($generatedFilesPath);
@@ -153,7 +151,8 @@ class MakeFileController extends Controller
         return response()->json(['file_path' => $generatedFilesPath . '.zip']);
     }
 
-    function camelCaseToUnderscore($input) {
+    public function camelCaseToUnderscore($input)
+    {
         // Use a regular expression to match the CamelCase pattern
         $pattern = '/(?!^)([A-Z])/';
         $replacement = '_$1';

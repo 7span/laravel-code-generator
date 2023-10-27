@@ -3,7 +3,6 @@
 namespace App\Library;
 
 use Illuminate\Support\Str;
-use App\Library\TextHelper;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,16 +27,17 @@ class ModelHelper
         $string = str_replace(' ', '_', $string);
         $string = str_replace('-', '_', $string);
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string);
+
         return $string;
     }
 
     public static function makeModel($modelName, $tableName, $fillableText, $generatedFilesPath, $scope, $softDelete, $deletedBy = '', $trait = '', $relationArr = '')
     {
-        $relationModel =  isset($relationArr['relationModel']) ? $relationArr['relationModel'] : [];
-        $relationShip =  isset($relationArr['relationShip']) ? $relationArr['relationShip'] : [];
-        $relationAnotherModel =  isset($relationArr['relationAnotherModel']) ? $relationArr['relationAnotherModel'] : [];
-        $foreignKeyArr =  isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
-        $localKey =  isset($relationArr['localKey']) ? $relationArr['localKey'] : [];
+        $relationModel = isset($relationArr['relationModel']) ? $relationArr['relationModel'] : [];
+        $relationShip = isset($relationArr['relationShip']) ? $relationArr['relationShip'] : [];
+        $relationAnotherModel = isset($relationArr['relationAnotherModel']) ? $relationArr['relationAnotherModel'] : [];
+        $foreignKeyArr = isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
+        $localKey = isset($relationArr['localKey']) ? $relationArr['localKey'] : [];
 
         // Make model using command
         \Artisan::call('make:model ' . 'Models/' . $modelName);
@@ -48,11 +48,11 @@ class ModelHelper
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
 
         $stringToReplace = '{{ softdelete }}';
-        $replaceText = $softDelete == "1" ? "use Illuminate\Database\Eloquent\SoftDeletes;" : '';
+        $replaceText = $softDelete == '1' ? "use Illuminate\Database\Eloquent\SoftDeletes;" : '';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
         $stringToReplace = '{{ uses }}';
-        $replaceText = "use BaseModel, BootModel, HasFactory" . ($softDelete == "1" ? ", SoftDeletes;" : ';');
+        $replaceText = 'use BaseModel, BootModel, HasFactory' . ($softDelete == '1' ? ', SoftDeletes;' : ';');
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceText);
 
         // Replace the content of file as per our need
@@ -65,12 +65,12 @@ class ModelHelper
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Replace the content on based on soft delete checkbox
-        $stringToReplace = "," . PHP_EOL . self::INDENT . self::INDENT . "'deleted_at' => 'datetime'";
-        $replaceWith = $softDelete == "1" ? "," . PHP_EOL . self::INDENT . self::INDENT . "'deleted_at' => 'datetime'" : '';
+        $stringToReplace = ',' . PHP_EOL . self::INDENT . self::INDENT . "'deleted_at' => 'datetime'";
+        $replaceWith = $softDelete == '1' ? ',' . PHP_EOL . self::INDENT . self::INDENT . "'deleted_at' => 'datetime'" : '';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         $stringToReplace = ", 'deleted_at'];";
-        $replaceWith = $softDelete == "1" ? ", 'deleted_at'];" : '];';
+        $replaceWith = $softDelete == '1' ? ", 'deleted_at'];" : '];';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Replace the content scopedFilters of file as per our need
@@ -108,7 +108,7 @@ class ModelHelper
         }
         $bootTrait = '';
         if (empty($trait)) {
-            $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+            $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});' . PHP_EOL . self::INDENT . '}' . PHP_EOL;
         }
 
         $stringToReplace = '{{ bootTrait }}';
@@ -117,9 +117,9 @@ class ModelHelper
         $mainModel = lcfirst($modelName);
         $relationData = '';
 
-        if (!empty($relationModel)) {
+        if (! empty($relationModel)) {
             foreach ($relationModel as $rkey => $val) {
-                if (!empty($val)) {
+                if (! empty($val)) {
                     $relationShipVal = isset($relationShip[$rkey]) ? $relationShip[$rkey] : '';
                     $relationShipSecondModel = isset($relationAnotherModel[$rkey]) ? $relationAnotherModel[$rkey] : '';
                     $localKey = isset($localKey[$rkey]) ? $localKey[$rkey] : '';
@@ -127,7 +127,7 @@ class ModelHelper
                     $foreignKey = isset($foreignKeyArr[$rkey]) ? $foreignKeyArr[$rkey] : '';
 
                     $modelname = ModelHelper::getModelName(ucfirst($val));
-                    $secondModel = $modelRelationName =  ModelHelper::getModelName(lcfirst($val));
+                    $secondModel = $modelRelationName = ModelHelper::getModelName(lcfirst($val));
 
                     if (in_array($relationShipVal, ['hasMany', 'belongsToMany', 'hasManyThrough', 'morphMany', 'morphToMany'])) {
                         $modelRelationName = Str::plural($modelRelationName);
@@ -138,16 +138,15 @@ class ModelHelper
                         $secondArg = ", '" . lcfirst($secondModel) . '_' . $mainModel . "'";
                     }
                     if ($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany') {
-
-                        if (!empty($foreignKey))
+                        if (! empty($foreignKey)) {
                             $secondArg .= ", '" . $foreignKey . "'";
-                        if (!empty($localKey))
+                        }
+                        if (! empty($localKey)) {
                             $secondArg .= ", '" . $localKey . "'";
+                        }
                     }
 
-
                     if ($relationShipVal == 'hasOneThrough' || $relationShipVal == 'hasManyThrough') {
-
                         if (empty($relationShipSecondModel)) {
                             continue;
                         }
@@ -165,11 +164,11 @@ class ModelHelper
                         $modelname = ucfirst($secondModel);
                         $secondArg = ucfirst($val);
 
-                        if (!empty($foreignKey)) {
-                            $mainModelId = $tableName = strtolower(preg_replace('/\B([A-Z])/', '_$1', $modelName)) . "_id";
-                            $secondArg = ", " . ucfirst($val) . "::class, '" . $mainModelId . "', '" . $foreignKey . "'";
+                        if (! empty($foreignKey)) {
+                            $mainModelId = $tableName = strtolower(preg_replace('/\B([A-Z])/', '_$1', $modelName)) . '_id';
+                            $secondArg = ', ' . ucfirst($val) . "::class, '" . $mainModelId . "', '" . $foreignKey . "'";
                         } else {
-                            $secondArg = ", " . ucfirst($val) . "::class";
+                            $secondArg = ', ' . ucfirst($val) . '::class';
                         }
                     }
                     if ($relationShipVal == 'morphMany' || $relationShipVal == 'morphToMany') {
@@ -184,11 +183,11 @@ class ModelHelper
                         $newintend = self::INDENT;
                     }
                     if (empty($secondArg)) {
-                        if (!empty($foreignKey)) {
+                        if (! empty($foreignKey)) {
                             $secondArg .= ", '" . $foreignKey . "'";
                         }
 
-                        if (!empty($localKey)) {
+                        if (! empty($localKey)) {
                             $secondArg .= ", '" . $localKey . "'";
                         }
                     }

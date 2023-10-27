@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
@@ -40,7 +39,7 @@ class MakeQueryCommand extends Command
         $this->files = $files;
     }
 
-     /**
+    /**
      * Execute the console command.
      *
      * @return int
@@ -79,10 +78,10 @@ class MakeQueryCommand extends Command
     public function getStubVariables()
     {
         return [
-            'NAMESPACE' => 'App\\GraphQL\\Query\\'.str_replace('ResourceQuery','',$this->getSingularClassName($this->argument('name'))),
+            'NAMESPACE' => 'App\\GraphQL\\Query\\' . str_replace('ResourceQuery', '', $this->getSingularClassName($this->argument('name'))),
             'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
-            'SERVICE_CLASSNAME' => str_replace('ResourceQuery','',$this->getSingularClassName($this->argument('name'))),
-            'SERVICE_CLASSNAME_VARIABLE' => strtolower(str_replace('ResourceQuery','',$this->getSingularClassName($this->argument('name')))),
+            'SERVICE_CLASSNAME' => str_replace('ResourceQuery', '', $this->getSingularClassName($this->argument('name'))),
+            'SERVICE_CLASSNAME_VARIABLE' => strtolower(str_replace('ResourceQuery', '', $this->getSingularClassName($this->argument('name')))),
         ];
     }
 
@@ -104,7 +103,6 @@ class MakeQueryCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
         $main_stub = __DIR__ . '/../../../stubs/query.stub';
 
         $upperContents = file_get_contents($main_stub);
@@ -117,8 +115,6 @@ class MakeQueryCommand extends Command
         $fullContents = $upperContents;
 
         return $fullContents;
-
-
     }
 
     /**
@@ -128,7 +124,7 @@ class MakeQueryCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Query') . '/' . str_replace('ResourceQuery','',$this->getSingularClassName($this->argument('name'))).'/'.$this->getSingularClassName($this->argument('name')) . '.php';
+        return base_path('app/GraphQL/Query') . '/' . str_replace('ResourceQuery', '', $this->getSingularClassName($this->argument('name'))) . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
     }
 
     /**
@@ -150,9 +146,8 @@ class MakeQueryCommand extends Command
     protected function makeDirectory($path)
     {
         // if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
+        $this->files->makeDirectory($path, 0777, true, true);
         // }
-
 
         return $path;
     }

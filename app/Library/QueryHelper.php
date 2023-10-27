@@ -4,13 +4,12 @@ namespace App\Library;
 
 use File;
 use Illuminate\Support\Str;
-use App\Library\TextHelper;
 use Illuminate\Support\Facades\Storage;
 
 class QueryHelper
 {
     const INDENT = '    ';
-    
+
     public static function getQueryName($string)
     {
         $string = ucwords($string);

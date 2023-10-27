@@ -68,7 +68,7 @@ class MakeGraphqlServiceCommand extends Command
      */
     public function getStubPath()
     {
-        return __DIR__. '/../../../stubs/graphql/service.stub';
+        return __DIR__ . '/../../../stubs/graphql/service.stub';
     }
 
     /**

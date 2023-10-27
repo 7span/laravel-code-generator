@@ -2,9 +2,10 @@
 
 namespace App\Library;
 
-use File;
+// use File;
 use Illuminate\Support\Str;
 use App\Library\TextHelper;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class ModelHelper
@@ -38,10 +39,11 @@ class ModelHelper
         $relationAnotherModel =  isset($relationArr['relationAnotherModel']) ? $relationArr['relationAnotherModel'] : [];
         $foreignKeyArr =  isset($relationArr['foreignKey']) ? $relationArr['foreignKey'] : [];
         $localKey =  isset($relationArr['localKey']) ? $relationArr['localKey'] : [];
-        // Make model using command
-        \Artisan::call('make:model ' . $modelName);
 
-        $filename = base_path('app/' . $modelName . '.php');
+        // Make model using command
+        \Artisan::call('make:model ' . 'Models/' . $modelName);
+
+        $filename = base_path('app/Models/' . $modelName . '.php');
         // Replace the content table name of file as per our need
         $tableText = "table = '" . $tableName . "'";
         TextHelper::replaceStringInFile($filename, "table = ''", $tableText);
@@ -105,16 +107,17 @@ class ModelHelper
             $stringToReplace = '{{ scopes }}';
             TextHelper::replaceStringInFile($filename, $stringToReplace, $scopesText);
         }
-        // $bootTrait = '';
-        // if (empty($trait)) {
-        //     $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
-        // }
+        $bootTrait = '';
+        if (empty($trait)) {
+            $bootTrait = 'public static function boot()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'parent::boot();' . PHP_EOL . self::INDENT . self::INDENT . 'static::creating(function ($model) { ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->created_by = auth()->id(); ' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$model->updated_by = auth()->id();' . PHP_EOL . self::INDENT . self::INDENT . '});'  . PHP_EOL . self::INDENT . '}' . PHP_EOL;
+        }
 
-        // $stringToReplace = '{{ bootTrait }}';
-        // TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
+        $stringToReplace = '{{ bootTrait }}';
+        TextHelper::replaceStringInFile($filename, $stringToReplace, $bootTrait);
 
         $mainModel = lcfirst($modelName);
         $relationData = '';
+
         if (!empty($relationModel)) {
             foreach ($relationModel as $rkey => $val) {
                 if (!empty($val)) {
@@ -133,7 +136,7 @@ class ModelHelper
 
                     $secondArg = '';
                     if ($relationShipVal == 'belongsToMany') {
-                        $secondArg = ", '" . $secondModel . '_' . $mainModel . "'";
+                        $secondArg = ", '" . lcfirst($secondModel) . '_' . $mainModel . "'";
                     }
                     if ($relationShipVal == 'hasMany' || $relationShipVal == 'belongsToMany') {
 
@@ -194,11 +197,14 @@ class ModelHelper
                 }
             }
         }
+
         $stringToReplace = '{{ relation }}';
         TextHelper::replaceStringInFile($filename, $stringToReplace, $relationData);
 
+        Storage::disk('local')->makeDirectory($generatedFilesPath . '/Models');
+        File::move($filename, storage_path('app/' . $generatedFilesPath . '/Models/' . $modelName . '.php'));
 
-        // Move the file to Generated_files
-        File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . $modelName . '.php'));
+        // Delete the Models folder
+        File::deleteDirectory(base_path('app/Models'));
     }
 }

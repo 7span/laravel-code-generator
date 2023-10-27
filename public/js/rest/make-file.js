@@ -33,7 +33,7 @@ $(document).on('click','.add_more',function(e){
 });
 $(document).on('change','.relation_ship',function(e){
     var relationShipType = $(this).val();
-    if(relationShipType == "belongsToMany" || relationShipType == "morphToMany"){
+    if(relationShipType == "morphToMany" || relationShipType == "hasOneThrough" || relationShipType == "hasManyThrough"){
         $(this).closest('tr').find('.relation_another_model').prop('disabled', false);
     }else {
         $(this).closest('tr').find('.relation_another_model').prop('disabled', true);
@@ -56,9 +56,9 @@ $('#makeFileForm').on('submit',function(e){
         success:function(response){
             if(response.file_path) {
                 window.location.href = response.file_path;
-                // setTimeout(function() {
-                //     location.reload();
-                // }, 5000);
+                setTimeout(function() {
+                    location.reload();
+                }, 5000);
             }
         },
         complete: function(){

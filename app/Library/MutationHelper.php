@@ -4,13 +4,12 @@ namespace App\Library;
 
 use File;
 use Illuminate\Support\Str;
-use App\Library\TextHelper;
 use Illuminate\Support\Facades\Storage;
 
 class MutationHelper
 {
     const INDENT = '    ';
-    
+
     public static function getMutationName($string)
     {
         $string = ucwords($string);

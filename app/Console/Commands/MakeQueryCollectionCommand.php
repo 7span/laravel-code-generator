@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Str;
+use App\Library\TypeHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
-use App\Library\TypeHelper;
 
 class MakeQueryCollectionCommand extends Command
 {
@@ -41,7 +40,7 @@ class MakeQueryCollectionCommand extends Command
         $this->files = $files;
     }
 
-     /**
+    /**
      * Execute the console command.
      *
      * @return int
@@ -81,11 +80,11 @@ class MakeQueryCollectionCommand extends Command
     public function getStubVariables()
     {
         return [
-            'NAMESPACE' => 'App\\GraphQL\\Query\\'.str_replace('CollectionQuery','',$this->getSingularClassName($this->argument('name'))),
+            'NAMESPACE' => 'App\\GraphQL\\Query\\' . str_replace('CollectionQuery', '', $this->getSingularClassName($this->argument('name'))),
             'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
-            'SERVICE_CLASSNAME' => str_replace('CollectionQuery','',$this->getSingularClassName($this->argument('name'))),
-            'SERVICE_CLASSNAME_VARIABLE' => strtolower(str_replace('CollectionQuery','',$this->getSingularClassName($this->argument('name')))),
-            'MODEL_NAME' => str_replace('CollectionQuery','',$this->getSingularClassName($this->argument('name'))),
+            'SERVICE_CLASSNAME' => str_replace('CollectionQuery', '', $this->getSingularClassName($this->argument('name'))),
+            'SERVICE_CLASSNAME_VARIABLE' => strtolower(str_replace('CollectionQuery', '', $this->getSingularClassName($this->argument('name')))),
+            'MODEL_NAME' => str_replace('CollectionQuery', '', $this->getSingularClassName($this->argument('name'))),
         ];
     }
 
@@ -107,7 +106,6 @@ class MakeQueryCollectionCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
         $main_stub = __DIR__ . '/../../../stubs/query-collection.stub';
 
         $upperContents = file_get_contents($main_stub);
@@ -116,32 +114,33 @@ class MakeQueryCollectionCommand extends Command
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
 
-        $fields = explode(',',$this->option('fields'));
-        $dataTypes = explode(',',$this->option('types'));
+        $fields = explode(',', $this->option('fields'));
+        $dataTypes = explode(',', $this->option('types'));
 
         $fieldsArr = [];
         $fieldCount = count($fields);
-        $modelName = str_replace('Type','',$this->getSingularClassName($this->argument('name')));
+        $modelName = str_replace('Type', '', $this->getSingularClassName($this->argument('name')));
 
         $temp = 'return [';
-        for($i = 0 ; $i < $fieldCount ; $i++){
+        for ($i = 0; $i < $fieldCount; $i++) {
             $aliasVal = TypeHelper::camelCaseToSnakeCase($fields[$i]);
 
-            $temp .= "'".$fields[$i]."' => [
-                    'name' => '".$fields[$i]."',
-                    'type' => Type::".$dataTypes[$i]."(),";
+            $temp .= "'" . $fields[$i] . "' => [
+                    'name' => '" . $fields[$i] . "',
+                    'type' => Type::" . $dataTypes[$i] . '(),';
 
-            $temp .= "'alias' => '".$aliasVal."'";
-            if(str_contains($dataTypes[$i],'!')){
+            $temp .= "'alias' => '" . $aliasVal . "'";
+            if (str_contains($dataTypes[$i], '!')) {
                 $temp .= ",'rules' => ['required']";
             }
 
-            $temp .= "],";
+            $temp .= '],';
         }
 
         $search = 'return [';
         $upperContents = str_replace($search, $temp, $upperContents);
         $fullContents = $upperContents;
+
         return $fullContents;
     }
 
@@ -152,7 +151,7 @@ class MakeQueryCollectionCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Query') . '/' . str_replace('CollectionQuery','',$this->getSingularClassName($this->argument('name'))).'/'.$this->getSingularClassName($this->argument('name')) . '.php';
+        return base_path('app/GraphQL/Query') . '/' . str_replace('CollectionQuery', '', $this->getSingularClassName($this->argument('name'))) . '/' . $this->getSingularClassName($this->argument('name')) . '.php';
     }
 
     /**

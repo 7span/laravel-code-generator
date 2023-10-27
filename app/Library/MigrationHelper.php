@@ -3,7 +3,6 @@
 namespace App\Library;
 
 use File;
-use App\Library\TextHelper;
 
 class MigrationHelper
 {
@@ -23,12 +22,11 @@ class MigrationHelper
         $replaceWith = "table->smallIncrements('id')->index();" . $migrationText;
         TextHelper::replaceStringInFile($filename, $stringToReplace, str_replace('"', "'", $replaceWith));
 
-
         $stringToReplace = '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();';
-        $replaceWith = $softDelete == "1" ? '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();' : '$table->timestamps();';
-        if(empty($deletedBy)){
-            $deleted_by = "deleted_by";
-            $replaceWith .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$'."table->integer('".$deleted_by."')->nullable();";
+        $replaceWith = $softDelete == '1' ? '$table->timestamps();' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$table->softDeletes();' : '$table->timestamps();';
+        if (empty($deletedBy)) {
+            $deleted_by = 'deleted_by';
+            $replaceWith .= PHP_EOL . self::INDENT . self::INDENT . self::INDENT . '$' . "table->integer('" . $deleted_by . "')->nullable();";
         }
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 

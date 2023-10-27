@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use File;
 use Exception;
 use App\Library\ZipHelper;
-use Illuminate\Support\Str;
 use App\Library\TypeHelper;
-use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\Library\ModelHelper;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -43,16 +43,16 @@ class MakeTypeController extends Controller
 
     public function store(Request $request)
     {
-        $rules = array('type_name' => 'required', 'type_text' => 'required');
+        $rules = ['type_name' => 'required', 'type_text' => 'required'];
         $validator = Validator::make($request->all(), $rules);
 
         // Validate the input and return correct response
         if ($validator->fails()) {
-            return response()->json(array(
+            return response()->json([
                 'success' => false,
-                'errors' => $validator->getMessageBag()->toArray()
+                'errors' => $validator->getMessageBag()->toArray(),
 
-            ), 400); // 400 being the HTTP code for an invalid request.
+            ], 400); // 400 being the HTTP code for an invalid request.
         }
 
         try {
@@ -73,7 +73,7 @@ class MakeTypeController extends Controller
             $typeTexts = trim(preg_replace('/\s\s+/', '', $request->get('type_text')));
             // }
 
-            if (!str_contains($typeName, 'Input')) {
+            if (! str_contains($typeName, 'Input')) {
                 $typeName = $typeName . 'Type';
             }
 
@@ -88,7 +88,6 @@ class MakeTypeController extends Controller
                 array_push($dataTypes, $splitTypeText[1]);
             }
 
-
             $modelName = str_replace('Type', '', str_replace('Input', '', $typeName));
             // Get table name
             $tableName = strtolower(Str::plural(preg_replace('/\B([A-Z])/', '_$1', $modelName)));
@@ -96,7 +95,7 @@ class MakeTypeController extends Controller
             $softDelete = 1;
             // Make model and move it to Generated_files
 
-            $tempFields = "";
+            $tempFields = '';
             foreach ($fields as $field) {
                 $tempFields .= "'" . $field . "',";
             }
@@ -117,7 +116,8 @@ class MakeTypeController extends Controller
 
             return response()->json(['file_path' => $generatedFilesPath . '.zip']);
         } catch (Exception $e) {
-            $format_error = ['format' => "Please Enter valid mutation format."];
+            $format_error = ['format' => 'Please Enter valid mutation format.'];
+
             return response()->json($format_error, 422);
         }
     }

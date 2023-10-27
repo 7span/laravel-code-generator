@@ -15,18 +15,17 @@ class MakeQueryController extends Controller
 {
     public function store(Request $request)
     {
-        $rules = array('query_name' => 'required', 'query_text' => 'required');
+        $rules = ['query_name' => 'required', 'query_text' => 'required'];
         $validator = Validator::make($request->all(), $rules);
 
         // Validate the input and return correct response
         if ($validator->fails()) {
-            return response()->json(array(
+            return response()->json([
                 'success' => false,
-                'errors' => $validator->getMessageBag()->toArray()
+                'errors' => $validator->getMessageBag()->toArray(),
 
-            ), 400); // 400 being the HTTP code for an invalid request.
+            ], 400); // 400 being the HTTP code for an invalid request.
         }
-
 
         // Path for generated files
         $generatedFilesPath = 'Generated_files_' . date('Y_m_d_His', time());
@@ -44,10 +43,8 @@ class MakeQueryController extends Controller
 
         $queryTexts = explode(',', $queryTexts);
 
-
         $fields = [];
         $dataTypes = [];
-
 
         foreach ($queryTexts as $typeText) {
             $splitTypeText = explode(': ', $typeText);
@@ -63,7 +60,6 @@ class MakeQueryController extends Controller
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . str_replace('CollectionQuery', '', $collectionQueryName)));
 
-
         $queryName = $queryName . 'ResourceQuery';
 
         // Get replaceable text
@@ -71,7 +67,6 @@ class MakeQueryController extends Controller
 
         // Move the file to Generated_files
         File::move($filename, storage_path('app/' . $generatedFilesPath . '/' . str_replace('ResourceQuery', '', $queryName)) . '/' . $queryName . '.php');
-
 
         $modelName = str_replace('CollectionQuery', '', str_replace('ResourceQuery', '', $queryName));
 

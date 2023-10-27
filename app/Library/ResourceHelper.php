@@ -9,7 +9,6 @@ class ResourceHelper
 {
     public static function makeResourceFiles($modelName, $methods, $generatedFilesPath)
     {
-
         // Make resource file using command and move it to Generated_files
         \Artisan::call('make:resource ' . $modelName);
         Storage::disk('local')->makeDirectory($generatedFilesPath . '/Http/Resources/' . $modelName);

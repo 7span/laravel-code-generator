@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-
 use Illuminate\Console\Command;
-use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
 
 class MakeLanguageFileCommand extends Command
@@ -105,8 +103,6 @@ class MakeLanguageFileCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
-
         $main_stub = __DIR__ . '/../../../stubs/lang/en/notification.stub';
 
         $upperContents = file_get_contents($main_stub);
@@ -115,8 +111,7 @@ class MakeLanguageFileCommand extends Command
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
 
-
-        $fullContents = $upperContents .  PHP_EOL;
+        $fullContents = $upperContents . PHP_EOL;
 
         return $fullContents;
     }
@@ -130,7 +125,6 @@ class MakeLanguageFileCommand extends Command
     {
         return base_path('lang/en') . '/notification.php';
     }
-
 
     /**
      * Build the directory for the class if necessary.

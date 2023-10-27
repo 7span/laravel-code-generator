@@ -13,6 +13,5 @@ class Helper
         if ($storage == false) {
             Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
-
     }
 }

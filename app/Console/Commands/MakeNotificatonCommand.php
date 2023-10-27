@@ -7,10 +7,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
 
-
 class MakeNotificatonCommand extends Command
 {
-
     /**
      * The name and signature of the console command.
      *
@@ -18,14 +16,12 @@ class MakeNotificatonCommand extends Command
      */
     protected $signature = 'make:notification';
 
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Create a notification file';
-
 
     /**
      * Create a new command instance.
@@ -36,7 +32,6 @@ class MakeNotificatonCommand extends Command
 
         $this->files = $files;
     }
-
 
     /**
      * Filesystem instance
@@ -53,29 +48,27 @@ class MakeNotificatonCommand extends Command
     public function handle(Request $request)
     {
         // Get table name
-       
-          $notificationData =[
-                'class_name' => $request->class_name,
-                'subject' => $request->subject,
-                'data' => $request->data,
-                'body' => $request->body
-            ];
 
-          
+        $notificationData = [
+            'class_name' => $request->class_name,
+            'subject' => $request->subject,
+            'data' => $request->data,
+            'body' => $request->body,
+        ];
+
         $path = $this->getSourceFilePath();
 
         $this->makeDirectory(dirname($path));
-        
+
         $contents = $this->getSourceFile($notificationData);
 
-        if (!$this->files->exists($path)) {
+        if (! $this->files->exists($path)) {
             $this->files->put($path, $contents);
             $this->info("File : {$path} created");
         } else {
             $this->info("File : {$path} already exits");
         }
     }
-
 
     /**
      * Get the stub path and the stub variables
@@ -95,17 +88,14 @@ class MakeNotificatonCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
         $contents = file_get_contents($stub);
 
-
         foreach ($stubVariables as $search => $replace) {
-
             $contents = str_replace('$' . $search . '$', $replace, $contents);
         }
+
         return $contents;
     }
-
 
     /**
      **
@@ -115,9 +105,8 @@ class MakeNotificatonCommand extends Command
      */
     public function getStubVariables($notificationData)
     {
+        return [
 
-        return [    
-            
             'CLASS_NAME' => $notificationData['class_name'],
             'SUBJECT' => $notificationData['subject'],
             'BODY' => $notificationData['body'],
@@ -125,7 +114,6 @@ class MakeNotificatonCommand extends Command
 
         ];
     }
-
 
     public function getStubPath()
     {
@@ -140,17 +128,17 @@ class MakeNotificatonCommand extends Command
      */
     protected function makeDirectory($path)
     {
-
-        if (!$this->files->isDirectory($path)) {
+        if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
+
         return $path;
     }
 
     public function getSourceFilePath()
     {
-        
         $sigularClassName = $this->getSingularClassName($_REQUEST['class_name']);
+
         return base_path('app/Notifications') . '/' . $sigularClassName . '.php';
     }
 

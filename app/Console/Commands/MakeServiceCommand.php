@@ -118,7 +118,6 @@ class MakeServiceCommand extends Command
         $methodContents = '';
 
         foreach ($methods as $method) {
-
             $stub = __DIR__ . '/../../../stubs/service.' . $method . '.stub';
 
             $stubVariables = $this->getStubVariables();

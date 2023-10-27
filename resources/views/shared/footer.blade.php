@@ -12,10 +12,6 @@
 
 <!-- Generate type js -->
 <script src="{!! asset('js/type/make-type.js') !!}"></script>
-<script src="{!! asset('js/type/fields-from-type-text.js') !!}"></script>
-<script src="{!! asset('js/type/add-pre-process.js') !!}"></script>
-<script src="{!! asset('js/type/on-edit-or-delete-type-button.js') !!}"></script>
-<script src="{!! asset('js/type/edit-type-field.js') !!}"></script>
 
 <!-- Generate query js -->
 <script src="{!! asset('js/query/make-query.js') !!}"></script>

@@ -3,14 +3,12 @@
 namespace App\Library;
 
 use File;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class NotificationHelper
 {
     public static function notification($generatedFilesPath)
     {
-
         // \Artisan::call('make:laravel-data ' . $modelName);
 
         \Artisan::call('make:notification');
@@ -23,13 +21,11 @@ class NotificationHelper
 
         $requestFilePath = base_path('app/Notifications');
 
-
         File::copyDirectory($requestFilePath, storage_path('app/' . $generatedFilesPath . '/Notifications/'));
 
         // Delete the laravel data folder
 
         File::deleteDirectory(base_path('app/Notifications/'));
-
 
         // notification language file move
         $requestFilePath = base_path('lang/en');

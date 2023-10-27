@@ -21,6 +21,7 @@ class ServiceHelper
         // Delete the Services folder
         File::deleteDirectory(base_path('app/Services'));
     }
+
     public static function makeQraphqlServiceFile($modelName, $generatedFilesPath)
     {
         // Make lang folder into Generated_files and copy lang file into it

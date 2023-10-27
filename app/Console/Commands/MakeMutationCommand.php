@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
@@ -80,7 +79,7 @@ class MakeMutationCommand extends Command
     public function getStubVariables()
     {
         return [
-            'NAMESPACE' => 'App\\GraphQL\\Mutation\\'.$this->argument('folderName'),
+            'NAMESPACE' => 'App\\GraphQL\\Mutation\\' . $this->argument('folderName'),
             'CLASSNAME' => $this->getSingularClassName($this->argument('name')),
             'SERVICE_CLASSNAME' => $this->argument('folderName'),
             'SERVICE_CLASSNAME_VARIABLE' => $this->getSingularName($this->argument('folderName')),
@@ -105,38 +104,36 @@ class MakeMutationCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-
         $main_stub = __DIR__ . '/../../../stubs/mutation.stub';
 
         $upperContents = file_get_contents($main_stub);
-        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
 
-        $fields = explode(',',$this->option('fields'));
-        $dataTypes = explode(',',$this->option('types'));
-        $requiredData = explode(',',$this->option('required'));
-        $alias = explode(',',$this->option('alias'));
+        $fields = explode(',', $this->option('fields'));
+        $dataTypes = explode(',', $this->option('types'));
+        $requiredData = explode(',', $this->option('required'));
+        $alias = explode(',', $this->option('alias'));
 
         $fieldCount = count($fields);
 
         $temp = 'return [';
-        for($i = 0 ; $i < $fieldCount ; $i++){
+        for ($i = 0; $i < $fieldCount; $i++) {
             $rule = '';
             $aliasData = '';
-            if($requiredData[$i] == '1'){
+            if ($requiredData[$i] == '1') {
                 $rule = "'rules' => ['required']";
             }
-            if(!empty($alias[$i])){
-                $aliasData = "'alias' => '".$alias[$i]."',";
+            if (! empty($alias[$i])) {
+                $aliasData = "'alias' => '" . $alias[$i] . "',";
             }
             $temp .=
-                "'".$fields[$i]."' => [
+                "'" . $fields[$i] . "' => [
                     $aliasData
-                    'name' => '".$fields[$i]."',
-                    'type' => Type::".$dataTypes[$i]."(),
+                    'name' => '" . $fields[$i] . "',
+                    'type' => Type::" . $dataTypes[$i] . "(),
                     $rule
                 ],";
         }
@@ -144,9 +141,8 @@ class MakeMutationCommand extends Command
         $search = 'return [';
         $upperContents = str_replace($search, $temp, $upperContents);
         $fullContents = $upperContents;
+
         return $fullContents;
-
-
     }
 
     /**
@@ -156,7 +152,7 @@ class MakeMutationCommand extends Command
      */
     public function getSourceFilePath()
     {
-        return base_path('app/GraphQL/Mutation') . '/' .$this->argument('folderName').'/' . $this->argument('name') . '.php';
+        return base_path('app/GraphQL/Mutation') . '/' . $this->argument('folderName') . '/' . $this->argument('name') . '.php';
     }
 
     /**
@@ -174,11 +170,9 @@ class MakeMutationCommand extends Command
      *
      * @return string
      */
-    public function getSingularName($name,$is_lower = false)
+    public function getSingularName($name, $is_lower = false)
     {
-
         return lcfirst($name);
-
     }
 
     /**

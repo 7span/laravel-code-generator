@@ -10,6 +10,7 @@ use Illuminate\Filesystem\Filesystem;
 class MakeAdminControllerCommand extends Command
 {
     const INDENT = '    ';
+
     /**
      * The name and signature of the console command.
      *
@@ -80,14 +81,11 @@ class MakeAdminControllerCommand extends Command
      */
     public function getStubVariables()
     {
-        // $use = "App\Models" . "\\" . $this->argument('name');
-
         return [
             'NAMESPACE' => 'App\\Http\\Controllers\\Api\\V1\\Admin',
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
-            // 'USE'               => $use,
             'SINGULAR_VARIABLE' => lcfirst($this->argument('name')),
-            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name')))
+            'PLURAL_VARIABLE' => Str::plural(strtolower($this->argument('name'))),
         ];
     }
 
@@ -109,24 +107,14 @@ class MakeAdminControllerCommand extends Command
      */
     public function getStubContents($stub, $stubVariables = [])
     {
-        // $contents = file_get_contents($stub);
-
-        // foreach ($stubVariables as $search => $replace)
-        // {
-        //     $contents = str_replace('$'.$search.'$' , $replace, $contents);
-        // }
-
-        // $stub = base_path('stubs/controller.stub');
         $main_stub = __DIR__ . '/../../../stubs/admin-controller.stub';
 
         $upperContents = file_get_contents($main_stub);
-        \Log::info('Main stub found');
 
         foreach ($stubVariables as $search => $replace) {
             $upperContents = str_replace('$' . $search . '$', $replace, $upperContents);
         }
 
-        \Log::info('methods--' . $this->option('methods'));
         $methods = explode(',', $this->option('methods'));
 
         $service = $this->option('service');
@@ -134,33 +122,32 @@ class MakeAdminControllerCommand extends Command
         $requestFile = $this->option('requestFile');
 
         $stringToReplace = '{{ service }}';
-        $replaceText = "".($service == "1" ? 'use App\Services' . '\\' . $stubVariables['CLASS_NAME'] . 'Service;' : '');
+        $replaceText = '' . ($service == '1' ? 'use App\Services' . '\\' . $stubVariables['CLASS_NAME'] . 'Service;' : '');
         $upperContents = str_replace($stringToReplace, $replaceText, $upperContents);
 
         $stringToReplace = '{{ request }}';
-        $replaceText = "".($requestFile == "1" ? 'use App\Http\Requests' . '\\' . $stubVariables['CLASS_NAME'] . '\\' . 'Request as '.$stubVariables['CLASS_NAME'].'Request;' : '');
+        $replaceText = '' . ($requestFile == '1' ? 'use App\Http\Requests' . '\\' . $stubVariables['CLASS_NAME'] . '\\' . 'Request as ' . $stubVariables['CLASS_NAME'] . 'Request;' : '');
         $upperContents = str_replace($stringToReplace, $replaceText, $upperContents);
 
         $stringToReplace = '{{ resource }}';
-        $replaceText = "".($requestFile == "1" ? 'use App\Http\Resources' . '\\' . $stubVariables['CLASS_NAME'] . '\\' . 'Resource as '.$stubVariables['CLASS_NAME'].'Resource;' : '');
+        $replaceText = '' . ($requestFile == '1' ? 'use App\Http\Resources' . '\\' . $stubVariables['CLASS_NAME'] . '\\' . 'Resource as ' . $stubVariables['CLASS_NAME'] . 'Resource;' : '');
         $upperContents = str_replace($stringToReplace, $replaceText, $upperContents);
 
         $stringToReplace = '{{ singularService }}';
-        $replaceText = "".($service == "1" ? 'private $' . $stubVariables['SINGULAR_VARIABLE'] . 'Service;' : '');
+        $replaceText = '' . ($service == '1' ? 'private $' . $stubVariables['SINGULAR_VARIABLE'] . 'Service;' : '');
         $upperContents = str_replace($stringToReplace, $replaceText, $upperContents);
 
         $stringToReplace = '{{ serviceObj }}';
-        $replaceText = "".($service == "1" ? '$this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service = new '.$stubVariables['CLASS_NAME'].'Service;' : '');
+        $replaceText = '' . ($service == '1' ? '$this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service = new ' . $stubVariables['CLASS_NAME'] . 'Service;' : '');
         $upperContents = str_replace($stringToReplace, $replaceText, $upperContents);
 
         $methodContents = '';
 
         foreach ($methods as $method) {
-            \Log::info('method--' . $method);
             if ($method == 'show') {
                 $className = $stubVariables['CLASS_NAME'];
                 $string_to_replace = 'use App\Http\Controllers\Controller;';
-                
+
                 $replace_with = $string_to_replace . PHP_EOL . 'use App\Http\Resources' . '\\' . $className . '\Resource as ' . $className . 'Resource;';
                 $replace_with = ($resource == '1') ? $replace_with : $string_to_replace;
                 $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
@@ -172,50 +159,46 @@ class MakeAdminControllerCommand extends Command
                 $upperContents = str_replace($string_to_replace, $replace_with, $upperContents);
             }
 
-            // $stub = base_path('stubs/controller.' . $method . '.stub');
             $stub = __DIR__ . '/../../../stubs/controller.' . $method . '.stub';
-            \Log::info($method . '-- stub found');
 
             $stubVariables = $this->getStubVariables();
             $contents = file_get_contents($stub);
 
-            $singularVariable = '$'.$stubVariables['SINGULAR_VARIABLE'];
+            $singularVariable = '$' . $stubVariables['SINGULAR_VARIABLE'];
 
             $stringToReplace = '{{ requestName }}';
-            $replaceText = "".($requestFile == "1" ? $className.'Request $request' : '');
+            $replaceText = '' . ($requestFile == '1' ? $className . 'Request $request' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             $stringToReplace = '{{ updaterRequestName }}';
-            $replaceText = "".($requestFile == "1" ? $className.' '.$singularVariable.', '.$className.'Request $request' : $className.' '.$singularVariable);
+            $replaceText = '' . ($requestFile == '1' ? $className . ' ' . $singularVariable . ', ' . $className . 'Request $request' : $className . ' ' . $singularVariable);
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             $stringToReplace = '{{ indexMethod }}';
-            $resourceExist = ($resource == '1') ? 'return new '.$className.'Collection($'.$stubVariables['PLURAL_VARIABLE'].');' : 'return $'.$stubVariables['PLURAL_VARIABLE'].";";
-            $replaceText = "".($service == "1" ? '$'.$stubVariables['PLURAL_VARIABLE'].' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->collection($request->all());'.PHP_EOL . self::INDENT . self::INDENT .$resourceExist : '');
+            $resourceExist = ($resource == '1') ? 'return new ' . $className . 'Collection($' . $stubVariables['PLURAL_VARIABLE'] . ');' : 'return $' . $stubVariables['PLURAL_VARIABLE'] . ';';
+            $replaceText = '' . ($service == '1' ? '$' . $stubVariables['PLURAL_VARIABLE'] . ' = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->collection($request->all());' . PHP_EOL . self::INDENT . self::INDENT . $resourceExist : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
-            
             $stringToReplace = '{{ storeMethod }}';
-            $singluarObj = $singularVariable.'Obj';
-            $error = $singularVariable.'Obj["errors"]';
-            $ifRequest = ($requestFile == "1" ? '$request->validated()' : '');
-            $replaceText = "".($service == "1" ? $singluarObj .' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->store('.$ifRequest.');'.PHP_EOL . self::INDENT . self::INDENT .'return isset('.$error.') ? $this->error('.$singluarObj.') : $this->success('.$singluarObj.');' : '');
+            $singluarObj = $singularVariable . 'Obj';
+            $error = $singularVariable . 'Obj["errors"]';
+            $ifRequest = ($requestFile == '1' ? '$request->validated()' : '');
+            $replaceText = '' . ($service == '1' ? $singluarObj . ' = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->store(' . $ifRequest . ');' . PHP_EOL . self::INDENT . self::INDENT . 'return isset(' . $error . ') ? $this->error(' . $singluarObj . ') : $this->success(' . $singluarObj . ');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
-
 
             $stringToReplace = '{{ showMethod }}';
-            $id = $singularVariable.'->id';
-            $resourceViewExist = ($resource == '1') ? 'return new '.$className.'Resource('.$singluarObj.');' : 'return '.$singularVariable.'Obj;';
-            $replaceText = "".($service == "1" ? $singularVariable.'Obj = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->resource('.$id.');'.PHP_EOL . self::INDENT . self::INDENT .$resourceViewExist : '');
+            $id = $singularVariable . '->id';
+            $resourceViewExist = ($resource == '1') ? 'return new ' . $className . 'Resource(' . $singluarObj . ');' : 'return ' . $singularVariable . 'Obj;';
+            $replaceText = '' . ($service == '1' ? $singularVariable . 'Obj = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->resource(' . $id . ');' . PHP_EOL . self::INDENT . self::INDENT . $resourceViewExist : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
             $stringToReplace = '{{ updateMethod }}';
-            
-            $ifUpdateRequest = ($requestFile == "1" ? ', $request->validated()' : '');
-            $replaceText = "".($service == "1" ? $singluarObj.' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->update('.$id.''.$ifUpdateRequest.');'.PHP_EOL . self::INDENT . self::INDENT .'return isset('.$error.') ? $this->error('.$singluarObj.') : $this->success('.$singluarObj.');' : '');
+
+            $ifUpdateRequest = ($requestFile == '1' ? ', $request->validated()' : '');
+            $replaceText = '' . ($service == '1' ? $singluarObj . ' = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->update(' . $id . '' . $ifUpdateRequest . ');' . PHP_EOL . self::INDENT . self::INDENT . 'return isset(' . $error . ') ? $this->error(' . $singluarObj . ') : $this->success(' . $singluarObj . ');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             $stringToReplace = '{{ destroyMethod }}';
-            $replaceText = "".($service == "1" ? $singularVariable.' = $this->'.$stubVariables['SINGULAR_VARIABLE'].'Service->destroy('.$id.');'.PHP_EOL . self::INDENT . self::INDENT .'return $this->success('.$singularVariable.');' : '');
+            $replaceText = '' . ($service == '1' ? $singularVariable . ' = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->destroy(' . $id . ');' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->success(' . $singularVariable . ');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
             foreach ($stubVariables as $search => $replace) {
@@ -237,9 +220,6 @@ class MakeAdminControllerCommand extends Command
      */
     public function getSourceFilePath()
     {
-        \Log::info('File bne 6e');
-        \Log::info(base_path('app/Http/Controllers/API/V1/Admin') . '/' . $this->getSingularClassName($this->argument('name')) . 'Controller.php');
-
         return base_path('app/Http/Controllers/API/V1/Admin') . '/' . $this->getSingularClassName($this->argument('name')) . 'Controller.php';
     }
 

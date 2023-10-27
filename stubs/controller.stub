@@ -13,7 +13,7 @@ use App\Models\$MODEL_NAME$;
 class $CLASS_NAME$Controller extends Controller
 {
     use ApiResponser;
-    
+
     {{ singularService }}
 
     public function __construct()

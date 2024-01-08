@@ -6,7 +6,7 @@
     <div class="loading" style="display:none">Loading&#8230;</div>
     <div class="container">
 
-        @include('render.add-notification-modal') <!-- Add field modal -->
+        @include('render.rest.add-notification-modal') <!-- Add field modal -->
         <h2>Generate files</h2>
         <p>Using this file generator you can generate the REST API files as well as GraphQL Type, Query and Mutation.
         </p>

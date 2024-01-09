@@ -10,17 +10,17 @@ $('#addnotificationForm').on('submit', function(e){
     var subjectvalue = $('#addnotificationForm #subject').val();
     var bodyvalue = $('#addnotificationForm #body').val();
 
-
     $('#makeFileForm #model_name').after('<input type="text" name="'+classname+'" value="' + classvalue + '"  style="display:none" />')
     $('#makeFileForm #model_name').after('<input type="text" name="'+data+'" value="' + datavalue + '"  style="display:none" />')
     $('#makeFileForm #model_name').after('<input type="text" name="'+subject+'" value="' + subjectvalue + '"  style="display:none" />')
     $('#makeFileForm #model_name').after('<input type="text" name="'+body+'" value="' + bodyvalue + '"  style="display:none" />')
     $('#notificationModal').modal('toggle');
+    document.getElementById("notification").checked = true;
 });
 
-$('#addnotificationForm #close-button').click(function(){
-    $('#addnotificationForm')[0].reset(); //Reset form
-    document.getElementById("notification").checked = false; // Uncheck the checkbox
+$('#notificationModal').on('hide.bs.modal', function () {
+    document.getElementById("notification").checked = false;
+    $('#addnotificationForm').trigger('reset');
 });
 
 

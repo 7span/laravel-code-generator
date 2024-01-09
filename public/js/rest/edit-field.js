@@ -84,7 +84,7 @@ $('#editFieldForm').on('submit', function(e){
             $('#label_scope_fields').show();
         }
         $('#editFieldModal').modal('toggle');
-        
+
         $('#editFieldForm').trigger('reset');
 
         $(".edit_possible").css("display", "none");
@@ -110,4 +110,10 @@ $('#edit_column_validation').on('change',function(){
     }else{
         $("select option[value='optional']").attr('disabled', false);
     }
+});
+
+// Remove error message and reset form on closing edit modal
+$('#editFieldModal').on('hide.bs.modal', function () {
+    $(".columnTypeError").remove();
+    $('#editFieldForm').trigger('reset');
 });

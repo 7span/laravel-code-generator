@@ -1,6 +1,5 @@
 $('#editFieldForm').on('submit', function(e){
     e.preventDefault();
-
     var column_type = $('#edit_column_type').find(":selected").val();
 
     let names = [];
@@ -17,9 +16,9 @@ $('#editFieldForm').on('submit', function(e){
         var old_column_name = $('.table tbody tr[data-row="' + which_row + '"]').attr('data-column-name');
         var column_name = $("input[name='edit_column_name']").val();
 
-        if($.inArray(column_name,names) != -1){
-            $('.columnTypeError').remove();
-            $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already existsnn.</span>");
+        $('.columnTypeError').remove();
+        if($.inArray(column_name,names) != -1 && column_name != old_column_name){
+            $('#edit_column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
             return true;
         }
 
@@ -84,8 +83,8 @@ $('#editFieldForm').on('submit', function(e){
             $('#scope_fields').show();
             $('#label_scope_fields').show();
         }
-
         $('#editFieldModal').modal('toggle');
+        
         $('#editFieldForm').trigger('reset');
 
         $(".edit_possible").css("display", "none");

@@ -94,7 +94,7 @@
       <input type="hidden" name="migration_fields" value="0" checked="checked">
       <input type="checkbox" id="migration_fields" name="migration_fields" value="1" @checked(old('migration_fields'))><label class="light" for="migration_fields">Want to add more fields in the table?</label><br><br>
 
-      <button type="button" class="btn btn-warning" id="addFieldButton" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br>
+      <button type="button" class="btn btn-warning" id="addFieldButton" style="display:none" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus">Add new field</i></button><br><br>
       <!-- <button type="button" class="btn btn-info btn-sm" id="hidden" data-toggle="modal" data-target="#addFieldModal"><i class="fas fa-plus"> Add new field</i></button><br><br> -->
 
       <input type="hidden" name="scope_fields" value="0" checked="checked">

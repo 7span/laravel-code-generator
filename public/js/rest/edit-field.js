@@ -18,7 +18,8 @@ $('#editFieldForm').on('submit', function(e){
         var column_name = $("input[name='edit_column_name']").val();
 
         if($.inArray(column_name,names) != -1){
-            $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
+            $('.columnTypeError').remove();
+            $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already existsnn.</span>");
             return true;
         }
 
@@ -66,7 +67,7 @@ $('#editFieldForm').on('submit', function(e){
         }else if(column_type == 'date'){
             $("input[name='table_fields[" + old_column_name + "]']").remove();
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
-            
+
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
 
         }else {

@@ -34,6 +34,11 @@ $(document).ready(function() {
                 $('#notificationModal').modal('toggle');
         }
     });
+
+        $('#close-button,#closeModalBtn').click(function () {
+            $('#addnotificationForm')[0].reset(); // Reset form
+            document.getElementById("notification").checked = false; // Uncheck the checkbox
+        });
 });
 
 

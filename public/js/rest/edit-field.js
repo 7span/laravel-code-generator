@@ -1,6 +1,5 @@
 $('#editFieldForm').on('submit', function(e){
     e.preventDefault();
-
     var column_type = $('#edit_column_type').find(":selected").val();
 
     let names = [];
@@ -17,8 +16,9 @@ $('#editFieldForm').on('submit', function(e){
         var old_column_name = $('.table tbody tr[data-row="' + which_row + '"]').attr('data-column-name');
         var column_name = $("input[name='edit_column_name']").val();
 
-        if($.inArray(column_name,names) != -1){
-            $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
+        $('.columnTypeError').remove();
+        if($.inArray(column_name,names) != -1 && column_name != old_column_name){
+            $('#edit_column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
             return true;
         }
 
@@ -66,7 +66,7 @@ $('#editFieldForm').on('submit', function(e){
         }else if(column_type == 'date'){
             $("input[name='table_fields[" + old_column_name + "]']").remove();
             var value = "{'type':'" + column_type + "', 'validation':'" + column_validation + "', 'possible_values':''}";
-            
+
             $('#makeFileForm #model_name').after('<input type="text" name="table_fields[' + column_name + ']" value="' + value + '" class="added_input" style="display:none" />')
 
         }else {
@@ -83,8 +83,8 @@ $('#editFieldForm').on('submit', function(e){
             $('#scope_fields').show();
             $('#label_scope_fields').show();
         }
-
         $('#editFieldModal').modal('toggle');
+
         $('#editFieldForm').trigger('reset');
 
         $(".edit_possible").css("display", "none");
@@ -110,4 +110,10 @@ $('#edit_column_validation').on('change',function(){
     }else{
         $("select option[value='optional']").attr('disabled', false);
     }
+});
+
+// Remove error message and reset form on closing edit modal
+$('#editFieldModal').on('hide.bs.modal', function () {
+    $(".columnTypeError").remove();
+    $('#editFieldForm').trigger('reset');
 });

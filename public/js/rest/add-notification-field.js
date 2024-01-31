@@ -1,7 +1,5 @@
 $(document).ready(function() {
 
-    // $('#class_name-error').css("color", "red"),
-
     $("#addnotificationForm").validate({
         rules: {
             class_name: {

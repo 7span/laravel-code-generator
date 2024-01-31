@@ -54,8 +54,9 @@ $("body").on("click", ".btn-edit", function () {
         var json_to_object = JSON.parse(row);
         var character_limit = json_to_object["character_limit"];
 
+        $("#character_limit_input").remove();
         $("#editFieldForm .edit_clone_three").after(
-            '<input name="character_limit" class="form-control input-lg cloned_input" type="text" value="' +
+            '<input id="character_limit_input" name="character_limit" class="form-control input-lg cloned_input" type="text" value="' +
                 character_limit +
                 '" />'
         );
@@ -106,7 +107,7 @@ $("body").on("click", ".btn-delete", function () {
         $('#makeFileForm #model_name').after('<input type="text" name="deleted_by" value="1" class="" style="display:none" />');
     }
     $("input[name='table_fields[" + column_name + "]']").remove();
-    
+
     if ($(".added_input").length == 0) {
         $('#scope_fields').hide();
         $('#label_scope_fields').hide();

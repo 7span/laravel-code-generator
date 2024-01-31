@@ -9,6 +9,7 @@ $('#addFieldForm').on('submit', function(e){
         names.push($('td:eq(0)', this).text());
     });
 
+    $('.columnTypeError').remove();
     if($.inArray(column_name,names) != -1){
         $('#column_type').after("<span style='color:red' class='columnTypeError'>Column already exists.</span>");
         return true;
@@ -107,4 +108,9 @@ $('#column_validation').on('change',function(){
     }else{
         $("select option[value='optional']").attr('disabled', false);
     }
+});
+
+$('#addFieldForm #close-button').click(function(){
+    $('#addFieldForm')[0].reset(); //Reset form
+    document.getElementById("notification").checked = false; // Uncheck the checkbox
 });

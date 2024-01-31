@@ -55,7 +55,7 @@ class MakeControllerCommand extends Command
 
         $contents = $this->getSourceFile();
 
-        if (! $this->files->exists($path)) {
+        if (!$this->files->exists($path)) {
             $this->files->put($path, $contents);
             $this->info("File : {$path} created");
         } else {
@@ -181,7 +181,7 @@ class MakeControllerCommand extends Command
             $stringToReplace = '{{ storeMethod }}';
             $singluarObj = $singularVariable . 'Obj';
             $error = $singularVariable . 'Obj["errors"]';
-            $ifRequest = ($requestFile == '1' ? '$request->all()' : '');
+            $ifRequest = ($requestFile == '1' ? '$request->validated()' : '');
             $replaceText = '' . ($service == '1' ? $singluarObj . ' = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->store(' . $ifRequest . ');' . PHP_EOL . self::INDENT . self::INDENT . 'return isset(' . $error . ') ? $this->error(' . $singluarObj . ') : $this->success(' . $singluarObj . ');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
@@ -193,7 +193,7 @@ class MakeControllerCommand extends Command
 
             $stringToReplace = '{{ updateMethod }}';
 
-            $ifUpdateRequest = ($requestFile == '1' ? ', $request->all()' : '');
+            $ifUpdateRequest = ($requestFile == '1' ? ', $request->validated()' : '');
             $replaceText = '' . ($service == '1' ? $singluarObj . ' = $this->' . $stubVariables['SINGULAR_VARIABLE'] . 'Service->update(' . $id . '' . $ifUpdateRequest . ');' . PHP_EOL . self::INDENT . self::INDENT . 'return isset(' . $error . ') ? $this->error(' . $singluarObj . ') : $this->success(' . $singluarObj . ');' : '');
             $contents = str_replace($stringToReplace, $replaceText, $contents);
 
@@ -241,7 +241,7 @@ class MakeControllerCommand extends Command
      */
     protected function makeDirectory($path)
     {
-        if (! $this->files->isDirectory($path)) {
+        if (!$this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
 

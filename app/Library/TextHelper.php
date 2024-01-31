@@ -18,11 +18,20 @@ class TextHelper
             foreach ($tableFields as $field => $values) {
                 $val = get_object_vars(json_decode(str_replace("'", '"', $values)));
                 $fieldType = $val['type'];
+
                 $validation = explode('|', $val['validation']);
+                if (in_array('optional', $validation)) {
+                    unset($validation[array_search('optional', $validation)]);
+                }
+
+                if (!in_array('required', $validation)) {
+                    array_push($validation, 'nullable');
+                }
+
                 $possibleValues = $val['possible_values'];
                 $field = str_replace(' ', '_', $field);
                 // $null_or_not_null = $validation != 'required' ? '->nullable()' : '';
-                $null_or_not_null = ! in_array('required', $validation) ? '->nullable()' : '';
+                $null_or_not_null = !in_array('required', $validation) ? '->nullable()' : '';
 
                 if ($fieldType == 'enum') {
                     $pVal = '';
@@ -58,9 +67,11 @@ class TextHelper
                     $ruleText .= '"' . $field . '" => "' . implode('|', $validation) . '",' . PHP_EOL;
                 } elseif (in_array('required', $validation) && array_key_last($tableFields) == $field) {
                     $ruleText .= self::INDENT . '"' . $field . '" => "' . implode('|', $validation) . '"';
+                } else {
+                    $ruleText .= '"' . $field . '" => "' . implode('|', $validation) . '",' . PHP_EOL;
                 }
 
-                $ruleText = str_replace('unique|', 'unique:' . $tableName . '|', $ruleText);
+                $ruleText = str_replace('unique', 'unique:' . $tableName, $ruleText);
 
                 $fillableText .= PHP_EOL . self::INDENT . self::INDENT . "'" . $field . "',";
             }

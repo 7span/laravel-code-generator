@@ -130,6 +130,11 @@ class MakeFileController extends Controller
         }
 
         if ($notification == 1) {
+            if (empty($request->class_name)) {
+                $classNameError = ['format' => 'Please Enter valid mutation format.'];
+
+                return response()->json($classNameError, 422);
+            }
             $titleKey = $this->camelCaseToUnderscore($request->class_name);
             $bodyKey = $this->camelCaseToUnderscore($request->class_name) . '_body';
 

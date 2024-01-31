@@ -8,7 +8,7 @@ use NotificationChannels\OneSignal\OneSignalMessage;
 
 class $CLASS_NAME$ extends Notification
 {
-    public function __construct(private $pollVote)
+    public function __construct()
     {
     }
 

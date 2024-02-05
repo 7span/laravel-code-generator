@@ -36,7 +36,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label possible" style="display:none">Possible values<i class="fa fa-plus-circle fa-3x add_more" aria-hidden="true"></i><p style="color:blue; margin-top:5px;">Add without special characters</p></label>
+                        <label class="control-label possible" style="display:none">Possible values<i
+                                class="fa fa-plus-circle fa-3x add_more_enum" aria-hidden="true"></i>
+                            <p style="color:blue; margin-top:5px;">Add without special characters</p>
+                        </label>
                         <div class="clone_one" style="display:none">
                             <input type="text" class="form-control input-lg" name="">
                         </div>

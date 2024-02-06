@@ -32,13 +32,14 @@ $(document).ready(function() {
                 $('#makeFileForm #model_name').after('<input type="text" name="'+subject+'" value="' + subjectvalue + '"  style="display:none" />')
                 $('#makeFileForm #model_name').after('<input type="text" name="'+body+'" value="' + bodyvalue + '"  style="display:none" />')
                 $('#notificationModal').modal('toggle');
+                document.getElementById("notification").checked = true;
         }
     });
 
-        $('#close-button,#closeModalBtn').click(function () {
-            $('#addnotificationForm')[0].reset(); // Reset form
-            document.getElementById("notification").checked = false; // Uncheck the checkbox
-        });
+    $('#notificationModal').on('hide.bs.modal', function () {
+        document.getElementById("notification").checked = false; // Uncheck the checkbox
+        $('#addnotificationForm').trigger('reset'); // Reset form
+    });
 });
 
 

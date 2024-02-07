@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use App\Library\ModelHelper;
 use App\Library\RouteHelper;
 use Illuminate\Http\Request;
+use App\Library\SeederHelper;
 use App\Library\RequestHelper;
 use App\Library\ServiceHelper;
 use App\Library\ResourceHelper;
@@ -127,6 +128,12 @@ class MakeFileController extends Controller
         if ($requestFile == 1) {
             // Make request file and move it to Generated_files
             RequestHelper::makeRequestFiles($modelName, $replaceableText[1], $generatedFilesPath);
+        }
+
+        $includeSeeder = $request->get('seeder');
+        if ($includeSeeder == 1) {
+            // Make seeder and move it to Generated_files
+            SeederHelper::makeSeeder($modelName, $generatedFilesPath);
         }
 
         if ($notification == 1) {

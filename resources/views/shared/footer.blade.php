@@ -7,6 +7,7 @@
 <script src="{!! asset('js/rest/on-edit-or-delete-button.js') !!}"></script>
 <script src="{!! asset('js/rest/add-or-edit-more.js') !!}"></script>
 <script src="{!! asset('js/rest/add-scope.js') !!}"></script>
+<script src="{!! asset('js/rest/add-seeder.js') !!}"></script>
 <script src="{!! asset('js/rest/add-notification-field.js') !!}"></script>
 
 <!-- Generate GraphQL type js -->

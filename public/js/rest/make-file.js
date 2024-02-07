@@ -10,6 +10,14 @@ document.getElementById("notification").addEventListener('click', function() {
     }
 
 });
+document.getElementById("seeder").addEventListener('click', function() {
+    let checkbox = document.getElementById("seeder");
+    if ( checkbox.checked ) {
+        $("#addSeederModal").modal('show');
+    }
+
+});
+
 
 if ($(".added_input").length == 0) {
     $('#scope_fields').hide();

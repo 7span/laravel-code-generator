@@ -10,12 +10,6 @@
             <div class="modal-body">
                 <form role="form" id="addSeederForm">
                     <div class="form-group">
-                        <label class="control-label">Class name</label>
-                        <div>
-                            <input type="text" class="form-control input-lg" name="seeder_class" id="seeder_class">
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label class="control-label">Database Column :</label>
                         <div id="database-columns">
                         </div>
@@ -23,19 +17,21 @@
                     <div class="form-group">
                         <label class="control-label">Data</label>
                         <p style="color:blue">
-                            <p>Example : [
-                                'name' => 'CENTRAL',
-                                'city_id' => '1'
-                                ],
-                            </p>
-                            <div>
-                                <textarea id="seeder_data" name="seeder_data" rows="4" cols="50"></textarea>
-                            </div>
+                        <p>Example : [
+                            'name' => 'CENTRAL',
+                            'city_id' => '1'
+                            ],
+                        </p>
+                        </p>
+                        <div>
+                            <textarea id="seeder_data" name="seeder_data" rows="4" cols="50"></textarea>
+                        </div>
                     </div>
                     <div class="form-group">
                         <div>
                             <button type="submit" class="btn btn-success">Submit</button>
-                            <button type="button" id="close-button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            <button type="button" id="close-button" class="btn btn-danger"
+                                data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </form>

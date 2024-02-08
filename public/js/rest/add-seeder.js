@@ -18,9 +18,6 @@ $(document).ready(function () {
 
     $("#addSeederForm").validate({
         rules: {
-            seeder_class: {
-                required: true,
-            },
             seeder_data: {
                 required: true,
             },

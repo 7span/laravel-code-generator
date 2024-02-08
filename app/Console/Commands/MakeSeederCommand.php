@@ -13,7 +13,7 @@ class MakeSeederCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:seeder {name}';
+    protected $signature = 'make:seeder {name} {--data=}';
 
     /**
      * The console command description.
@@ -37,6 +37,7 @@ class MakeSeederCommand extends Command
 
     public function handle()
     {
+        dd($this->argument('data'));
         $path = $this->getSourceFilePath();
 
         $this->makeDirectory(dirname($path));
@@ -73,6 +74,7 @@ class MakeSeederCommand extends Command
             'NAMESPACE' => 'Database\\Seeders',
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
             'MODEL_NAME' => $this->getModelName($this->argument('name')),
+            'SEEDER_DATA' => $this->argument('data') ?? '',
         ];
     }
 

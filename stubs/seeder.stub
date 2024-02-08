@@ -13,10 +13,6 @@ class $CLASS_NAME$ extends Seeder
     */
     public function run(){
         
-        // Example data for seeding$data = [
-        // Add sample data for seeding here
-        // e.g., ['name' => 'Item 1', 'description' => 'Description for item 1'],
-        //       ['name' => 'Item 2', 'description' => 'Description for item 2'],
-        // ];
+        $data = $SEEDER_DATA$;
     }
 }

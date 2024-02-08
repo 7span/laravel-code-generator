@@ -12,7 +12,7 @@
                     <div class="form-group">
                         <label class="control-label">Class name</label>
                         <div>
-                            <input type="text" class="form-control input-lg" name="class_name" id="class_name">
+                            <input type="text" class="form-control input-lg" name="seeder_class" id="seeder_class">
                         </div>
                     </div>
                     <div class="form-group">
@@ -25,11 +25,11 @@
                         <p style="color:blue">
                             <p>Example : [
                                 'name' => 'CENTRAL',
-                                'city_id' => '1',
+                                'city_id' => '1'
                                 ],
                             </p>
                             <div>
-                                <textarea id="data" name="data" rows="4" cols="50"></textarea>
+                                <textarea id="seeder_data" name="seeder_data" rows="4" cols="50"></textarea>
                             </div>
                     </div>
                     <div class="form-group">

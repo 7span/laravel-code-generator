@@ -1,58 +1,42 @@
 $(document).ready(function () {
     $("#addSeederModal").on("shown.bs.modal", function () {
         $("#database-columns").empty("");
-        var scopeArray = [];
+        var seederArray = [];
         var input = document.getElementsByClassName("added_input");
 
         for (var i = 0; i < input.length; i++) {
             var a = input[i];
-            scopeArray.push(
+            seederArray.push(
                 a.name.replace("table_fields[", "").replace("]", "")
             );
         }
-        console.log(scopeArray);
-
-        $.each(scopeArray, function (key, value) {
-            //     $('#scope_fields_select')
-            //     .append($("<option>jk</option>")
-            //     .attr("value", value)
-            //     .text(value));
+        console.log(seederArray);
+        $.each(seederArray, function (key, value) {
             $("#database-columns").append(value + "<br>");
         });
     });
 
-    $("#addnotificationForm").validate({
+    $("#addSeederForm").validate({
         rules: {
-            class_name: {
+            seeder_class: {
                 required: true,
             },
-            data: {
+            seeder_data: {
                 required: true,
             },
         },
 
         submitHandler: function (form) {
-            var classname = $("#addSeederForm #class_name").attr("name");
-            var data = $("#addSeederForm #data").attr("name");
-            var classvalue = $("#addSeederForm #class_name").val();
-            var datavalue = $("#addSeederForm #data").val();
+            var classname = $("#addSeederForm #seeder_class").attr("name");
+            var data = $("#addSeederForm #seeder_data").attr("name");
+            var classvalue = $("#addSeederForm #seeder_class").val();
+            var datavalue = $("#addSeederForm #seeder_data").val();
+            console.log(classname, data, classvalue, datavalue);
 
-            $("#addSeederForm #model_name").after(
-                '<input type="text" name="' +
-                    classname +
-                    '" value="' +
-                    classvalue +
-                    '"  style="display:none" />'
-            );
-            $("#addSeederForm #model_name").after(
-                '<input type="text" name="' +
-                    data +
-                    '" value="' +
-                    datavalue +
-                    '"  style="display:none" />'
-            );
+            $("#makeFileForm #model_name").after('<input type="text" name="' + classname +'" value="' + classvalue +'" style="display:none" />');
+            $("#makeFileForm #model_name").after('<input type="text" name="' + data +'" value="' + datavalue +'"  style="display:none" />');
 
-            $("#addSeederForm").modal("toggle");
+            $("#addSeederModal").modal("toggle");
         },
     });
 

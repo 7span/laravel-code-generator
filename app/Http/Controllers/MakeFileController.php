@@ -114,10 +114,8 @@ class MakeFileController extends Controller
             MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
         }
         if ($includeSeeder == 1) {
-            
-            $seederData = $request->get('seeder_data');
             // Make seeder and move it to Generated_files
-            SeederHelper::makeSeeder($modelName,$seederData,$generatedFilesPath);
+            SeederHelper::makeSeeder($modelName, $generatedFilesPath);
         }
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);

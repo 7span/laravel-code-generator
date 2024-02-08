@@ -12,7 +12,9 @@ class $CLASS_NAME$ extends Seeder
     * @return void
     */
     public function run(){
-        
-        $data = $SEEDER_DATA$;
+
+        $data = $MODEL_NAME$::insert([
+            $SEEDER_DATA$
+            ]);
     }
 }

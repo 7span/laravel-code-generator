@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Http\Request;
 use Illuminate\Console\Command;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Filesystem\Filesystem;
@@ -13,7 +14,7 @@ class MakeSeederCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:seeder {name} {--data=}';
+    protected $signature = 'make:seeder {name}';
 
     /**
      * The console command description.
@@ -23,6 +24,8 @@ class MakeSeederCommand extends Command
     protected $description = 'Make seeder file';
 
     protected $files;
+
+    protected $seederData;
     /**
      * Execute the console command.
      *
@@ -35,9 +38,10 @@ class MakeSeederCommand extends Command
         $this->files = $files;
     }
 
-    public function handle()
+    public function handle(Request $request)
     {
-        dd($this->argument('data'));
+        $this->seederData = $request->seeder_data;
+
         $path = $this->getSourceFilePath();
 
         $this->makeDirectory(dirname($path));
@@ -74,7 +78,7 @@ class MakeSeederCommand extends Command
             'NAMESPACE' => 'Database\\Seeders',
             'CLASS_NAME' => $this->getSingularClassName($this->argument('name')),
             'MODEL_NAME' => $this->getModelName($this->argument('name')),
-            'SEEDER_DATA' => $this->argument('data') ?? '',
+            'SEEDER_DATA' => $this->seederData ?? '',
         ];
     }
 

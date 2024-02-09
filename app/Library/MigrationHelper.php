@@ -3,6 +3,7 @@
 namespace App\Library;
 
 use File;
+use Illuminate\Support\Facades\Storage;
 
 class MigrationHelper
 {
@@ -31,6 +32,7 @@ class MigrationHelper
         TextHelper::replaceStringInFile($filename, $stringToReplace, $replaceWith);
 
         // Move migration file to Generated_files
-        File::move(base_path('database/migrations/' . $newest_file), storage_path('app/' . $generatedFilesPath . '/' . $newest_file));
+        Storage::disk('local')->makeDirectory($generatedFilesPath . '/database/migrations');
+        File::move(base_path('database/migrations/' . $newest_file), storage_path('app/' . $generatedFilesPath . '/database/migrations/' . $newest_file));
     }
 }

@@ -152,3 +152,7 @@
       max-width: 1200px;
     }
   }
+
+  .error{
+    color: red;
+  }

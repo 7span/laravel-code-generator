@@ -14,6 +14,7 @@ $(document).ready(function () {
         $.each(seederArray, function (key, value) {
             $("#database-columns").append(value + "<br>");
         });
+        $("#seederErr").html("");
     });
 
     $("#addSeederForm").validate({
@@ -24,15 +25,10 @@ $(document).ready(function () {
         },
 
         submitHandler: function (form) {
-            var classname = $("#addSeederForm #seeder_class").attr("name");
             var data = $("#addSeederForm #seeder_data").attr("name");
-            var classvalue = $("#addSeederForm #seeder_class").val();
             var datavalue = $("#addSeederForm #seeder_data").val();
-            console.log(classname, data, classvalue, datavalue);
-
-            $("#makeFileForm #model_name").after('<input type="text" name="' + classname +'" value="' + classvalue +'" style="display:none" />');
-            $("#makeFileForm #model_name").after('<input type="text" name="' + data +'" value="' + datavalue +'"  style="display:none" />');
-
+            console.log(data, datavalue);
+            $("#makeFileForm #model_name").after('<input type="text" name="'+ data +'" value="' + datavalue +'"  style="display:none" />');
             $("#addSeederModal").modal("toggle");
         },
     });

@@ -67,7 +67,7 @@
       <input type="checkbox" id="request" name="request" value="1" @checked(old('request') ?? 'checked')><label class="light" for="request">Do you want request file?</label><br>
 
       <input type="hidden" name="seeder" value="0" checked="checked">
-      <input type="checkbox" id="seeder" name="seeder" value="1" @checked(old('seeder'))><label class="light" for="seeder">Do you want seeder file?</label><br>
+      <input type="checkbox" id="seeder" name="seeder" value="1" @checked(old('seeder'))><label class="light" for="seeder">Do you want seeder file?</label>&nbsp;<span id="seederErr"></span><br>
 
       <input type="hidden" name="trait" value="0" checked="checked">
       <input type="checkbox" id="trait" name="trait" value="1" @checked(old('trait') ?? 'checked')><label class="light" for="trait">Do you want below trait files?</label><br>

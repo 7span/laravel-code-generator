@@ -8,6 +8,6 @@ trait PaginationTrait
     {
         $inputs['limit'] = isset($inputs['limit']) ? $inputs['limit'] : config('site.pagination.limit');
 
-        return (isset($inputs['limit']) && $inputs['limit'] == '-1') ? $data->get() : $data->paginate($inputs['limit']);
+        return $inputs['limit'] == '-1' ? $data->get() : $data->paginate($inputs['limit']);
     }
 }

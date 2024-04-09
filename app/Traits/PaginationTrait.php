@@ -4,11 +4,10 @@ namespace App\Traits;
 
 trait PaginationTrait
 {
-    public function paginationAttribute($inputs)
+    public function paginationAttribute($inputs, $data)
     {
         $inputs['limit'] = isset($inputs['limit']) ? $inputs['limit'] : config('site.pagination.limit');
-        $inputs['page'] = (isset($inputs['page']) && $inputs['limit'] !== -1) ? $inputs['page'] : config('site.pagination.default_page');
 
-        return $inputs;
+        return $inputs['limit'] == '-1' ? $data->get() : $data->paginate($inputs['limit']);
     }
 }

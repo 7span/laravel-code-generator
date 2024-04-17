@@ -131,7 +131,7 @@ class MakeFileController extends Controller
 
         if ($notification == 1) {
             if (empty($request->class_name)) {
-                $classNameError = ['format' => 'Please Enter valid mutation format.'];
+                $classNameError = ['format' => 'Please Enter valid class name.'];
 
                 return response()->json($classNameError, 422);
             }

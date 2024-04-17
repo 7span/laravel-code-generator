@@ -125,7 +125,8 @@
   }
 
   .modal-header .close {
-    margin-top: -34px;
+    margin-top: -47px;
+    margin-right: -68px;
   }
   .relation_model select {
     padding: 16px;
@@ -145,6 +146,9 @@
   }
   .relation_model {
     margin-bottom: 20px;
+  }
+  .error {
+    color: #FF0000;
   }
 
   @media screen and (min-width: 480px) {

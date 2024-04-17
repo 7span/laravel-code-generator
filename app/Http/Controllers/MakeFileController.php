@@ -15,6 +15,7 @@ use App\Library\ResourceHelper;
 use App\Library\MigrationHelper;
 use App\Library\ControllerHelper;
 use App\Library\NotificationHelper;
+use App\Library\SeederHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,6 +61,7 @@ class MakeFileController extends Controller
         $resource = $request->get('resource');
         $requestFile = $request->get('request');
         $notification = $request->get('notification');
+        $includeSeeder = $request->get('seeder');
 
         $relationModel = $request->get('relation_model');
         $relationShip = $request->get('relation_ship');
@@ -110,6 +112,10 @@ class MakeFileController extends Controller
         if ($includeMigration == 1) {
             // Make migration and move it to Generated_files
             MigrationHelper::makeMigration($tableName, $replaceableText[0], $generatedFilesPath, $softDelete, $deletedBy);
+        }
+        if ($includeSeeder == 1) {
+            // Make seeder and move it to Generated_files
+            SeederHelper::makeSeeder($modelName, $generatedFilesPath);
         }
         // Make api-v1.php route file and write content into the file
         RouteHelper::makeRouteFiles($modelName, $methods, $generatedFilesPath, $adminCrud);

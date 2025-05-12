@@ -1,0 +1,22 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
+{{ service }}
+use App\Models\{{ ModelName }};
+use App\Http\Controllers\Controller;
+{{ request }}
+
+class {{ className }} extends Controller
+{
+    use ApiResponser;
+       {{ singularService }}
+
+    public function __construct()
+    {
+        {{ serviceObj }}
+    }
+
+    

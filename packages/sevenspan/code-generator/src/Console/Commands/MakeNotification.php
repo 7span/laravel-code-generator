@@ -17,11 +17,11 @@ class MakeNotification extends Command
      *
      * @var string
      */
-    protected $signature = 'codegenerator:notification {className} 
-                                                       {--modelName=}
-                                                       {--data=}
-                                                       {--body=}
-                                                       {--subject=}';
+    protected $signature = 'codegenerator:notification {className :name of the notification class } 
+                                                       {--modelName= :related model name } 
+                                                       {--data= : A comma-separated list of key-value pairs for notification data (e.g., key1:value1,key2:value2).} 
+                                                       {--body= : The body content of the notification.} 
+                                                       {--subject= : The subject of the notification.}';
 
     /**
      * The console command description.

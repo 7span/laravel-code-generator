@@ -15,11 +15,11 @@ class MakeModel extends Command
      *
      * @var string
      */
-    protected $signature = 'codegenerator:model {name}
-                                                {--fields=}
-                                                {--relations=:User:hasmany,Post:hasMany,Comment:hasMany}
-                                                {--softdelete} 
-                                                {--includeAllTraits}';
+    protected $signature = 'codegenerator:model {name : The name of the model} 
+                                                {--fields= : A comma-separated list of fields for the model (e.g., name:string,age:integer).} 
+                                                {--relations= : Define model relationships (e.g., User:hasMany,Post:belongsTo).} 
+                                                {--softdelete : Include soft delete} 
+                                                {--includeAllTraits : Include all predefined traits in the model.}';
 
     /**
      * The console command description.

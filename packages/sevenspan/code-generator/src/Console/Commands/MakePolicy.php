@@ -15,7 +15,8 @@ class MakePolicy extends Command
      *
      * @var string
      */
-    protected $signature = 'codegenerator:policy {name} {--model=}';
+    protected $signature = 'codegenerator:policy {name : The name of the policy class to generate.} 
+                                                 {--model= : The related model for the policy.}';
 
     /**
      * The console command description.

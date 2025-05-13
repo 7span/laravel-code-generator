@@ -15,8 +15,8 @@ class MakeObserver extends Command
      *
      * @var string
      */
-    protected $signature = 'codegenerator:observer {name} {--model=}';
-
+    protected $signature = 'codegenerator:observer {name : The name of the observer class to generate.} 
+                                                   {--model= : The related model for the observer.}';
     /**
      * The console command description.
      *

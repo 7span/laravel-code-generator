@@ -17,7 +17,7 @@ class MakeService extends Command
      *
      * @var string
      */
-    protected $signature = 'codegenerator:service {name}';
+    protected $signature = 'codegenerator:service {name : The name of the service class to generate.}';
 
     /**
      * The console command description.

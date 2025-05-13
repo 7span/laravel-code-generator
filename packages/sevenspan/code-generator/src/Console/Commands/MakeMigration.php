@@ -15,11 +15,12 @@ class MakeMigration extends Command
      *
      * @var string
      */
+
     protected $signature = 'codegenerator:migration 
-                            {name} 
-                            {--fields=:e.g., name:string,age:integer}  
-                            {--softdelete} 
-                            {--deletedBy} ';
+                                        {name : The name of the migration} 
+                                        {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
+                                        {--softdelete : Include soft delete} 
+                                        {--deletedBy : Add a "deleted_by" column to the migration }';
 
     /**
      * The console command description.

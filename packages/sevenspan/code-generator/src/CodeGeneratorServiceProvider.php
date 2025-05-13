@@ -1,60 +1,45 @@
 <?php
 
-namespace sevenspan\CodeGenerator;
+namespace Sevenspan\CodeGenerator\Models;
 
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Model;
+use SevenSpan\CodeGenerator\Enums\FileGenerationStatus;
 
-
-class CodeGeneratorServiceProvider extends ServiceProvider
+class CodeGeneratorFileLog extends Model
 {
     /**
-     * Register services.
+     * The table associated with the model.
+     *
+     * @var string
      */
-    public function register(): void
-    {
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/code_generator.php',
-            'code_generator'
-        );
-
-        $this->commands([
-            \Sevenspan\CodeGenerator\Console\Commands\MakeModel::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeController::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeMigration::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakePolicy::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeObserver::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeFactory::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeService::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeNotification::class,
-            \Sevenspan\CodeGenerator\Console\Commands\MakeResource::class
-        ]);
-    }
+    protected $table = 'codegenerator_file_logs';
 
     /**
-     * Bootstrap services.
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
      */
-    public function boot(): void
-    {
-        Route::middlewareGroup(
-            'codeGeneratorMiddleware',
-            config('code_generator.middleware', [])
-        );
+    public $timestamps = true;
 
-        $this->publishes([
-            __DIR__ . '/../config/code_generator.php' => config_path('code_generator.php'),
-        ], 'config');
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        "file_type",       // Type of the file (e.g., Controller, Model, etc.)
+        "file_path",       // Path where the file is generated
+        "status",          // Status of the file generation (e.g., success, error)
+        "message",         // Optional message or description
+        "is_overwrite",    // Indicates if the file was overwritten
+    ];
 
-        $this->publishes([
-            __DIR__ . '/Migrations' => database_path('migrations'),
-        ], 'codegenerator-migrations');
-
-        $this->publishes([
-            __DIR__ . '/stubs' => database_path('stubs'),
-        ], 'stubs');
-
-        $this->loadRoutesFrom(__DIR__ . "/../routes/web.php");
-        $this->loadMigrationsFrom(__DIR__ . '/Migrations');
-    }
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => FileGenerationStatus::class, // Cast the status attribute to the FileGenerationStatus enum
+    ];
 }

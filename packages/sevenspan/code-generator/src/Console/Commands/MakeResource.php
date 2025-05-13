@@ -12,14 +12,14 @@ class MakeResource extends Command
      *
      * @var string
      */
-    protected $signature = 'app:make-resource {modelName}';
+    protected $signature = 'codegenerator:resource {modelName}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Generate a resource class for the specified model';
 
     public function __construct(protected Filesystem $files)
     {
@@ -30,8 +30,6 @@ class MakeResource extends Command
      */
     public function handle()
     {
-        $message = '';
-        $status = 'error';
-        // $resourcePath=app_path('Http/Resource')
+        //TODO :to be implemented , working on this 
     }
 }

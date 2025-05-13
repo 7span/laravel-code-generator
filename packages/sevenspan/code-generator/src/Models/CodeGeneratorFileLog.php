@@ -3,17 +3,22 @@
 namespace Sevenspan\CodeGenerator\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use SevenSpan\CodeGenerator\Enums\FileGenerationStatus;
 
-class CodeGeneratorFileLogs extends Model
+class CodeGeneratorFileLog extends Model
 {
     protected $table = 'codegenerator_file_logs';
-    public $timestamps = false;
+    public $timestamps = true;
     protected $fillable = [
         "file_type",
         "file_path",
         "status",
         "message",
         "is_overwrite",
-        "created_at",
+
+    ];
+
+    protected $casts = [
+        'status' => FileGenerationStatus::class,
     ];
 }

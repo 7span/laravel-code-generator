@@ -81,7 +81,9 @@ class MakeFileController extends Controller
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
         if ($storage == false) {
-            Storage::disk('local')->makeDirectory($generatedFilesPath);
+            Storage::disk('local')->makeDirectory($generatedFilesPath);+
+
+            
         }
 
         // Get fields of migrations

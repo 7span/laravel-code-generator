@@ -1,11 +1,11 @@
 <?php
 
-namespace {{ namespace }};
+namespace App\Http\{{ namespace }};
 
+use App\Models\{{ ModelName }};
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 {{ service }}
-use App\Models\{{ ModelName }};
 use App\Http\Controllers\Controller;
 {{ request }}
 

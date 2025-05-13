@@ -2,108 +2,176 @@
 
 namespace Sevenspan\CodeGenerator\Console\Commands;
 
-use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLogs;
+use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 
 class MakeMigration extends Command
 {
-    protected $signature = 'make:custom-migration 
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'codegenerator:migration 
                             {name} 
-                            {--fields=}
+                            {--fields=:e.g., name:string,age:integer}  
                             {--softdelete} 
-                            {--deletedBy}';
+                            {--deletedBy} ';
 
-    protected $description = 'Generate a migration file using a stub template.';
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Create a custom migration file with optional fields, soft deletes, and deleted by functionality.';
 
+    /**
+     * Constructor to initialize the Filesystem dependency.
+     *
+     * @param Filesystem $files
+     */
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
 
+    /**
+     * Execute the console command.
+     *
+     * @return void
+     */
     public function handle()
     {
-        $message = '';
-        $status = "error";
-        $tableName = Str::snake($this->argument('name'));
+        $logMessage = '';
+        $table = Str::snake($this->argument('name'));
+
+        // Generate a timestamp for the migration file name
         $timestamp = now()->format('Y_m_d_His');
-        $fileName = "{$timestamp}_create_{$tableName}_table.php";
-        $migrationPath = base_path("database/migrations/{$fileName}");
 
-        $this->createDirectoryIfMissing(dirname($migrationPath));
+        // Define the migration file name and path
+        $migrationFileName = "{$timestamp}_create_{$table}_table.php";
+        $migrationFilePath = base_path("database/migrations/{$migrationFileName}");
 
-        $contents = $this->getReplacedContent($tableName);
+        // Ensure the directory exists
+        $this->createDirectoryIfMissing(dirname($migrationFilePath));
 
-        if (! $this->files->exists($migrationPath)) {
-            $this->files->put($migrationPath, $contents);
-            $message = "Migration created: {$migrationPath}";
-            $status = "success";
-            $this->info($message);
+        // Generate the migration content with stub replacements
+        $contents = $this->getReplacedContent($table);
+
+        // Check if the migration file already exists
+        if (! $this->files->exists($migrationFilePath)) {
+            // Create the migration file
+            $this->files->put($migrationFilePath, $contents);
+            $logMessage = "Migration file has been created successfully at: {$migrationFilePath}";
+            $logStatus =  FileGenerationStatus::SUCCESS;
+            $this->info($logMessage);
         } else {
-            $message = "Migration already exists: {$migrationPath}";
-            $status = "error";
-            $this->warn($message);
+            // Log a warning if the migration file already exists
+            $logMessage = "Migration file already exists at: {$migrationFilePath}";
+            $logStatus =  FileGenerationStatus::ERROR;
+            $this->warn($logMessage);
         }
 
-        CodeGeneratorFileLogs::create([
+        // Log the migration creation details
+        CodeGeneratorFileLog::create([
             'file_type' => 'migration',
-            'file_path' => $migrationPath,
-            'status' => $status,
-            'message' => $message,
-            'created_at' => now(),
+            'file_path' => $migrationFilePath,
+            'status' => $logStatus,
+            'message' => $logMessage,
         ]);
     }
 
+    /**
+     * Get the path to the migration stub file.
+     *
+     * @return string
+     */
     protected function getStubPath(): string
     {
+        // Return the path to the migration stub file
         return __DIR__ . '/../../stubs/migration.create.stub';
     }
 
+    /**
+     * Get the variables to replace in the stub file.
+     *
+     * @param string $table
+     * @return array
+     */
     protected function getStubVariables(string $table): array
     {
-        $softdelete = $this->option('softdelete');
-        $deletedBy = $this->option('deletedBy');
-        $fieldsOption = $this->option('fields');
+        // Check if soft deletes and deleted_by column included
+        $includeSoftDeletes = $this->option('softdelete');
+        $includeDeletedBy = $this->option('deletedBy');
 
-        $fieldsLine = $this->parseFields($fieldsOption);
+        $fieldDefinitions = $this->parseFields($this->option('fields'));
+
+        // Return the variables to replace in the stub file
         return [
             'table' => $table,
-            'fieldsLine' => $fieldsLine,
-            'softdeleteLine' => $softdelete ? "  \$table->softDeletes();" : '',
-            'deletedByLine' => $deletedBy ? "   \$table->integer('deleted_by')->nullable();" : '',
+            'fieldDefinitions' => $fieldDefinitions,
+            'softdelete' => $includeSoftDeletes ? "  \$table->softDeletes();" : '',
+            'deletedBy' => $includeDeletedBy ? "   \$table->integer('deleted_by')->nullable();" : '',
         ];
     }
+
+    /**
+     * Parse the --fields option into migration field definitions.
+     *
+     * @param string|null $fieldsOption
+     * @return string
+     */
     protected function parseFields(?string $fieldsOption): string
     {
+        // Return an empty string if no fields are provided
         if (!$fieldsOption) {
             return '';
         }
 
-        $lines = [];
+        $fieldLines = [];
         $fields = explode(',', $fieldsOption);
 
+        // Parse each field and its type
         foreach ($fields as $field) {
             // Expected format: name:type, e.g., provider:text
             [$name, $type] = array_map('trim', explode(':', $field));
 
-            // Generate line like: $table->text('provider');
-            $lines[] = "\$table->{$type}('{$name}');";
+            // Generate a line like: $table->text('provider');
+            $fieldLines[] = "\$table->{$type}('{$name}');";
         }
 
-        return implode("\n", $lines);
+        // Combine all field definitions into a single string
+        return implode("\n", $fieldLines);
     }
 
-
+    /**
+     * Generate the final content for the migration file.
+     *
+     * @param string $table
+     * @return string
+     */
     protected function getReplacedContent(string $table): string
     {
+        // Generate the final content by replacing variables in the stub
         return $this->getStubContents($this->getStubPath(), $this->getStubVariables($table));
     }
 
+    /**
+     * Replace the variables in the stub content with actual values.
+     *
+     * @param string $stubPath
+     * @param array $stubVariables
+     * @return string
+     */
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
+        // Read the stub file content
         $content = file_get_contents($stubPath);
 
+        // Replace each variable in the stub content
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -111,8 +179,15 @@ class MakeMigration extends Command
         return $content;
     }
 
+    /**
+     * Create a directory if it does not already exist.
+     *
+     * @param string $path
+     * @return string
+     */
     protected function createDirectoryIfMissing($path): string
     {
+        // Create the directory if it doesn't exist
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
@@ -120,4 +195,3 @@ class MakeMigration extends Command
         return $path;
     }
 }
-//make:migration Test --fields=name:string,age:integer,gender:string --softdelete --deletedBy=1

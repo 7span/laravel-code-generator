@@ -2,10 +2,11 @@
 
 namespace Sevenspan\CodeGenerator\Console\Commands;
 
+use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLogs;
+use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 
 class MakeFactory extends Command
 {
@@ -14,7 +15,7 @@ class MakeFactory extends Command
      *
      * @var string
      */
-    protected $signature = 'make:factory {model} {--fields=}';
+    protected $signature = 'codegenerator:factory {model} {--fields=}';
 
     /**
      * The console command description.
@@ -22,72 +23,112 @@ class MakeFactory extends Command
      * @var string
      */
     protected $description = 'Generate a factory file for a given model with optional fields';
+
+    /**
+     * Constructor to initialize the Filesystem dependency.
+     *
+     * @param Filesystem $files
+     */
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
+
     /**
      * Execute the console command.
+     *
+     * @return void
      */
     public function handle()
     {
-        $message = '';
-        $status = "error";
-        $model = Str::studly($this->argument('model'));
-        $factoryPath = base_path("database/factories/{$model}Factory.php");
-        $this->createDirectoryIfMissing(dirname($factoryPath));
-        $fields = $this->parseFieldsOption($this->option('field'));
+        $logMessage = '';
 
-        //with stub content replcament 
+        // Get the model name from the command argument
+        $model = Str::studly($this->argument('model'));
+
+        // Define the path for the factory file
+        $factoryFilePath = base_path("database/factories/{$model}Factory.php");
+
+        // Ensure the directory exists
+        $this->createDirectoryIfMissing(dirname($factoryFilePath));
+
+        // Parse fields from the --fields option
+        $fields = $this->parseFieldsOption($this->option('fields'));
+
+        // Generate the factory content with stub replacements
         $contents = $this->getReplacedContent($model, $fields);
 
-        if (! $this->files->exists($factoryPath)) {
-            $this->files->put($factoryPath, $contents);
-            $message = "Factory created: {$factoryPath}";
-            $status = "success";
-            $this->info($message);
+        // Check if the factory file already exists
+        if (! $this->files->exists($factoryFilePath)) {
+            // Create the factory file
+            $this->files->put($factoryFilePath, $contents);
+            $logMessage = "Factory file has been created successfully at: {$factoryFilePath}";
+            $logStatus = FileGenerationStatus::SUCCESS;
+            $this->info($logMessage);
         } else {
-            $message = "Factory already exists: {$factoryPath}";
-            $status = "error";
-            $this->warn($message);
+            // Log a warning if the factory file already exists
+            $logMessage = "Factory file already exists at: {$factoryFilePath}";
+            $logStatus = FileGenerationStatus::ERROR;
+            $this->warn($logMessage);
         }
 
-
-
-        CodeGeneratorFileLogs::create([
+        // Log the factory creation details
+        CodeGeneratorFileLog::create([
             'file_type' => 'Factory',
-            'file_path' => $factoryPath,
-            ' status' => $status,
-            'message' => $message,
-            'created_at' => now(),
+            'file_path' => $factoryFilePath,
+            'status' => $logStatus,
+            'message' => $logMessage,
         ]);
     }
+
+    /**
+     * Get the path to the factory stub file.
+     *
+     * @return string
+     */
     protected function getStubPath(): string
     {
+        // Return the path to the factory stub file
         return __DIR__ . '/../../stubs/factory.stub';
     }
 
+    /**
+     * Parse the --fields option into an associative array.
+     *
+     * @param string|null $fieldsOption
+     * @return array
+     */
     protected function parseFieldsOption(?string $fieldsOption): array
     {
-        $parsed = [];
+        $parsedFields = [];
 
+        // Return an empty array if no fields are provided
         if (!$fieldsOption) {
-            return $parsed;
+            return $parsedFields;
         }
 
+        // Parse each field and its type from the --fields option
         foreach (explode(',', $fieldsOption) as $pair) {
             if (str_contains($pair, ':')) {
                 [$name, $type] = explode(':', $pair);
-                $parsed[trim($name)] = trim($type);
+                $parsedFields[trim($name)] = trim($type);
             }
         }
 
-        return $parsed;
+        return $parsedFields;
     }
 
+    /**
+     * Generate a factory field definition based on the column name and type.
+     *
+     * @param string $column
+     * @param string $type
+     * @return string
+     */
     protected function getFactoryField(string $column, string $type): string
     {
-        $fakerMapping = [
+        // Map field types to Faker methods
+        $fakerTypeMapping = [
             'string' => "'{$column}' => \$this->faker->word",
             'text' => "'{$column}' => \$this->faker->text",
             'integer' => "'{$column}' => \$this->faker->numberBetween(1, 100)",
@@ -101,34 +142,60 @@ class MakeFactory extends Command
             'uuid' => "'{$column}' => \$this->faker->uuid",
         ];
 
-        return $fakerMapping[$type] ?? "'{$column}' => null";
+        // Return the corresponding Faker method or null if the type is not mapped
+        return $fakerTypeMapping[$type] ?? "'{$column}' => null";
     }
+
+    /**
+     * Generate the factory fields as a string for the stub.
+     *
+     * @param array $fields
+     * @return string
+     */
     protected function generateFactoryFields(array $fields): string
     {
-        $fieldLines = [];
+        $factoryFieldLines = [];
 
+        // Generate each field definition
         foreach ($fields as $column => $type) {
-            $fieldLines[] = '      ' . $this->getFactoryField($column, $type) . ',';
+            $factoryFieldLines[] = '      ' . $this->getFactoryField($column, $type) . ',';
         }
 
-        return implode("\n", $fieldLines);
+        // Combine all field definitions into a single string
+        return implode("\n", $factoryFieldLines);
     }
 
-
-    protected function getStubVariables($model, $fields): array
+    /**
+     * Get the variables to replace in the factory stub.
+     *
+     * @param string $model
+     * @param array $fields
+     * @return array
+     */
+    protected function getStubVariables(string $model, array $fields): array
     {
+        // Return the variables to replace in the stub file
         return [
             'factoryNamespace' => 'Database\Factories',
             'namespacedModel' => 'App\Models\\' . $model,
-            'factory'     => $model,
+            'factory' => $model,
             'fields' => $this->generateFactoryFields($fields),
-
         ];
     }
+
+    /**
+     * Replace the variables in the stub content with actual values.
+     *
+     * @param string $stubPath
+     * @param array $stubVariables
+     * @return string
+     */
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
+        // Read the stub file content
         $content = file_get_contents($stubPath);
 
+        // Replace each variable in the stub content
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -136,12 +203,28 @@ class MakeFactory extends Command
         return $content;
     }
 
-    protected function getReplacedContent(string $model, $field): string
+    /**
+     * Generate the final content for the factory file.
+     *
+     * @param string $model
+     * @param array $fields
+     * @return string
+     */
+    protected function getReplacedContent(string $model, array $fields): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($model, $field));
+        // Generate the final content by replacing variables in the stub
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($model, $fields));
     }
-    protected function createDirectoryIfMissing($path): string
+
+    /**
+     * Create a directory if it does not already exist.
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function createDirectoryIfMissing(string $path): string
     {
+        // Create the directory if it doesn't exist
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
@@ -149,5 +232,3 @@ class MakeFactory extends Command
         return $path;
     }
 }
-
-//make:factory Test --fields='name:string,age:integer'

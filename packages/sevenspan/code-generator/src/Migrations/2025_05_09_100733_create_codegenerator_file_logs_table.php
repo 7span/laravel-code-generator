@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('file_type');
             $table->string('file_path');
-            $table->enum('status', ['success', 'error']);
+            $table->string('status');
             $table->text('message')->nullable();
             $table->boolean('is_overwrite')->default(false);
-            $table->timestamp('created_at');
+            $table->timestamps();
         });
     }
 

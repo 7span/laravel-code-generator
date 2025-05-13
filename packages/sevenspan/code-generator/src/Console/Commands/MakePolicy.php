@@ -1,12 +1,12 @@
 <?php
 
-
 namespace Sevenspan\CodeGenerator\Console\Commands;
 
+use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLogs;
+use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 
 class MakePolicy extends Command
 {
@@ -15,7 +15,7 @@ class MakePolicy extends Command
      *
      * @var string
      */
-    protected $signature = 'make:policy {name} {--model=} ';
+    protected $signature = 'codegenerator:policy {name} {--model=}';
 
     /**
      * The console command description.
@@ -23,62 +23,105 @@ class MakePolicy extends Command
      * @var string
      */
     protected $description = 'Generate a policy class for a specified model.';
+
+    /**
+     * Constructor to initialize the Filesystem dependency.
+     *
+     * @param Filesystem $files
+     */
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
+
     /**
      * Execute the console command.
+     *
+     * @return void
      */
     public function handle()
     {
-        $message = '';
-        $status = "error";
-        $policyName = Str::studly($this->argument('name'));
-        $policyPath = app_path('Policies/' . $policyName . 'Policy.php');
+        $logMessage = '';
 
-        $this->createDirectoryIfMissing(dirname($policyPath));
+        // Get the policy class name from the command argument
+        $policyClass = Str::studly($this->argument('name'));
 
-        //with stub content replcament 
-        $contents = $this->getReplacedContent($policyName);
+        // Define the path for the policy file
+        $policyFilePath = app_path('Policies/' . $policyClass . 'Policy.php');
 
-        if (! $this->files->exists($policyPath)) {
-            $this->files->put($policyPath, $contents);
-            $message = "Policy created: {$policyPath}";
-            $status = "success";
-            $this->info($message);
+        // Create the directory if it doesn't exist
+        $this->createDirectoryIfMissing(dirname($policyFilePath));
+
+        // Generate the policy content with stub replacements
+        $contents = $this->getReplacedContent($policyClass);
+
+        // Check if the policy file already exists
+        if (! $this->files->exists($policyFilePath)) {
+            // Create the policy file
+            $this->files->put($policyFilePath, $contents);
+            $logMessage = "Policy file has been created successfully at: {$policyFilePath}";
+            $logStatus = FileGenerationStatus::SUCCESS;
+            $this->info($logMessage);
         } else {
-            $message = "Policy already exists: {$policyPath}";
-            $this->warn($message);
+            // Log a warning if the policy file already exists
+            $logMessage = "Policy file already exists at: {$policyFilePath}";
+            $logStatus = FileGenerationStatus::ERROR;
+            $this->warn($logMessage);
         }
 
-        CodeGeneratorFileLogs::create([
+        // Log the policy creation details
+        CodeGeneratorFileLog::create([
             'file_type' => 'Policy',
-            'file_path' => $policyPath,
-            'status' => $status,
-            'message' => $message,
-            'created_at' => now(),
+            'file_path' => $policyFilePath,
+            'status' => $logStatus,
+            'message' => $logMessage,
         ]);
     }
+
+    /**
+     * Get the path to the policy stub file.
+     *
+     * @return string
+     */
     protected function getStubPath(): string
     {
+        // Return the path to the policy stub file
         return __DIR__ . '/../../stubs/policy.stub';
     }
-    protected function getStubVariables($policyName): array
+
+    /**
+     * Get the variables to replace in the stub file.
+     *
+     * @param string $policyClass
+     * @return array
+     */
+    protected function getStubVariables($policyClass): array
     {
-        $modelName = $this->option('model');
+        // Get the related model name from the --model option
+        $relatedModel = $this->option('model');
+
+        // Return the variables to replace in the stub file
         return [
             'namespace' => 'App\\Policies',
-            'class'     => $policyName,
-            'model' => Str::studly($modelName),
-            'modelVariable' => Str::camel($modelName),
+            'class' => $policyClass,
+            'model' => Str::studly($relatedModel),
+            'modelInstance' => Str::camel($relatedModel),
         ];
     }
 
+    /**
+     * Replace the variables in the stub content with actual values.
+     *
+     * @param string $stubPath
+     * @param array $stubVariables
+     * @return string
+     */
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
+        // Read the stub file content
         $content = file_get_contents($stubPath);
 
+        // Replace each variable in the stub content
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -86,12 +129,27 @@ class MakePolicy extends Command
         return $content;
     }
 
-    protected function getReplacedContent($policyName): string
+    /**
+     * Generate the final content for the policy file.
+     *
+     * @param string $policyClass
+     * @return string
+     */
+    protected function getReplacedContent($policyClass): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($policyName));
+        // Generate the final content by replacing variables in the stub
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($policyClass));
     }
+
+    /**
+     * Create a directory if it does not already exist.
+     *
+     * @param string $path
+     * @return string
+     */
     protected function createDirectoryIfMissing($path): string
     {
+        // Create the directory if it doesn't exist
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
@@ -99,4 +157,3 @@ class MakePolicy extends Command
         return $path;
     }
 }
-//make:policy Test --model=Test

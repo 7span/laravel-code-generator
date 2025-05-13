@@ -16,7 +16,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(
             __DIR__ . '/../config/code_generator.php',
-            'code-Generator'
+            'code_generator'
         );
 
         $this->commands([
@@ -38,7 +38,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Route::middlewareGroup(
-            'codeGenMiddleware',
+            'codeGeneratorMiddleware',
             config('code_generator.middleware', [])
         );
 
@@ -48,7 +48,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__ . '/Migrations' => database_path('migrations'),
-        ], 'codegen-migrations');
+        ], 'codegenerator-migrations');
 
         $this->publishes([
             __DIR__ . '/stubs' => database_path('stubs'),

@@ -14,8 +14,7 @@ class {{ class }} extends Model
     protected $table = '';
 
     public $fillable = [
-        'created_by',
-        'updated_by'
+        {{ fillableFields }}
     ];
 
     protected function casts()

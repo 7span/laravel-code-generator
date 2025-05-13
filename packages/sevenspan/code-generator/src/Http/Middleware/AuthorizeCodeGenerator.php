@@ -18,7 +18,7 @@ class AuthorizeCodeGenerator
     public function handle(Request $request, Closure $next): Response
     {
         if (app()->environment('production')) {
-            if (!config('code_generator.require_code_gen_in_production')) {
+            if (!config('code_generator.require_auth_in_production')) {
                 abort(403);
             }
         }

@@ -16,7 +16,7 @@ class MakeFactory extends Command
      * @var string
      */
     protected $signature = 'codegenerator:factory 
-                                          {model : The name of the model for which the factory file will be generated.} 
+                                          {modelName : The name of the model for which the factory file will be generated.} 
                                           {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}';
 
     /**
@@ -46,7 +46,7 @@ class MakeFactory extends Command
         $logMessage = '';
 
         // Get the model name from the command argument
-        $model = Str::studly($this->argument('model'));
+        $model = Str::studly($this->argument('modelName'));
 
         // Define the path for the factory file
         $factoryFilePath = base_path("database/factories/{$model}Factory.php");

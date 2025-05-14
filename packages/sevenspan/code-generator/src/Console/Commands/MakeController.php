@@ -18,9 +18,9 @@ class MakeController extends Command
                             {className}   
                             {--modelName= : The name of the model to associate with the controller} 
                             {--methods= : Comma-separated list of methods to include in the controller}  
-                            {--Service : Include a service file for the controller} 
-                            {--Resource : Include resource files for the controller} 
-                            {--Request : Include request files for the controller}';
+                            {--service : Include a service file for the controller} 
+                            {--resource : Include resource files for the controller} 
+                            {--request : Include request files for the controller}';
 
     // Command description
     protected $description = 'Generate a custom controller with optional methods and service injection';

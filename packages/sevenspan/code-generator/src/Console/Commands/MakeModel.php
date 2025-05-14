@@ -18,7 +18,7 @@ class MakeModel extends Command
     protected $signature = 'codegenerator:model {name : The name of the model} 
                                                 {--fields= : A comma-separated list of fields for the model (e.g., name:string,age:integer).} 
                                                 {--relations= : Define model relationships (e.g., User:hasMany,Post:belongsTo).} 
-                                                {--softdelete : Include soft delete} 
+                                                {--softDelete : Include soft delete} 
                                                 {--includeAllTraits : Include all predefined traits in the model.}';
 
     /**
@@ -132,7 +132,7 @@ class MakeModel extends Command
      */
     protected function getStubVariables($modelClass): array
     {
-        $includeSoftDeletes = $this->option('softdelete');
+        $includeSoftDeletes = $this->option('softDelete');
         $includeAllTraits = $this->option('includeAllTraits');
         $fieldDefinitions = $this->option('fields');
         $fillableFields = '';
@@ -194,7 +194,7 @@ class MakeModel extends Command
             $modelClass = Str::studly($class);
             $relationMethodName = Str::camel($class);
 
-            $relationMethods .= "public function {$relationMethodName}()\n{\n    return \$this->{$rel}(\\App\\Models\\{$modelClass}::class);\n}";
+            $relationMethods .= "public function {$relationMethodName}()\n{\n    return \$this->{$rel}(\\App\\Models\\{$modelClass}::class);\n}" . PHP_EOL;
         }
 
         return $relationMethods;

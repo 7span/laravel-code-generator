@@ -174,13 +174,13 @@ class MakeController extends Command
      */
     public function getStubContents($mainStub, $stubVariables = [])
     {
-        $includeServiceFile = (bool)$this->option('Service');
-        $includeResourceFile = (bool)$this->option('Resource');
-        $includeRequestFile = (bool)$this->option('Request');
+        $includeServiceFile = (bool)$this->option('service');
+        $includeResourceFile = (bool)$this->option('resource');
+        $includeRequestFile = (bool)$this->option('request');
         $mainContent = file_get_contents($mainStub);
 
         $className = $stubVariables['class'];
-        $modelName = $stubVariables['ModelName'];
+        $modelName = $stubVariables['modelName'];
         $singularInstance = lcfirst($className);
         $singularObj = '$' . $singularInstance . 'Obj';
 

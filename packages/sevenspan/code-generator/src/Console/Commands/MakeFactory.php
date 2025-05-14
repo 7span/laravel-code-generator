@@ -179,7 +179,7 @@ class MakeFactory extends Command
         // Return the variables to replace in the stub file
         return [
             'factoryNamespace' => 'Database\Factories',
-            'namespacedModel' => 'App\Models\\' . $model,
+            'namespacedModel' => 'App\\Models\\' . $model,
             'factory' => $model,
             'fields' => $this->generateFactoryFields($fields),
         ];

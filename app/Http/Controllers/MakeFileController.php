@@ -81,9 +81,7 @@ class MakeFileController extends Controller
         // Check if Generated_files folder exit otherwise create it
         $storage = Storage::disk('local')->exists($generatedFilesPath);
         if ($storage == false) {
-            Storage::disk('local')->makeDirectory($generatedFilesPath);+
-
-            
+            Storage::disk('local')->makeDirectory($generatedFilesPath);
         }
 
         // Get fields of migrations
@@ -105,7 +103,6 @@ class MakeFileController extends Controller
         if ($trait == 1) {
             // Make folder in Generated_files and copy traits files into it
             Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
-
             File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath . '/Traits'));
         }
 

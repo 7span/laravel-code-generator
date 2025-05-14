@@ -1,45 +1,74 @@
 <?php
 
-namespace Sevenspan\CodeGenerator\Models;
+namespace sevenspan\CodeGenerator;
 
-use Illuminate\Database\Eloquent\Model;
-use SevenSpan\CodeGenerator\Enums\FileGenerationStatus;
+use Livewire\Livewire;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
-class CodeGeneratorFileLog extends Model
+class CodeGeneratorServiceProvider extends ServiceProvider
 {
     /**
-     * The table associated with the model.
+     * Register services.
      *
-     * @var string
+     * This method is used to bind services into the container and register
+     * any commands or configurations required by the package.
      */
-    protected $table = 'codegenerator_file_logs';
+    public function register(): void
+    {
+        // Merge the package's configuration file with the application's configuration
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/code_generator.php',
+            'code_generator'
+        );
+
+        // Register the artisan commands provided by the package
+        $this->commands([
+            \Sevenspan\CodeGenerator\Console\Commands\MakeModel::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeController::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeMigration::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakePolicy::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeObserver::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeFactory::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeService::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeNotification::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeResource::class
+        ]);
+    }
 
     /**
-     * Indicates if the model should be timestamped.
+     * Bootstrap services.
      *
-     * @var bool
+     * This method is used to perform any actions required to bootstrap the package,
+     * such as publishing assets, loading routes, and loading migrations.
      */
-    public $timestamps = true;
+    public function boot(): void
+    {
+        // Define a middleware group for the code generator
+        Route::middlewareGroup(
+            'codeGeneratorMiddleware',
+            config('code_generator.middleware', [])
+        );
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        "file_type",       // Type of the file (e.g., Controller, Model, etc.)
-        "file_path",       // Path where the file is generated
-        "status",          // Status of the file generation (e.g., success, error)
-        "message",         // Optional message or description
-        "is_overwrite",    // Indicates if the file was overwritten
-    ];
+        // Publish the package's configuration file to the application's config directory
+        $this->publishes([
+            __DIR__ . '/../config/code_generator.php' => config_path('code_generator.php'),
+        ], 'config');
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'status' => FileGenerationStatus::class, // Cast the status attribute to the FileGenerationStatus enum
-    ];
+        // Publish the package's migration files to the application's migrations directory
+        $this->publishes([
+            __DIR__ . '/Migrations' => database_path('migrations'),
+        ], 'codegenerator-migrations');
+
+        // Publish the package's stub files to the application's stubs directory
+        $this->publishes([
+            __DIR__ . '/stubs' => database_path('stubs'),
+        ], 'stubs');
+
+        // Load the package's routes from the web.php file
+        $this->loadRoutesFrom(__DIR__ . "/../routes/web.php");
+
+        // Load the package's migrations from the Migrations directory
+        $this->loadMigrationsFrom(__DIR__ . '/Migrations');
+    }
 }

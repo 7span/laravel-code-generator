@@ -18,9 +18,9 @@ class MakeController extends Command
                             {className}   
                             {--modelName= : The name of the model to associate with the controller} 
                             {--methods= : Comma-separated list of methods to include in the controller}  
-                            {--ServiceFile : Include a service file for the controller} 
-                            {--ResourceFile : Include resource files for the controller} 
-                            {--RequestFile : Include request files for the controller}';
+                            {--Service : Include a service file for the controller} 
+                            {--Resource : Include resource files for the controller} 
+                            {--Request : Include request files for the controller}';
 
     // Command description
     protected $description = 'Generate a custom controller with optional methods and service injection';
@@ -122,7 +122,7 @@ class MakeController extends Command
             'namespace' => $controllerNamespace,
             'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
             'className' => $controllerClassName,
-            'ModelName' => ucfirst($this->option('modelName')),
+            'modelName' => ucfirst($this->option('modelName')),
         ];
     }
 
@@ -174,9 +174,9 @@ class MakeController extends Command
      */
     public function getStubContents($mainStub, $stubVariables = [])
     {
-        $includeServiceFile = (bool)$this->option('ServiceFile');
-        $includeResourceFile = (bool)$this->option('ResourceFile');
-        $includeRequestFile = (bool)$this->option('RequestFile');
+        $includeServiceFile = (bool)$this->option('Service');
+        $includeResourceFile = (bool)$this->option('Resource');
+        $includeRequestFile = (bool)$this->option('Request');
         $mainContent = file_get_contents($mainStub);
 
         $className = $stubVariables['class'];

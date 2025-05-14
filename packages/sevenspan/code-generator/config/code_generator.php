@@ -6,20 +6,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Middleware
-    |--------------------------------------------------------------------------
-    |
-    | This option defines the middleware that will be applied to the routes
-    | of the code generator. You can add or remove middleware as needed.
-    |
-    */
-    'middleware' => [
-        'web',
-        AuthorizeCodeGenerator::class
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Route Path
     |--------------------------------------------------------------------------
     |
@@ -27,6 +13,7 @@ return [
     | You can customize this path to suit your application's requirements.
     |
     */
+
     'route_path' => 'code-generator',
 
     /*
@@ -39,6 +26,22 @@ return [
     | enforce authentication in production.
     |
     */
+
     'require_auth_in_production' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Middleware
+    |--------------------------------------------------------------------------
+    |
+    | This option defines the middleware that will be applied to the routes
+    | of the code generator. You can add or remove middleware as needed.
+    |
+    */
+
+    'middleware' => [
+        'web',
+        AuthorizeCodeGenerator::class,
+    ],
 
 ];

@@ -2,12 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Group routes under the 'codeGeneratorMiddleware' middleware
-Route::middleware('codeGeneratorMiddleware')->group(function () {
-
-    // Define a route for the code generator
-    Route::get(config('code-generator.route_path'), function () {
-        // TODO: Replace this with the appropriate view to be returned by the frontend
-        return "in laravel code generator";
-    });
-});
+// Define the route for the code generator
+// The route path is configurable via the 'route_path' option in the code_generator config file
+Route::get(config('code_generator.route_path'), function () {
+    // TODO: Replace this with the appropriate view to be returned by the frontend
+    return "in laravel code generator";
+})->middleware('codeGeneratorMiddleware'); // Apply the middleware for authorization or other checks

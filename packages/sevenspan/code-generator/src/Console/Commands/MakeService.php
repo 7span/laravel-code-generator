@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeService extends Command
 {
@@ -49,7 +50,7 @@ class MakeService extends Command
         $serviceClass = Str::studly($this->argument('name'));
 
         // Define the path for the service file
-        $serviceFilePath = app_path("Services/{$serviceClass}Service.php");
+        $serviceFilePath = app_path(config('code_generator.service_path', 'Services') . "/{$serviceClass}Service.php");
 
         // Create the directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($serviceFilePath));
@@ -62,18 +63,18 @@ class MakeService extends Command
             // Create the service file
             $this->files->put($serviceFilePath, $stubContent);
             $logMessage = "Service file has been created successfully at: {$serviceFilePath}";
-            $logStatus = FileGenerationStatus::SUCCESS;
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             // Log a warning if the service file already exists
             $logMessage = "Service file already exists at: {$serviceFilePath}";
-            $logStatus = FileGenerationStatus::ERROR;
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->info($logMessage);
         }
 
         // Log the service creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Service',
+            'file_type' => CodeGeneratorFileType::SERVICE,
             'file_path' => $serviceFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
@@ -156,14 +157,15 @@ class MakeService extends Command
         $modelInstance = $modelVariable . 'Model';
 
         return [
-            'modelNamespace'    => "App\\Models\\{$modelName}",
-            'serviceClass'      => "{$modelName}Service",
-            'modelObject'       => "private {$modelName} \${$modelInstance}",
-            'resourceMethod'    => $this->getResourceMethod($modelInstance),
-            'collectionMethod'  => $this->getCollectionMethod($modelVariable, $modelInstance),
-            'storeMethod'       => $this->getStoreMethod($modelVariable, $modelInstance),
-            'updateMethod'      => $this->getUpdateMethod($modelVariable),
-            'deleteMethod'      => $this->getDeleteMethod($modelVariable),
+            'serviceClassNamespace' => 'App\\' . config('code_generator.service_path', 'Services'),
+            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . "\\{$modelName}",
+            'serviceClass'          => "{$modelName}Service",
+            'modelObject'           => "private {$modelName} \${$modelInstance}",
+            'resourceMethod'        => $this->getResourceMethod($modelInstance),
+            'collectionMethod'      => $this->getCollectionMethod($modelVariable, $modelInstance),
+            'storeMethod'           => $this->getStoreMethod($modelVariable, $modelInstance),
+            'updateMethod'          => $this->getUpdateMethod($modelVariable),
+            'deleteMethod'          => $this->getDeleteMethod($modelVariable),
         ];
     }
 
@@ -178,7 +180,9 @@ class MakeService extends Command
         $query = '$query';
 
         return "{$query} = \$this->{$modelInstance}->getQB();" . PHP_EOL .
-            self::INDENT . "if (is_numeric(\$id)) {" . PHP_EOL . self::INDENT . self::INDENT . "{$query} = {$query}->whereId(\$id);" . PHP_EOL . self::INDENT . "} else {" . PHP_EOL .
+            self::INDENT . "if (is_numeric(\$id)) {" . PHP_EOL .
+            self::INDENT . self::INDENT . "{$query} = {$query}->whereId(\$id);" . PHP_EOL .
+            self::INDENT . "} else {" . PHP_EOL .
             self::INDENT . self::INDENT . "{$query} = {$query}->whereUuid(\$id);" . PHP_EOL .
             self::INDENT . "}" . PHP_EOL .
             self::INDENT . "return {$query}->firstOrFail();";
@@ -194,7 +198,6 @@ class MakeService extends Command
     protected function getCollectionMethod(string $modelVar, string $modelInstance): string
     {
         $query = '$query';
-        $pluralVar = Str::plural($modelVar);
 
         return "{$query} = \$this->{$modelInstance}->getQB();" . PHP_EOL .
             self::INDENT . "return (isset(\$inputs['limit']) && \$inputs['limit'] != -1) ? {$query}->paginate(\$inputs['limit']) : {$query}->get();";

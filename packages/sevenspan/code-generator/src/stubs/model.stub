@@ -2,15 +2,15 @@
 
 namespace {{ namespace }};
 
-
+{{ relatedModelNamespaces }}
+{{ traitNamespaces }}
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-{{ softdelete }}
 
 
 class {{ class }} extends Model
 {
-    {{ uses }}
+    {{ traits }}
+
     protected $table = '';
 
     public $fillable = [
@@ -22,10 +22,10 @@ class {{ class }} extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'deleted_at' => 'datetime'
+            {{ deletedAt }}
         ];
     }
 
-    {{ relation }}
-    
+   {{ relation }}
+
 }

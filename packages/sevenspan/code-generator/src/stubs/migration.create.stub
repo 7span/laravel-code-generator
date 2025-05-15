@@ -8,14 +8,11 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('{{ table }}', function (Blueprint $table) {
+        Schema::create('{{ tableName }}', function (Blueprint $table) {
             $table->smallIncrements('id')->index();
-            $table->timestamps();
             {{ fieldDefinitions }}
+            $table->timestamps();
             {{ softdelete }}
-            {{ deletedBy }}
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
         });
     }
 

@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeObserver extends Command
 {
@@ -17,6 +18,7 @@ class MakeObserver extends Command
      */
     protected $signature = 'codegenerator:observer {name : The name of the observer class to generate.} 
                                                    {--model= : The related model for the observer.}';
+
     /**
      * The console command description.
      *
@@ -48,7 +50,7 @@ class MakeObserver extends Command
         $observerClass = Str::studly($this->argument('name'));
 
         // Define the path for the observer file
-        $observerFilePath = app_path('Observers/' . $observerClass . '.php');
+        $observerFilePath = app_path(config('code_generator.observer_path', 'Notification') . "/{$observerClass}.php");
 
         // Create the directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($observerFilePath));
@@ -61,21 +63,21 @@ class MakeObserver extends Command
             // Create the observer file
             $this->files->put($observerFilePath, $contents);
             $logMessage = "Observer file has been created successfully at: {$observerFilePath}";
-            $status = FileGenerationStatus::SUCCESS;
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             // Log a warning if the observer file already exists
-            $logMessage = "Observer File already exists at: {$observerFilePath}";
-            $logStatus = FileGenerationStatus::ERROR;
+            $logMessage = "Observer file already exists at: {$observerFilePath}";
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->warn($logMessage);
         }
 
         // Log the observer creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Observer',
+            'file_type' => CodeGeneratorFileType::OBSERVER,
             'file_path' => $observerFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
+            'status'    => $logStatus,
+            'message'   => $logMessage,
         ]);
     }
 
@@ -93,20 +95,21 @@ class MakeObserver extends Command
     /**
      * Get the variables to replace in the stub file.
      *
-     * @param string $name
+     * @param string $observerClass
      * @return array
      */
-    protected function getStubVariables($name): array
+    protected function getStubVariables($observerClass): array
     {
         // Get the related model name from the --model option
         $relatedModel = $this->option('model');
 
         // Return the variables to replace in the stub file
         return [
-            'namespace' => 'App\\Observers',
-            'class' => $name,
-            'model' => Str::studly($relatedModel),
-            'modelInstance' => Str::camel($relatedModel),
+            'namespace'              => 'App\\' . config('code_generator.observer_path', 'Observers'),
+            'class'                  => $observerClass,
+            'model'                  => $relatedModel,
+            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . '\\' . Str::studly($relatedModel),
+            'modelInstance'         => Str::camel($relatedModel),
         ];
     }
 
@@ -136,10 +139,10 @@ class MakeObserver extends Command
      * @param string $name
      * @return string
      */
-    protected function getReplacedContent($name): string
+    protected function getReplacedContent($observerClass): string
     {
         // Generate the final content by replacing variables in the stub
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($name));
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($observerClass));
     }
 
     /**

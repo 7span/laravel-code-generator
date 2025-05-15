@@ -2,7 +2,7 @@
 
 namespace {{ namespace }};
 
-use App\Http\Models\{{ Model }};
+use App\{{ relatedModelNamespace }};
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +12,7 @@ class {{ class }} extends Notification
 {
     use Queueable;
 
-    public function __construct(protected {{ Model }} {{ modelObject }})
+    public function __construct(protected {{ model }} {{ modelObject }})
     { 
     }
 

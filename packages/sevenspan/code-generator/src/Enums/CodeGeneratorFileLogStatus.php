@@ -3,11 +3,11 @@
 namespace Sevenspan\CodeGenerator\Enums;
 
 /**
- * Enum FileGenerationStatus
+ * Enum CodeGeneratorFileLogStatus
  *
  * Represents the status of file generation operations.
  */
-enum FileGenerationStatus: string
+enum CodeGeneratorFileLogStatus: string
 {
 /**
      * Indicates that the file generation was successful.

@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakePolicy extends Command
 {
@@ -48,7 +49,7 @@ class MakePolicy extends Command
         $policyClass = Str::studly($this->argument('name'));
 
         // Define the path for the policy file
-        $policyFilePath = app_path('Policies/' . $policyClass . 'Policy.php');
+        $policyFilePath = app_path(config('code_generator.policy_path', 'Policies') . "/{$policyClass}Policy.php");
 
         // Create the directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($policyFilePath));
@@ -61,18 +62,18 @@ class MakePolicy extends Command
             // Create the policy file
             $this->files->put($policyFilePath, $contents);
             $logMessage = "Policy file has been created successfully at: {$policyFilePath}";
-            $logStatus = FileGenerationStatus::SUCCESS;
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             // Log a warning if the policy file already exists
             $logMessage = "Policy file already exists at: {$policyFilePath}";
-            $logStatus = FileGenerationStatus::ERROR;
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->warn($logMessage);
         }
 
         // Log the policy creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Policy',
+            'file_type' => CodeGeneratorFileType::POLICY,
             'file_path' => $policyFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
@@ -103,9 +104,10 @@ class MakePolicy extends Command
 
         // Return the variables to replace in the stub file
         return [
-            'namespace' => 'App\\Policies',
+            'namespace' => 'App\\' . config('code_generator.policy_path', 'Policies'),
             'class' => $policyClass,
             'model' => Str::studly($relatedModel),
+            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . "\\" . Str::studly($relatedModel),
             'modelInstance' => Str::camel($relatedModel),
         ];
     }

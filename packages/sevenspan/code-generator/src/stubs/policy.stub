@@ -3,7 +3,7 @@
 namespace {{ namespace }};
 
 use Illuminate\Auth\Access\Response;
-use App\Models\{{ model }};
+use App\{{ relatedModelNamespace }};
 use App\Models\User;
 
 class {{ class }}

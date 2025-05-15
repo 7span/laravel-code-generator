@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeController extends Command
 {
@@ -44,43 +45,33 @@ class MakeController extends Command
 
         /**
          * Get and process the class name
-         * className will come as a api\v1\ExampleController
          */
-        $className = Str::studly($this->argument('className'));
-
-        // Separate the namespace and controller name
-        $seperator = strrpos($className, '\\');
-
-        // Extract the namespace (e.g., api/v1)
-        $controllerNamespace = substr($className, 0, $seperator);
-
-        // Extract the class name (e.g., ExampleController)
-        $controllerClassName = Str::studly(substr($className, $seperator + 1));
+        $controllerClassName = Str::studly($this->argument('className'));
 
         // Define the controller file path
-        $controllerFilePath = app_path("Http/Controllers/Api/V1/{$controllerClassName}.php");
+        $controllerFilePath = app_path(config('code_generator.controller_path', 'Http/Controllers') . "/{$controllerClassName}.php");
 
         // Create directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($controllerFilePath));
 
         // Generate the controller content
-        $contents = $this->getReplacedContent($controllerNamespace, $controllerClassName);
+        $contents = $this->getReplacedContent($controllerClassName);
 
         // Check if the controller already exists
         if (!$this->files->exists($controllerFilePath)) {
             $this->files->put($controllerFilePath, $contents);
             $logMessage = "Controller file has been created successfully at: {$controllerFilePath}";
-            $logStatus =  FileGenerationStatus::SUCCESS;
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             $logMessage = "Controller file already exists at: {$controllerFilePath}";
-            $logStatus =  FileGenerationStatus::ERROR;
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->warn($logMessage);
         }
 
         // Log the file creation status
         CodeGeneratorFileLog::create([
-            'file_type' => 'Controller',
+            'file_type' => CodeGeneratorFileType::CONTROLLER,
             'file_path' => $controllerFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
@@ -100,29 +91,30 @@ class MakeController extends Command
     /**
      * Get the replaced content for the controller file.
      *
-     * @param string $controllerNamespace
      * @param string $controllerClassName
      * @return string
      */
-    public function getReplacedContent($controllerNamespace, $controllerClassName)
+    public function getReplacedContent($controllerClassName)
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($controllerNamespace, $controllerClassName));
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($controllerClassName));
     }
 
     /**
      * Get the variables to replace in the stub file.
      *
-     * @param string $controllerNamespace
      * @param string $controllerClassName
      * @return array
      */
-    public function getStubVariables($controllerNamespace, $controllerClassName)
+    public function getStubVariables(string $controllerClassName)
     {
+        $modelName = $this->option('modelName') ? ucfirst($this->option('modelName')) : '';
+
         return [
-            'namespace' => $controllerNamespace,
-            'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
-            'className' => $controllerClassName,
-            'modelName' => ucfirst($this->option('modelName')),
+            'namespace'            => config('code_generator.controller_path', 'Http\Controllers'),
+            'class'                => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
+            'className'            => $controllerClassName,
+            'relatedModelNamespace' => "use App\\" . config('code_generator.model_path', 'Models') . "\\" . $modelName,
+            'modelName'            => $modelName,  // used in generating methods
         ];
     }
 
@@ -136,24 +128,37 @@ class MakeController extends Command
      * @param string $className
      * @return string
      */
-    protected function injectUseStatements(string $mainContent, bool $includeServiceFile = false, bool $includeRequestFile = false, bool $includeResourceFile = false, string $className): string
-    {
+    protected function injectUseStatements(
+        string $mainContent,
+        bool $includeServiceFile = false,
+        bool $includeRequestFile = false,
+        bool $includeResourceFile = false,
+        string $className
+    ): string {
         $additionalUseStatements = [];
 
         // Add service file use statement
         if ($includeServiceFile) {
-            $mainContent = str_replace('{{ service }}', "use App\Services\\{$className}Service;", $mainContent);
+            $mainContent = str_replace(
+                '{{ service }}',
+                'use App\\' . config('code_generator.service_path', 'Services') . '\\' . $className . 'Service;',
+                $mainContent
+            );
         }
 
         // Add request file use statement
         if ($includeRequestFile) {
-            $mainContent = str_replace('{{ request }}', "use App\Http\Request\\{$className}\\Request as {$className}Request;", $mainContent);
+            $mainContent = str_replace(
+                '{{ request }}',
+                "use App\\" . config('code_generator.request_path', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;",
+                $mainContent
+            );
         }
 
         // Add resource file use statements
         if ($includeResourceFile) {
-            $additionalUseStatements[] = "use App\Http\Resources\\{$className}\\Resource;";
-            $additionalUseStatements[] = "use App\Http\Resources\\{$className}\\Collection;";
+            $additionalUseStatements[] = "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Resource;";
+            $additionalUseStatements[] = "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Collection;";
         }
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
@@ -172,17 +177,17 @@ class MakeController extends Command
      * @param array $stubVariables
      * @return string
      */
-    public function getStubContents($mainStub, $stubVariables = [])
+    public function getStubContents(string $mainStub, array $stubVariables = [])
     {
-        $includeServiceFile = (bool)$this->option('service');
-        $includeResourceFile = (bool)$this->option('resource');
-        $includeRequestFile = (bool)$this->option('request');
-        $mainContent = file_get_contents($mainStub);
+        $includeServiceFile  = (bool) $this->option('service');
+        $includeResourceFile = (bool) $this->option('resource');
+        $includeRequestFile  = (bool) $this->option('request');
+        $mainContent         = file_get_contents($mainStub);
 
-        $className = $stubVariables['class'];
-        $modelName = $stubVariables['modelName'];
-        $singularInstance = lcfirst($className);
-        $singularObj = '$' . $singularInstance . 'Obj';
+        $className         = $stubVariables['class'];
+        $modelName         = $stubVariables['modelName'];
+        $singularInstance  = lcfirst($className);
+        $singularObj       = '$' . $singularInstance . 'Obj';
 
         // Method names
         $methods = explode(',', $this->option('methods') ?? '');
@@ -198,6 +203,7 @@ class MakeController extends Command
             $includeServiceFile ? 'private $' . $singularInstance . 'Service;' : '',
             $mainContent
         );
+
         $mainContent = str_replace(
             '{{ serviceObj }}',
             $includeServiceFile ? '$this->' . $singularInstance . 'Service = new ' . $className . 'Service;' : '',
@@ -205,21 +211,38 @@ class MakeController extends Command
         );
 
         // Conditionally inject use statements
-        $mainContent = $this->injectUseStatements($mainContent, $includeServiceFile, $includeRequestFile, $includeResourceFile, $className);
+        $mainContent = $this->injectUseStatements(
+            $mainContent,
+            $includeServiceFile,
+            $includeRequestFile,
+            $includeResourceFile,
+            $className
+        );
 
         // Append methods
         $methodContents = '';
+
         foreach ($methods as $method) {
             $methodStubPath = __DIR__ . "/../../stubs/controller.{$method}.stub";
             if (!file_exists($methodStubPath)) continue;
 
             $methodContent = file_get_contents($methodStubPath);
-            $pluralVar = Str::plural($singularInstance);
-            $classObject = "{$modelName} \${$singularInstance}";
+            $pluralVar     = Str::plural($singularInstance);
+            $classObject   = "{$modelName} \${$singularInstance}";
 
             // Common replacements
-            $methodContent = str_replace('{{ requestName }}', $includeRequestFile ? "{$className}Request \$request" : 'Request $request', $methodContent);
-            $methodContent = str_replace('{{ updaterRequestName }}', $includeRequestFile ? "{$classObject}, {$className}Request \$request" : $classObject, $methodContent);
+            $methodContent = str_replace(
+                '{{ requestName }}',
+                $includeRequestFile ? "{$className}Request \$request" : 'Request $request',
+                $methodContent
+            );
+
+            $methodContent = str_replace(
+                '{{ updaterRequestName }}',
+                $includeRequestFile ? "{$classObject}, {$className}Request \$request" : $classObject,
+                $methodContent
+            );
+
             $methodContent = str_replace('{{ classObject }}', $classObject, $methodContent);
 
             switch ($method) {
@@ -236,8 +259,8 @@ class MakeController extends Command
 
                 case 'store':
                     $validated = $includeRequestFile ? '$request->validated()' : '';
-                    $storeBody = "\${$singularObj} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->success(\${$singularObj});";
+                    $storeBody = "{$singularObj} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
 
                     $methodContent = str_replace('{{ storeMethod }}', $includeServiceFile ? $storeBody : '', $methodContent);
                     break;
@@ -246,16 +269,16 @@ class MakeController extends Command
                     $id = $singularInstance . '->id';
                     $showBody = $includeServiceFile
                         ? "{$singularObj} = \$this->{$singularInstance}Service->resource(\${$id});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->resource(new Resource(\${$singularObj}));"
+                        self::INDENT . self::INDENT . "return \$this->resource(new Resource({$singularObj}));"
                         : '';
 
                     $methodContent = str_replace('{{ showMethod }}', $includeServiceFile ? $showBody : '', $methodContent);
                     break;
 
                 case 'update':
-                    $validated = $includeRequestFile ? ' $request->validated()' : '';
-                    $updateBody = "\${$singularObj} = \$this->{$singularInstance}Service->update(\${$singularInstance},{$validated});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->success(\${$singularObj});";
+                    $validated  = $includeRequestFile ? ' $request->validated()' : '';
+                    $updateBody = "{$singularObj} = \$this->{$singularInstance}Service->update(\${$singularInstance},{$validated});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
 
                     $methodContent = str_replace('{{ updateMethod }}', $includeServiceFile ? $updateBody : '', $methodContent);
                     break;

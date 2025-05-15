@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeNotification extends Command
 {
@@ -17,11 +18,11 @@ class MakeNotification extends Command
      *
      * @var string
      */
-    protected $signature = 'codegenerator:notification {className :name of the notification class } 
-                                                       {--modelName= :related model name } 
-                                                       {--data= : A comma-separated list of key-value pairs for notification data (e.g., key1:value1,key2:value2).} 
-                                                       {--body= : The body content of the notification.} 
-                                                       {--subject= : The subject of the notification.}';
+    protected $signature = 'codegenerator:notification {className : Name of the notification class} 
+                                                           {--modelName= : Related model name} 
+                                                           {--data= : A comma-separated list of key-value pairs for notification data (e.g., key1:value1,key2:value2)} 
+                                                           {--body= : The body content of the notification} 
+                                                           {--subject= : The subject of the notification}';
 
     /**
      * The console command description.
@@ -53,7 +54,7 @@ class MakeNotification extends Command
         $notificationClass = Str::studly($this->argument('className'));
 
         // Define the path for the notification file
-        $notificationFilePath = app_path('Notifications/' . $notificationClass . '.php');
+        $notificationFilePath = app_path(config('code_generator.notification_path', 'Notification') . "/{$notificationClass}.php");
 
         // Create the directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($notificationFilePath));
@@ -65,22 +66,22 @@ class MakeNotification extends Command
         if (! $this->files->exists($notificationFilePath)) {
             // Create the notification file
             $this->files->put($notificationFilePath, $contents);
-            $logMessage = "Notification File has been created successfully at: {$notificationFilePath}";
-            $logStatus = FileGenerationStatus::SUCCESS;
+            $logMessage = "Notification file has been created successfully at: {$notificationFilePath}";
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             // Log a warning if the notification file already exists
-            $logMessage = "Notification File already exists at: {$notificationFilePath}";
-            $logStatus = FileGenerationStatus::ERROR;
+            $logMessage = "Notification file already exists at: {$notificationFilePath}";
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->warn($logMessage);
         }
 
         // Log the notification creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Notification',
+            'file_type' => CodeGeneratorFileType::NOTIFICATION,
             'file_path' => $notificationFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
+            'status'    => $logStatus,
+            'message'   => $logMessage,
         ]);
     }
 
@@ -160,13 +161,14 @@ class MakeNotification extends Command
 
         // Return the variables to replace in the stub file
         return [
-            'namespace' => 'App\Notifications',
-            'class' => $notificationClass,
-            'Model' => $relatedModel,
-            'modelObject' => '$' . (Str::camel($relatedModel)),
-            'subject' => $this->option('subject'),
-            'body' => (string)$this->option('body'),
-            'data' => $parsedData,
+            'namespace'              => 'App\\' . config('code_generator.notification_path', 'Notification'),
+            'class'                  => $notificationClass,
+            'model'                  => $relatedModel,
+            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . '\\' . $relatedModel,
+            'modelObject'            => '$' . (Str::camel($relatedModel)),
+            'subject'                => $this->option('subject'),
+            'body'                   => (string) $this->option('body'),
+            'data'                   => $parsedData,
         ];
     }
 
@@ -179,7 +181,7 @@ class MakeNotification extends Command
     protected function parseDataOption(?string $dataOption): string
     {
         // Return an empty string if no data is provided
-        if (!$dataOption) {
+        if (! $dataOption) {
             return '';
         }
 

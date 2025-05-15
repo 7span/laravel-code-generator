@@ -5,28 +5,37 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeModel extends Command
 {
+    /**
+     * Indentation constant for code generation
+     */
+    private const INDENT = '    ';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'codegenerator:model {name : The name of the model} 
-                                                {--fields= : A comma-separated list of fields for the model (e.g., name:string,age:integer).} 
-                                                {--relations= : Define model relationships (e.g., User:hasMany,Post:belongsTo).} 
-                                                {--softDelete : Include soft delete} 
-                                                {--includeAllTraits : Include all predefined traits in the model.}';
+    protected $signature = 'codegenerator:model 
+                            {name : The name of the model} 
+                            {--fields= : Comma-separated fields (e.g., name:string,age:integer)} 
+                            {--relations= : Model relationships (e.g., Post:hasMany,User:belongsTo)} 
+                            {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
+                            {--softDelete : Include soft delete} 
+                            {--factoryFile : if factory file is included}
+                            {--traits= : Comma-separated traits to include in the model}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate a custom Eloquent model with optional fields, relations, and traits.';
+    protected $description = 'Generate a custom Eloquent model with optional fields, relations, soft deletes, and traits.';
 
     /**
      * Constructor to initialize the Filesystem dependency.
@@ -43,38 +52,35 @@ class MakeModel extends Command
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        $logMessage = '';
-
-        // Get the model name from the command argument
         $modelClass = Str::studly($this->argument('name'));
-        $modelFilePath = app_path('Models/' . $modelClass . '.php');
+        $modelFilePath = app_path(config('code_generator.model_path', 'Models') . "/{$modelClass}.php");
 
-        // Create the directory if it doesn't exist
+        // Ensure the directory exists
         $this->createDirectoryIfMissing(dirname($modelFilePath));
+        $stubContent = $this->getReplacedContent($modelClass);
 
-        // Generate the model content with stub replacements
-        $contents = $this->getReplacedContent($modelClass);
+        $logMessage = '';
+        $logStatus = CodeGeneratorFileLogStatus::ERROR;
 
         // Check if the model file already exists
-        if (! $this->files->exists($modelFilePath)) {
-            $this->files->put($modelFilePath, $contents);
-            $logMessage = "Model file has been created successfully at: {$modelFilePath}";
-            $logStatus = FileGenerationStatus::SUCCESS;
+        if (!$this->files->exists($modelFilePath)) {
+            // Create the model file
+            $this->files->put($modelFilePath, $stubContent);
+            $logMessage = "Model created at: {$modelFilePath}";
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
-
-            // Append the API route for the model
             $this->appendApiRoute($modelClass);
         } else {
-            $logMessage = "Model file already exists at: {$modelFilePath}";
-            $logStatus = FileGenerationStatus::ERROR;
+            // Log a warning if the model file already exists
+            $logMessage = "Model already exists at: {$modelFilePath}";
             $this->warn($logMessage);
         }
 
         // Log the model creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Model',
+            'file_type' => CodeGeneratorFileType::MODEL,
             'file_path' => $modelFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
@@ -82,35 +88,43 @@ class MakeModel extends Command
     }
 
     /**
-     * Append the API route for the model to the routes/api.php file.
+     * Append API route for the model to the routes/api.php file.
      *
      * @param string $modelName
      * @return void
      */
     protected function appendApiRoute(string $modelName): void
     {
-        $controllerName = ucfirst($modelName) . 'Controller';
-        $resource = Str::plural(Str::kebab($modelName));
-        $apiRouteEntry = "Route::apiResource('$resource', \\App\\Http\\Controllers\\$controllerName::class);";
-        $apiRoutesFilePath = base_path('routes/api.php');
+        $controllerName = "{$modelName}Controller";
+        $methods = $this->option('methods');
+        $methodCount = count(array_map('trim', explode(',', $methods)));
 
-        // Create the routes/api.php file if it doesn't exist
-        if (! $this->files->exists($apiRoutesFilePath)) {
-            $this->files->put($apiRoutesFilePath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n");
+        $resource = Str::plural(Str::kebab($modelName));
+        // Use apiResource if all 5 standard methods are included, otherwise use resource with only()
+        if ($methodCount == 5) {
+            $routeEntry = "Route::apiResource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerName}::class);";
+        } else {
+            $routeEntry = "Route::resource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerName}::class)->only(['{$methods}']);";
+        }
+
+        $apiPath = base_path('routes/api.php');
+
+        // Create api.php file if it doesn't exist
+        if (!$this->files->exists($apiPath)) {
+            $this->files->put($apiPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n");
             $this->info("routes/api.php file created.");
         }
 
-        // Append the API route entry to the file
-        file_put_contents($apiRoutesFilePath, PHP_EOL . $apiRouteEntry . PHP_EOL, FILE_APPEND);
-        $logMessage = "Route added to routes/api.php successfully.";
-        $this->info($logMessage);
+        // Append the route entry to the api.php file
+        file_put_contents($apiPath, PHP_EOL . $routeEntry . PHP_EOL, FILE_APPEND);
+        $this->info("Route added for {$modelName}");
 
-        // Log the route addition details
+        // Log the route creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Route',
-            'file_path' => $apiRoutesFilePath,
-            'status' => FileGenerationStatus::SUCCESS,
-            'message' => $logMessage,
+            'file_type' => CodeGeneratorFileType::ROUTE,
+            'file_path' => $apiPath,
+            'status' => CodeGeneratorFileLogStatus::SUCCESS,
+            'message' => "API route added for {$modelName}.",
         ]);
     }
 
@@ -125,56 +139,100 @@ class MakeModel extends Command
     }
 
     /**
+     * Generate the final content for the model file.
+     *
+     * @param string $modelClass
+     * @return string
+     */
+    protected function getReplacedContent(string $modelClass): string
+    {
+        $stub = file_get_contents($this->getStubPath());
+        $variables = $this->getStubVariables($modelClass);
+
+        // Replace each variable in the stub content
+        foreach ($variables as $key => $value) {
+            $stub = str_replace('{{ ' . $key . ' }}', $value, $stub);
+        }
+
+        return $stub;
+    }
+
+    /**
      * Get the variables to replace in the stub file.
      *
      * @param string $modelClass
      * @return array
      */
-    protected function getStubVariables($modelClass): array
+    protected function getStubVariables(string $modelClass): array
     {
-        $includeSoftDeletes = $this->option('softDelete');
-        $includeAllTraits = $this->option('includeAllTraits');
-        $fieldDefinitions = $this->option('fields');
-        $fillableFields = '';
+        $traitInfo = $this->getTraitInfo();
+        $fieldsOption = $this->option('fields');
+        $relationMethods = $this->getRelations();
+        $relatedModelImports = $this->getRelatedModels();
 
-        // Parse the fields for the fillable property
-        if ($fieldDefinitions) {
-            $fieldArray = explode(',', $fieldDefinitions);
-            $fillableFields = implode(",\n        ", array_map(fn($field) => "'$field'", $fieldArray));
+        // Process fillable fields from the fields option
+        $fillableFields = '';
+        if ($fieldsOption) {
+            $fieldNames = array_map(fn($item) => "'" . explode(':', $item)[0] . "'", explode(',', $fieldsOption));
+            $fillableFields = implode(",\n        ", $fieldNames);
         }
 
         // Return the variables to replace in the stub file
         return [
-            'namespace' => 'App\\Models',
+            'namespace' => 'App\\' . config('code_generator.model_path', 'Models'),
             'class' => $modelClass,
-            'softdelete' => $includeSoftDeletes ? 'use Illuminate\Database\Eloquent\SoftDeletes;' : '',
-            'uses' => $this->getUses($includeSoftDeletes, $includeAllTraits),
-            'relation' => $this->getRelations(),
+            'traitNamespaces' => $traitInfo['uses'],
+            'traits' => $traitInfo['apply'],
+            'relatedModelNamespace' => implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)),
+            'relation' => $relationMethods,
             'fillableFields' => $fillableFields,
+            'deletedAt' => $this->option('softDelete') ? "'deleted_at' => 'datetime'," : ''
         ];
     }
 
     /**
-     * Get the traits to include in the model.
+     * Get trait information for the model.
      *
-     * @param bool $includeSoftDeletes
-     * @param bool $includeAllTraits
-     * @return string
+     * @return array
      */
-    protected function getUses($includeSoftDeletes, $includeAllTraits): string
+    protected function getTraitInfo(): array
     {
-        $traits = ['HasFactory'];
-        if ($includeSoftDeletes) {
-            $traits[] = 'SoftDeletes';
+        $softDeleteIncluded = $this->option('softDelete');
+        $isFactoryIncluded = $this->option('factoryFile');
+
+        $traitUseStatements = [];
+        $traitNames = [];
+
+        // Add HasFactory trait if factory file is included
+        if ($isFactoryIncluded) {
+            $traitUseStatements[] = "use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;";
+            $traitNames[] = 'HasFactory';
         }
-        if ($includeAllTraits) {
-            $traits[] = 'ApiResponse,BaseModel,BootModel,PaginationTrait,ResourceFilterable';
+
+        // Add SoftDeletes trait if soft delete is included
+        if ($softDeleteIncluded) {
+            $traitUseStatements[] = "use Illuminate\\Database\\Eloquent\\SoftDeletes;";
+            $traitNames[] = 'SoftDeletes';
         }
-        return 'use ' . implode(', ', $traits) . ';';
+
+        // Add custom traits if specified
+        $customTraits = $this->option('traits');
+        if ($customTraits) {
+            foreach (explode(',', $customTraits) as $trait) {
+                $trait = trim($trait);
+                $traitUseStatements[] = "use App\\" . config('code_generator.trait_path', 'Traits') . "\\$trait;";
+                $traitNames[] = $trait;
+            }
+        }
+
+        return [
+            'uses' => implode("\n", $traitUseStatements),
+            'apply' => 'use ' . implode(', ', $traitNames) . ';',
+        ];
     }
 
     /**
-     * Get the relation methods for the model.
+     * Generate relation methods for the model.
      *
      * @return string
      */
@@ -183,66 +241,59 @@ class MakeModel extends Command
         $relations = $this->option('relations');
         if (!$relations) return '';
 
-        $relationArray = explode(',', $relations);
-        $relationMethods = '';
+        $methods = [];
 
-        // Generate relation methods for each relation
-        foreach ($relationArray as $relation) {
+        // Process each relation
+        foreach (explode(',', $relations) as $relation) {
             if (!str_contains($relation, ':')) continue;
-            [$class, $rel] = explode(':', $relation);
-            $rel = Str::camel($rel);
-            $modelClass = Str::studly($class);
-            $relationMethodName = Str::camel($class);
 
-            $relationMethods .= "public function {$relationMethodName}()\n{\n    return \$this->{$rel}(\\App\\Models\\{$modelClass}::class);\n}" . PHP_EOL;
+            [$model, $type] = explode(':', $relation);
+            $methodName = Str::camel($model);
+            $relatedClass = Str::studly($model);
+
+            // Generate the relation method
+            $methods[] =
+                self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL .
+                self::INDENT . '{' . PHP_EOL .
+                self::INDENT . self::INDENT . 'return $this->' . $type . '(' . $relatedClass . '::class);' . PHP_EOL .
+                self::INDENT . '}' . PHP_EOL;
         }
 
-        return $relationMethods;
+        return rtrim(implode(PHP_EOL, $methods));
     }
 
     /**
-     * Generate the final content for the model file.
+     * Get related models for imports.
      *
-     * @param string $modelClass
-     * @return string
+     * @return array
      */
-    protected function getReplacedContent($modelClass): string
+    protected function getRelatedModels(): array
     {
-        return $this->replaceStubVariables($this->getStubPath(), $this->getStubVariables($modelClass));
-    }
+        $relations = $this->option('relations');
+        if (!$relations) return [];
 
-    /**
-     * Replace the variables in the stub content with actual values.
-     *
-     * @param string $stubPath
-     * @param array $stubVariables
-     * @return string
-     */
-    protected function replaceStubVariables(string $stubPath, array $stubVariables): string
-    {
-        $modelContent = file_get_contents($stubPath);
+        $models = [];
 
-        // Replace each variable in the stub content
-        foreach ($stubVariables as $search => $replace) {
-            $modelContent = str_replace('{{ ' . $search . ' }}', $replace, $modelContent);
+        // Extract model names from relations
+        foreach (explode(',', $relations) as $relation) {
+            if (!str_contains($relation, ':')) continue;
+            [$model,] = explode(':', $relation);
+            $models[] = Str::studly($model);
         }
 
-        return $modelContent;
+        return array_unique($models);
     }
 
     /**
      * Create a directory if it does not already exist.
      *
      * @param string $path
-     * @return string
+     * @return void
      */
-    protected function createDirectoryIfMissing($path): string
+    protected function createDirectoryIfMissing(string $path): void
     {
-        // Create the directory if it doesn't exist
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
+        if (!$this->files->isDirectory($path)) {
+            $this->files->makeDirectory($path, 0755, true);
         }
-
-        return $path;
     }
 }

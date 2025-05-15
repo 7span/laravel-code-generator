@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeFactory extends Command
 {
@@ -16,8 +17,8 @@ class MakeFactory extends Command
      * @var string
      */
     protected $signature = 'codegenerator:factory 
-                                          {modelName : The name of the model for which the factory file will be generated.} 
-                                          {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}';
+        {modelName : The name of the model for which the factory file will be generated.} 
+        {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}';
 
     /**
      * The console command description.
@@ -46,10 +47,10 @@ class MakeFactory extends Command
         $logMessage = '';
 
         // Get the model name from the command argument
-        $model = Str::studly($this->argument('modelName'));
+        $modelName = Str::studly($this->argument('modelName'));
 
         // Define the path for the factory file
-        $factoryFilePath = base_path("database/factories/{$model}Factory.php");
+        $factoryFilePath = base_path("database/" . config('code_generator.factory_path', 'Factories') . "/{$modelName}Factory.php");
 
         // Ensure the directory exists
         $this->createDirectoryIfMissing(dirname($factoryFilePath));
@@ -58,25 +59,25 @@ class MakeFactory extends Command
         $fields = $this->parseFieldsOption($this->option('fields'));
 
         // Generate the factory content with stub replacements
-        $contents = $this->getReplacedContent($model, $fields);
+        $contents = $this->getReplacedContent($modelName, $fields);
 
         // Check if the factory file already exists
         if (! $this->files->exists($factoryFilePath)) {
             // Create the factory file
             $this->files->put($factoryFilePath, $contents);
             $logMessage = "Factory file has been created successfully at: {$factoryFilePath}";
-            $logStatus = FileGenerationStatus::SUCCESS;
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             // Log a warning if the factory file already exists
             $logMessage = "Factory file already exists at: {$factoryFilePath}";
-            $logStatus = FileGenerationStatus::ERROR;
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->warn($logMessage);
         }
 
         // Log the factory creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'Factory',
+            'file_type' => CodeGeneratorFileType::FACTORY,
             'file_path' => $factoryFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
@@ -105,7 +106,7 @@ class MakeFactory extends Command
         $parsedFields = [];
 
         // Return an empty array if no fields are provided
-        if (!$fieldsOption) {
+        if (! $fieldsOption) {
             return $parsedFields;
         }
 
@@ -131,17 +132,17 @@ class MakeFactory extends Command
     {
         // Map field types to Faker methods
         $fakerTypeMapping = [
-            'string' => "'{$column}' => \$this->faker->word",
-            'text' => "'{$column}' => \$this->faker->text",
-            'integer' => "'{$column}' => \$this->faker->numberBetween(1, 100)",
-            'bigint' => "'{$column}' => \$this->faker->randomNumber()",
-            'boolean' => "'{$column}' => \$this->faker->boolean",
+            'string'   => "'{$column}' => \$this->faker->word",
+            'text'     => "'{$column}' => \$this->faker->text",
+            'integer'  => "'{$column}' => \$this->faker->numberBetween(1, 100)",
+            'bigint'   => "'{$column}' => \$this->faker->randomNumber()",
+            'boolean'  => "'{$column}' => \$this->faker->boolean",
             'datetime' => "'{$column}' => \$this->faker->dateTime()",
-            'date' => "'{$column}' => \$this->faker->date()",
-            'time' => "'{$column}' => \$this->faker->time()",
-            'email' => "'{$column}' => \$this->faker->unique()->safeEmail",
-            'name' => "'{$column}' => \$this->faker->name",
-            'uuid' => "'{$column}' => \$this->faker->uuid",
+            'date'     => "'{$column}' => \$this->faker->date()",
+            'time'     => "'{$column}' => \$this->faker->time()",
+            'email'    => "'{$column}' => \$this->faker->unique()->safeEmail",
+            'name'     => "'{$column}' => \$this->faker->name",
+            'uuid'     => "'{$column}' => \$this->faker->uuid",
         ];
 
         // Return the corresponding Faker method or null if the type is not mapped
@@ -170,18 +171,18 @@ class MakeFactory extends Command
     /**
      * Get the variables to replace in the factory stub.
      *
-     * @param string $model
+     * @param string $modelName
      * @param array $fields
      * @return array
      */
-    protected function getStubVariables(string $model, array $fields): array
+    protected function getStubVariables(string $modelName, array $fields): array
     {
         // Return the variables to replace in the stub file
         return [
-            'factoryNamespace' => 'Database\Factories',
-            'namespacedModel' => 'App\\Models\\' . $model,
-            'factory' => $model,
-            'fields' => $this->generateFactoryFields($fields),
+            'factoryNamespace'       => 'Database\\' . config('code_generator.factory_path', 'Factories'),
+            'relatedModelNamespace'  => 'App\\' . config('code_generator.model_path', 'Models') . "\\" . $modelName,
+            'factory'                => $modelName,
+            'fields'                 => $this->generateFactoryFields($fields),
         ];
     }
 
@@ -208,14 +209,14 @@ class MakeFactory extends Command
     /**
      * Generate the final content for the factory file.
      *
-     * @param string $model
+     * @param string $modelName
      * @param array $fields
      * @return string
      */
-    protected function getReplacedContent(string $model, array $fields): string
+    protected function getReplacedContent(string $modelName, array $fields): string
     {
         // Generate the final content by replacing variables in the stub
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($model, $fields));
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($modelName, $fields));
     }
 
     /**

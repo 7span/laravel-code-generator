@@ -5,8 +5,9 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\FileGenerationStatus;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeMigration extends Command
 {
@@ -15,12 +16,10 @@ class MakeMigration extends Command
      *
      * @var string
      */
-
     protected $signature = 'codegenerator:migration 
-                                        {name : The name of the migration} 
-                                        {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
-                                        {--softdelete : Include soft delete} 
-                                        {--deletedBy : Add a "deleted_by" column to the migration }';
+                            {name : The name of the migration} 
+                            {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
+                            {--softdelete : Include soft delete} ';
 
     /**
      * The console command description.
@@ -47,41 +46,41 @@ class MakeMigration extends Command
     public function handle()
     {
         $logMessage = '';
-        $table = Str::snake($this->argument('name'));
+        $tableName = Str::snake($this->argument('name'));
 
         // Generate a timestamp for the migration file name
         $timestamp = now()->format('Y_m_d_His');
 
         // Define the migration file name and path
-        $migrationFileName = "{$timestamp}_create_{$table}_table.php";
-        $migrationFilePath = base_path("database/migrations/{$migrationFileName}");
+        $migrationFileName = "{$timestamp}_create_{$tableName}_table.php";
+        $migrationFilePath = base_path("database/" . config('code_generator.migration_path', 'Migration') . "/{$migrationFileName}");
 
         // Ensure the directory exists
         $this->createDirectoryIfMissing(dirname($migrationFilePath));
 
         // Generate the migration content with stub replacements
-        $contents = $this->getReplacedContent($table);
+        $contents = $this->getReplacedContent($tableName);
 
         // Check if the migration file already exists
         if (! $this->files->exists($migrationFilePath)) {
             // Create the migration file
             $this->files->put($migrationFilePath, $contents);
             $logMessage = "Migration file has been created successfully at: {$migrationFilePath}";
-            $logStatus =  FileGenerationStatus::SUCCESS;
+            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         } else {
             // Log a warning if the migration file already exists
             $logMessage = "Migration file already exists at: {$migrationFilePath}";
-            $logStatus =  FileGenerationStatus::ERROR;
+            $logStatus = CodeGeneratorFileLogStatus::ERROR;
             $this->warn($logMessage);
         }
 
         // Log the migration creation details
         CodeGeneratorFileLog::create([
-            'file_type' => 'migration',
+            'file_type' => CodeGeneratorFileType::MIGRATION,
             'file_path' => $migrationFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
+            'status'    => $logStatus,
+            'message'   => $logMessage,
         ]);
     }
 
@@ -99,23 +98,21 @@ class MakeMigration extends Command
     /**
      * Get the variables to replace in the stub file.
      *
-     * @param string $table
+     * @param string $tableName
      * @return array
      */
-    protected function getStubVariables(string $table): array
+    protected function getStubVariables(string $tableName): array
     {
         // Check if soft deletes and deleted_by column included
         $includeSoftDeletes = $this->option('softdelete');
-        $includeDeletedBy = $this->option('deletedBy');
 
         $fieldDefinitions = $this->parseFields($this->option('fields'));
 
         // Return the variables to replace in the stub file
         return [
-            'table' => $table,
+            'tableName'        => $tableName,
             'fieldDefinitions' => $fieldDefinitions,
-            'softdelete' => $includeSoftDeletes ? "  \$table->softDeletes();" : '',
-            'deletedBy' => $includeDeletedBy ? "   \$table->integer('deleted_by')->nullable();" : '',
+            'softdelete'       => $includeSoftDeletes ? "  \$table->softDeletes();" : '',
         ];
     }
 
@@ -151,13 +148,13 @@ class MakeMigration extends Command
     /**
      * Generate the final content for the migration file.
      *
-     * @param string $table
+     * @param string $tableName
      * @return string
      */
-    protected function getReplacedContent(string $table): string
+    protected function getReplacedContent(string $tableName): string
     {
         // Generate the final content by replacing variables in the stub
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($table));
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($tableName));
     }
 
     /**

@@ -23,7 +23,7 @@ class MakeModel extends Command
      */
     protected $signature = 'codegenerator:model 
                             {name : The name of the model} 
-                            {--fields= : Comma-separated fields (e.g., name:string,age:integer)} 
+                            {--fields= : Comma-separated fields (e.g., name,age)} 
                             {--relations= : Model relationships (e.g., Post:hasMany,User:belongsTo)} 
                             {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
                             {--softDelete : Include soft delete} 
@@ -170,10 +170,32 @@ class MakeModel extends Command
         $relationMethods = $this->getRelations();
         $relatedModelImports = $this->getRelatedModels();
 
+        // Check if deleted_by field exists
+        $hasDeletedBy = false;
+        if ($fieldsOption) {
+            $fields = explode(',', $fieldsOption);
+            foreach ($fields as $field) {
+                if (trim(explode(':', $field)[0]) === 'deleted_by') {
+                    $hasDeletedBy = true;
+                    break;
+                }
+            }
+        }
+
         // Process fillable fields from the fields option
         $fillableFields = '';
         if ($fieldsOption) {
-            $fieldNames = array_map(fn($item) => "'" . explode(':', $item)[0] . "'", explode(',', $fieldsOption));
+            $fields = explode(',', $fieldsOption);
+            $fieldNames = [];
+
+            foreach ($fields as $field) {
+                $fieldName = explode(':', $field)[0];
+                // Skip deleted_by field
+                if (trim($fieldName) !== 'deleted_by') {
+                    $fieldNames[] = "'" . trim($fieldName) . "',";
+                }
+            }
+
             $fillableFields = implode(",\n        ", $fieldNames);
         }
 
@@ -183,10 +205,11 @@ class MakeModel extends Command
             'class' => $modelClass,
             'traitNamespaces' => $traitInfo['uses'],
             'traits' => $traitInfo['apply'],
-            'relatedModelNamespace' => implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)),
+            'relatedModelNamespace' => !empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : "",
             'relation' => $relationMethods,
             'fillableFields' => $fillableFields,
-            'deletedAt' => $this->option('softDelete') ? "'deleted_at' => 'datetime'," : ''
+            'deletedAt' => $this->option('softDelete') ? "'deleted_at' => 'datetime'," : '',
+            'deletedBy' => $hasDeletedBy ? "'deleted_by'," : ''
         ];
     }
 

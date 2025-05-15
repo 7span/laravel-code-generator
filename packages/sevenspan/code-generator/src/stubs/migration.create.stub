@@ -13,11 +13,14 @@ return new class extends Migration
             {{ fieldDefinitions }}
             $table->timestamps();
             {{ softdelete }}
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            {{ deletedBy }}
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('{{ table }}');
+        Schema::dropIfExists('{{ tableName }}');
     }
 };

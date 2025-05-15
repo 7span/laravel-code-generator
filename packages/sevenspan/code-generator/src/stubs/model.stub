@@ -15,7 +15,12 @@ class {{ class }} extends Model
 
     public $fillable = [
         {{ fillableFields }}
+        'created_by',
+        'updated_by',
+        {{ deletedBy }}
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     protected function casts()
     {

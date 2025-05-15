@@ -103,16 +103,18 @@ class MakeMigration extends Command
      */
     protected function getStubVariables(string $tableName): array
     {
-        // Check if soft deletes and deleted_by column included
+        $fieldsOption = $this->option('fields');
+
+        // Get field definitions and check for special fields
+        $fieldDefinitions = $this->parseFields($fieldsOption, $hasDeletedBy);
+
         $includeSoftDeletes = $this->option('softdelete');
 
-        $fieldDefinitions = $this->parseFields($this->option('fields'));
-
-        // Return the variables to replace in the stub file
         return [
             'tableName'        => $tableName,
             'fieldDefinitions' => $fieldDefinitions,
             'softdelete'       => $includeSoftDeletes ? "  \$table->softDeletes();" : '',
+            'deletedBy'        => $hasDeletedBy ? "\$table->integer('deleted_by')->nullable();" : '',
         ];
     }
 
@@ -120,11 +122,13 @@ class MakeMigration extends Command
      * Parse the --fields option into migration field definitions.
      *
      * @param string|null $fieldsOption
+     * @param bool &$hasDeletedBy - Outputs true if 'deleted_by' field is present
      * @return string
      */
-    protected function parseFields(?string $fieldsOption): string
+    protected function parseFields(?string $fieldsOption, &$hasDeletedBy = false): string
     {
-        // Return an empty string if no fields are provided
+        $hasDeletedBy = false;
+
         if (!$fieldsOption) {
             return '';
         }
@@ -132,18 +136,23 @@ class MakeMigration extends Command
         $fieldLines = [];
         $fields = explode(',', $fieldsOption);
 
-        // Parse each field and its type
         foreach ($fields as $field) {
-            // Expected format: name:type, e.g., provider:text
+            // Ensure field is in correct format like name:string
             [$name, $type] = array_map('trim', explode(':', $field));
 
-            // Generate a line like: $table->text('provider');
-            $fieldLines[] = "\$table->{$type}('{$name}');";
+            // Detect if 'deleted_by' is in the fields
+            if (Str::lower($name) === 'deleted_by') {
+                $hasDeletedBy = true;
+                // Skip adding this field as it will be added separately
+                continue;
+            }
+
+            $fieldLines[] = "            \$table->{$type}('{$name}');";
         }
 
-        // Combine all field definitions into a single string
         return implode("\n", $fieldLines);
     }
+
 
     /**
      * Generate the final content for the migration file.

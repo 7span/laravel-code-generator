@@ -1,0 +1,24 @@
+{
+  "name": "sevenspan/code-generator",
+  "description": "A Laravel package to generate CRUD files",
+  "autoload": {
+    "psr-4": {
+      "Sevenspan\\CodeGenerator\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "sevenspan"
+    }
+  ],
+  "require": {
+    "livewire/livewire": "^3.6"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Sevenspan\\CodeGenerator\\CodeGeneratorServiceProvider"
+      ]
+    }
+  }
+}

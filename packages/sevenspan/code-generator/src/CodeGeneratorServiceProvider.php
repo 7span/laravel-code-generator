@@ -32,6 +32,8 @@ class CodeGeneratorServiceProvider extends ServiceProvider
             \Sevenspan\CodeGenerator\Console\Commands\MakeService::class,
             \Sevenspan\CodeGenerator\Console\Commands\MakeNotification::class,
             \Sevenspan\CodeGenerator\Console\Commands\MakeRequest::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeResource::class,
+            \Sevenspan\CodeGenerator\Console\Commands\MakeResourceCollection::class,
         ]);
     }
 

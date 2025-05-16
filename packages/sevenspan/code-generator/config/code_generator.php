@@ -27,37 +27,16 @@ return [
     |
     */
 
-    // Path for model files (default: app/Models)
     "model_path" => "Models",
-
-    // Path for migration files (default: app/Migrations)
     "migration_path" => "Migrations",
-
-    // Path for factory files (default: app/Factories)
     "factory_path" => "Factories",
-
-    // Path for notification files (default: app/Notifications)
     "notification_path" => "Notifications",
-
-    // Path for observer files (default: app/Observers)
     "observer_path" => "Observers",
-
-    // Path for policy files (default: app/Policies)
     "policy_path" => "Policies",
-
-    // Path for service files (default: app/Services)
     "service_path" => "Services",
-
-    // Path for controller files (default: app/Http/Controllers)
     "controller_path" => "Http\Controllers",
-
-    // Path for request files (default: app/Http/Requests)
     "request_path" => "Http\Requests",
-
-    // Path for resource files (default: app/Http/Resources)
     "resource_path" => "Http\Resources",
-
-    // Path for trait files (default: app/Traits)
     "trait_path" => "Traits",
 
     /*
@@ -85,7 +64,7 @@ return [
     */
 
     "middleware" => [
-        "web", // Required for session and CSRF handling
+        "web",
         AuthorizeCodeGenerator::class, // Custom middleware to authorize generator access
     ],
 ];

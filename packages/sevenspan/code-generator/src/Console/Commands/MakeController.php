@@ -7,30 +7,21 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
+use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeController extends Command
 {
-    // Constant for indentation
+    use ManagesFileCreationAndOverwrite;
     private const INDENT = '    ';
+    protected $signature = 'codegenerator:controller {modelName : The name of the model to associate with the controller} 
+                                                     {--methods= : Comma-separated list of methods to include in the controller}  
+                                                     {--service : Include a service file for the controller} 
+                                                     {--resource : Include resource files for the controller} 
+                                                     {--request : Include request files for the controller}
+                                                     {--overwrite : is overwriting this file is selected}';
 
-    // Command signature with arguments and options
-    protected $signature = 'codegenerator:controller 
-                            {className}   
-                            {--modelName= : The name of the model to associate with the controller} 
-                            {--methods= : Comma-separated list of methods to include in the controller}  
-                            {--service : Include a service file for the controller} 
-                            {--resource : Include resource files for the controller} 
-                            {--request : Include request files for the controller}';
-
-    // Command description
     protected $description = 'Generate a custom controller with optional methods and service injection';
 
-    /**
-     * Constructor to initialize the Filesystem dependency.
-     *
-     * @param Filesystem $files
-     */
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
@@ -41,46 +32,31 @@ class MakeController extends Command
      */
     public function handle()
     {
-        $logMessage = '';
-
-        /**
-         * Get and process the class name
-         */
-        $controllerClassName = Str::studly($this->argument('className'));
+        $controllerClassName = Str::studly($this->argument('modelName')) . 'Controller';
 
         // Define the controller file path
         $controllerFilePath = app_path(config('code_generator.controller_path', 'Http/Controllers') . "/{$controllerClassName}.php");
-
-        // Create directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($controllerFilePath));
 
-        // Generate the controller content
-        $contents = $this->getReplacedContent($controllerClassName);
+        $content = $this->getReplacedContent($controllerClassName);
 
-        // Check if the controller already exists
-        if (!$this->files->exists($controllerFilePath)) {
-            $this->files->put($controllerFilePath, $contents);
-            $logMessage = "Controller file has been created successfully at: {$controllerFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
-            $this->info($logMessage);
-        } else {
-            $logMessage = "Controller file already exists at: {$controllerFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::ERROR;
-            $this->warn($logMessage);
-        }
+        // Create or overwrite migration file and get the status and message
+        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+            $controllerFilePath,
+            $content,
+            'Controller'
+        );
 
-        // Log the file creation status
         CodeGeneratorFileLog::create([
             'file_type' => CodeGeneratorFileType::CONTROLLER,
             'file_path' => $controllerFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
+            'is_overwrite' => $isOverwrite,
         ]);
     }
 
     /**
-     * Get the path to the stub file.
-     *
      * @return string
      */
     protected function getStubPath(): string
@@ -107,7 +83,7 @@ class MakeController extends Command
      */
     public function getStubVariables(string $controllerClassName)
     {
-        $modelName = $this->option('modelName') ? ucfirst($this->option('modelName')) : '';
+        $modelName = $this->argument('modelName') ? ucfirst($this->argument('modelName')) : '';
 
         return [
             'namespace'            => config('code_generator.controller_path', 'Http\Controllers'),
@@ -189,7 +165,6 @@ class MakeController extends Command
         $singularInstance  = lcfirst($className);
         $singularObj       = '$' . $singularInstance . 'Obj';
 
-        // Method names
         $methods = explode(',', $this->option('methods') ?? '');
 
         // Replace stub variables in base content
@@ -298,8 +273,6 @@ class MakeController extends Command
     }
 
     /**
-     * Create a directory if it doesn't exist.
-     *
      * @param string $path
      */
     protected function createDirectoryIfMissing(string $path): void

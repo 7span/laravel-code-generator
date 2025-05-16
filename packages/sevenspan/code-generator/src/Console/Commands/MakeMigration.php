@@ -7,32 +7,19 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
+use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeMigration extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'codegenerator:migration 
-                            {name : The name of the migration} 
-                            {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
-                            {--softdelete : Include soft delete} ';
+    use ManagesFileCreationAndOverwrite;
+    protected $signature = 'codegenerator:migration {modelName : The name of the migration} 
+                                                    {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
+                                                    {--softdelete : Include soft delete} 
+                                                    {--overwrite : is overwriting this file is selected}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Create a custom migration file with optional fields, soft deletes, and deleted by functionality.';
 
-    /**
-     * Constructor to initialize the Filesystem dependency.
-     *
-     * @param Filesystem $files
-     */
+
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
@@ -45,53 +32,39 @@ class MakeMigration extends Command
      */
     public function handle()
     {
-        $logMessage = '';
-        $tableName = Str::snake($this->argument('name'));
+        $tableName = Str::snake($this->argument('modelName'));
 
-        // Generate a timestamp for the migration file name
         $timestamp = now()->format('Y_m_d_His');
 
         // Define the migration file name and path
         $migrationFileName = "{$timestamp}_create_{$tableName}_table.php";
         $migrationFilePath = base_path("database/" . config('code_generator.migration_path', 'Migration') . "/{$migrationFileName}");
 
-        // Ensure the directory exists
         $this->createDirectoryIfMissing(dirname($migrationFilePath));
 
-        // Generate the migration content with stub replacements
-        $contents = $this->getReplacedContent($tableName);
+        $content = $this->getReplacedContent($tableName);
 
-        // Check if the migration file already exists
-        if (! $this->files->exists($migrationFilePath)) {
-            // Create the migration file
-            $this->files->put($migrationFilePath, $contents);
-            $logMessage = "Migration file has been created successfully at: {$migrationFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
-            $this->info($logMessage);
-        } else {
-            // Log a warning if the migration file already exists
-            $logMessage = "Migration file already exists at: {$migrationFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::ERROR;
-            $this->warn($logMessage);
-        }
+        // Create or overwrite migration file and get the status and message
+        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+            $migrationFilePath,
+            $content,
+            'Migration'
+        );
 
-        // Log the migration creation details
         CodeGeneratorFileLog::create([
             'file_type' => CodeGeneratorFileType::MIGRATION,
             'file_path' => $migrationFilePath,
             'status'    => $logStatus,
             'message'   => $logMessage,
+            'is_overwrite' => $isOverwrite,
         ]);
     }
 
     /**
-     * Get the path to the migration stub file.
-     *
      * @return string
      */
     protected function getStubPath(): string
     {
-        // Return the path to the migration stub file
         return __DIR__ . '/../../stubs/migration.create.stub';
     }
 
@@ -105,7 +78,6 @@ class MakeMigration extends Command
     {
         $fieldsOption = $this->option('fields');
 
-        // Get field definitions and check for special fields
         $fieldDefinitions = $this->parseFields($fieldsOption, $hasDeletedBy);
 
         $includeSoftDeletes = $this->option('softdelete');
@@ -137,13 +109,11 @@ class MakeMigration extends Command
         $fields = explode(',', $fieldsOption);
 
         foreach ($fields as $field) {
-            // Ensure field is in correct format like name:string
             [$name, $type] = array_map('trim', explode(':', $field));
 
             // Detect if 'deleted_by' is in the fields
             if (Str::lower($name) === 'deleted_by') {
                 $hasDeletedBy = true;
-                // Skip adding this field as it will be added separately
                 continue;
             }
 
@@ -162,7 +132,6 @@ class MakeMigration extends Command
      */
     protected function getReplacedContent(string $tableName): string
     {
-        // Generate the final content by replacing variables in the stub
         return $this->getStubContents($this->getStubPath(), $this->getStubVariables($tableName));
     }
 
@@ -175,30 +144,20 @@ class MakeMigration extends Command
      */
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
-        // Read the stub file content
         $content = file_get_contents($stubPath);
-
-        // Replace each variable in the stub content
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
 
         return $content;
     }
-
     /**
-     * Create a directory if it does not already exist.
-     *
      * @param string $path
-     * @return string
      */
-    protected function createDirectoryIfMissing($path): string
+    protected function createDirectoryIfMissing($path)
     {
-        // Create the directory if it doesn't exist
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
-
-        return $path;
     }
 }

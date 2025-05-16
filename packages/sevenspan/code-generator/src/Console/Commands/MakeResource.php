@@ -9,40 +9,39 @@ use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
-
-class MakeObserver extends Command
+class MakeResource extends Command
 {
     use ManagesFileCreationAndOverwrite;
-    protected $signature = 'codegenerator:observer {modelName : The related model for the observer.}
+    protected $signature = 'codegenerator:resource {modelName : The name of the model for the resource}
                                                    {--overwrite : is overwriting this file is selected}';
 
-    protected $description = 'Generate an observer class for a specified model.';
+    protected $description = 'Generate a resource class for a specified model.';
 
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
-
     public function handle()
     {
-        $observerClass = Str::studly($this->argument('modelName'));
+        $modelName = Str::studly($this->argument('modelName'));
 
-        // Define the path for the observer file
-        $observerFilePath = app_path(config('code_generator.observer_path', 'Notification') . "/{$observerClass}.php");
+        // Define the path for the resource file
+        $resourceFilePath = app_path(config('code_generator.resource_path', 'Resources') . "/{$modelName}/Resource.php");
 
-        $this->createDirectoryIfMissing(dirname($observerFilePath));
+        $this->createDirectoryIfMissing(dirname($resourceFilePath));
 
-        $content = $this->getReplacedContent($observerClass);
+        $content = $this->getReplacedContent($modelName);
 
         // Create or overwrite migration file and get the status and message
         [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
-            $observerFilePath,
+            $resourceFilePath,
             $content,
-            'Observer'
+            'Resource'
         );
+
         CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::OBSERVER,
-            'file_path' => $observerFilePath,
+            'file_type' => CodeGeneratorFileType::RESOURCE,
+            'file_path' => $resourceFilePath,
             'status'    => $logStatus,
             'message'   => $logMessage,
             'is_overwrite' => $isOverwrite,
@@ -54,24 +53,23 @@ class MakeObserver extends Command
      */
     protected function getStubPath(): string
     {
-        return __DIR__ . '/../../stubs/observer.stub';
+        return __DIR__ . '/../../stubs/resource.stub';
     }
 
     /**
      * Get the variables to replace in the stub file.
      *
-     * @param string $observerClass
+     * @param string $modelName
      * @return array
      */
-    protected function getStubVariables($observerClass): array
+    protected function getStubVariables($modelName): array
     {
-        $relatedModel = $this->argument('modelName');
         return [
-            'namespace'              => 'App\\' . config('code_generator.observer_path', 'Observers'),
-            'class'                  => $observerClass,
-            'model'                  => $relatedModel,
-            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . '\\' . Str::studly($relatedModel),
-            'modelInstance'         => Str::camel($relatedModel),
+            'namespace' => "App\\" . config('code_generator.resource_path', 'Resources') . "\\{$modelName}",
+            'class'     => 'Resource',
+            'modelName' => $modelName,
+            'modelNamespace' => "use App\\" . config('code_generator.model_path', 'Models') . "\\{$modelName};",
+
         ];
     }
 
@@ -85,7 +83,6 @@ class MakeObserver extends Command
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
         $content = file_get_contents($stubPath);
-
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -94,14 +91,14 @@ class MakeObserver extends Command
     }
 
     /**
-     * Generate the final content for the observer file.
+     * Generate the final content for the resource file.
      *
-     * @param string $name
+     * @param string $modelName
      * @return string
      */
-    protected function getReplacedContent($observerClass): string
+    protected function getReplacedContent($modelName): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($observerClass));
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($modelName));
     }
 
     /**
@@ -109,7 +106,6 @@ class MakeObserver extends Command
      */
     protected function createDirectoryIfMissing($path): void
     {
-        // Create the directory if it doesn't exist
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }

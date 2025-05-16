@@ -7,87 +7,51 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
+use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakePolicy extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'codegenerator:policy {name : The name of the policy class to generate.} 
-                                                 {--model= : The related model for the policy.}';
+    use ManagesFileCreationAndOverwrite;
+    protected $signature = 'codegenerator:policy {modelName : The related model for the policy.}
+                                                 {--overwrite : is overwriting this file is selected}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Generate a policy class for a specified model.';
 
-    /**
-     * Constructor to initialize the Filesystem dependency.
-     *
-     * @param Filesystem $files
-     */
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle()
     {
-        $logMessage = '';
-
-        // Get the policy class name from the command argument
-        $policyClass = Str::studly($this->argument('name'));
+        $policyClass = Str::studly($this->argument('modelName'));
 
         // Define the path for the policy file
         $policyFilePath = app_path(config('code_generator.policy_path', 'Policies') . "/{$policyClass}Policy.php");
-
-        // Create the directory if it doesn't exist
         $this->createDirectoryIfMissing(dirname($policyFilePath));
 
-        // Generate the policy content with stub replacements
-        $contents = $this->getReplacedContent($policyClass);
+        $content = $this->getReplacedContent($policyClass);
 
-        // Check if the policy file already exists
-        if (! $this->files->exists($policyFilePath)) {
-            // Create the policy file
-            $this->files->put($policyFilePath, $contents);
-            $logMessage = "Policy file has been created successfully at: {$policyFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
-            $this->info($logMessage);
-        } else {
-            // Log a warning if the policy file already exists
-            $logMessage = "Policy file already exists at: {$policyFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::ERROR;
-            $this->warn($logMessage);
-        }
-
-        // Log the policy creation details
+        // Create or overwrite migration file and get the status and message
+        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+            $policyFilePath,
+            $content,
+            'Policy'
+        );
         CodeGeneratorFileLog::create([
             'file_type' => CodeGeneratorFileType::POLICY,
             'file_path' => $policyFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
+            'is_overwrite' => $isOverwrite,
         ]);
     }
 
     /**
-     * Get the path to the policy stub file.
-     *
      * @return string
      */
     protected function getStubPath(): string
     {
-        // Return the path to the policy stub file
         return __DIR__ . '/../../stubs/policy.stub';
     }
 
@@ -99,10 +63,7 @@ class MakePolicy extends Command
      */
     protected function getStubVariables($policyClass): array
     {
-        // Get the related model name from the --model option
-        $relatedModel = $this->option('model');
-
-        // Return the variables to replace in the stub file
+        $relatedModel = $this->option('modelName');
         return [
             'namespace' => 'App\\' . config('code_generator.policy_path', 'Policies'),
             'class' => $policyClass,
@@ -121,10 +82,7 @@ class MakePolicy extends Command
      */
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
-        // Read the stub file content
         $content = file_get_contents($stubPath);
-
-        // Replace each variable in the stub content
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -140,23 +98,17 @@ class MakePolicy extends Command
      */
     protected function getReplacedContent($policyClass): string
     {
-        // Generate the final content by replacing variables in the stub
         return $this->getStubContents($this->getStubPath(), $this->getStubVariables($policyClass));
     }
 
     /**
-     * Create a directory if it does not already exist.
-     *
      * @param string $path
-     * @return string
      */
-    protected function createDirectoryIfMissing($path): string
+    protected function createDirectoryIfMissing($path): void
     {
         // Create the directory if it doesn't exist
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
-
-        return $path;
     }
 }

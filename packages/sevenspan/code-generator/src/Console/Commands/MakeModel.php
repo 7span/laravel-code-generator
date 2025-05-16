@@ -8,82 +8,49 @@ use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
+use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeModel extends Command
 {
-    /**
-     * Indentation constant for code generation
-     */
+    use ManagesFileCreationAndOverwrite;
+
     private const INDENT = '    ';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'codegenerator:model 
-                            {name : The name of the model} 
-                            {--fields= : Comma-separated fields (e.g., name,age)} 
-                            {--relations= : Model relationships (e.g., Post:hasMany,User:belongsTo)} 
-                            {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
-                            {--softDelete : Include soft delete} 
-                            {--factoryFile : if factory file is included}
-                            {--traits= : Comma-separated traits to include in the model}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    protected $signature = 'codegenerator:model {modelName : The name of the model} 
+                                                {--fields= : Comma-separated fields (e.g., name,age)} 
+                                                {--relations= : Model relationships (e.g., Post:hasMany,User:belongsTo)} 
+                                                {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
+                                                {--softDelete : Include soft delete} 
+                                                {--factory : if factory file is included}
+                                                {--traits= : Comma-separated traits to include in the model}
+                                                {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a custom Eloquent model with optional fields, relations, soft deletes, and traits.';
 
-    /**
-     * Constructor to initialize the Filesystem dependency.
-     *
-     * @param Filesystem $files
-     */
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle(): void
     {
-        $modelClass = Str::studly($this->argument('name'));
+        $modelClass = Str::studly($this->argument('modelName'));
         $modelFilePath = app_path(config('code_generator.model_path', 'Models') . "/{$modelClass}.php");
 
-        // Ensure the directory exists
         $this->createDirectoryIfMissing(dirname($modelFilePath));
-        $stubContent = $this->getReplacedContent($modelClass);
+        $content = $this->getReplacedContent($modelClass);
 
-        $logMessage = '';
-        $logStatus = CodeGeneratorFileLogStatus::ERROR;
+        // Create or overwrite migration file and get the status and message
+        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+            $modelFilePath,
+            $content,
+            'Model'
+        );
 
-        // Check if the model file already exists
-        if (!$this->files->exists($modelFilePath)) {
-            // Create the model file
-            $this->files->put($modelFilePath, $stubContent);
-            $logMessage = "Model created at: {$modelFilePath}";
-            $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
-            $this->info($logMessage);
-            $this->appendApiRoute($modelClass);
-        } else {
-            // Log a warning if the model file already exists
-            $logMessage = "Model already exists at: {$modelFilePath}";
-            $this->warn($logMessage);
-        }
-
-        // Log the model creation details
         CodeGeneratorFileLog::create([
             'file_type' => CodeGeneratorFileType::MODEL,
             'file_path' => $modelFilePath,
             'status' => $logStatus,
             'message' => $logMessage,
+            'is_overwrite' => $isOverwrite,
         ]);
     }
 
@@ -109,17 +76,14 @@ class MakeModel extends Command
 
         $apiPath = base_path('routes/api.php');
 
-        // Create api.php file if it doesn't exist
         if (!$this->files->exists($apiPath)) {
             $this->files->put($apiPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n");
             $this->info("routes/api.php file created.");
         }
 
-        // Append the route entry to the api.php file
         file_put_contents($apiPath, PHP_EOL . $routeEntry . PHP_EOL, FILE_APPEND);
         $this->info("Route added for {$modelName}");
 
-        // Log the route creation details
         CodeGeneratorFileLog::create([
             'file_type' => CodeGeneratorFileType::ROUTE,
             'file_path' => $apiPath,
@@ -128,9 +92,8 @@ class MakeModel extends Command
         ]);
     }
 
+
     /**
-     * Get the path to the model stub file.
-     *
      * @return string
      */
     protected function getStubPath(): string
@@ -149,7 +112,6 @@ class MakeModel extends Command
         $stub = file_get_contents($this->getStubPath());
         $variables = $this->getStubVariables($modelClass);
 
-        // Replace each variable in the stub content
         foreach ($variables as $key => $value) {
             $stub = str_replace('{{ ' . $key . ' }}', $value, $stub);
         }
@@ -199,7 +161,6 @@ class MakeModel extends Command
             $fillableFields = implode(",\n        ", $fieldNames);
         }
 
-        // Return the variables to replace in the stub file
         return [
             'namespace' => 'App\\' . config('code_generator.model_path', 'Models'),
             'class' => $modelClass,
@@ -221,7 +182,7 @@ class MakeModel extends Command
     protected function getTraitInfo(): array
     {
         $softDeleteIncluded = $this->option('softDelete');
-        $isFactoryIncluded = $this->option('factoryFile');
+        $isFactoryIncluded = $this->option('factory');
 
         $traitUseStatements = [];
         $traitNames = [];
@@ -266,7 +227,6 @@ class MakeModel extends Command
 
         $methods = [];
 
-        // Process each relation
         foreach (explode(',', $relations) as $relation) {
             if (!str_contains($relation, ':')) continue;
 
@@ -308,8 +268,6 @@ class MakeModel extends Command
     }
 
     /**
-     * Create a directory if it does not already exist.
-     *
      * @param string $path
      * @return void
      */

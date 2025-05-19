@@ -3,7 +3,6 @@
 namespace Sevenspan\CodeGenerator\Enums;
 
 /**
- * Enum CodeGeneratorFileLogStatus
  *
  * Represents the status of file generation operations.
  */

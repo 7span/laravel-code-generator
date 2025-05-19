@@ -5,13 +5,12 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeFactory extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
     protected $signature = 'codegenerator:factory {modelName : The name of the model for which the factory file will be generated.} 
                                                   {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}
                                                   {--overwrite : is overwriting this file is selected}';
@@ -23,11 +22,6 @@ class MakeFactory extends Command
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle()
     {
         $modelName = Str::studly($this->argument('modelName'));
@@ -42,20 +36,12 @@ class MakeFactory extends Command
 
         $content = $this->getReplacedContent($modelName, $fields);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $factoryFilePath,
             $content,
-            'Factory'
+            CodeGeneratorFileType::FACTORY
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::FACTORY,
-            'file_path' => $factoryFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**
@@ -69,7 +55,7 @@ class MakeFactory extends Command
     /**
      * Parse the --fields option into an associative array.
      *
-     * @param string|null $fieldsOption
+     * @param  string|null  $fieldsOption
      * @return array
      */
     protected function parseFieldsOption(?string $fieldsOption): array
@@ -93,8 +79,8 @@ class MakeFactory extends Command
     /**
      * Generate a factory field definition based on the column name and type.
      *
-     * @param string $column
-     * @param string $type
+     * @param  string  $column
+     * @param  string  $type
      * @return string
      */
     protected function getFactoryField(string $column, string $type): string
@@ -119,7 +105,7 @@ class MakeFactory extends Command
     /**
      * Generate the factory fields as a string for the stub.
      *
-     * @param array $fields
+     * @param  array  $fields
      * @return string
      */
     protected function generateFactoryFields(array $fields): string
@@ -136,8 +122,8 @@ class MakeFactory extends Command
     /**
      * Get the variables to replace in the factory stub.
      *
-     * @param string $modelName
-     * @param array $fields
+     * @param  string  $modelName
+     * @param  array  $fields
      * @return array
      */
     protected function getStubVariables(string $modelName, array $fields): array
@@ -145,7 +131,7 @@ class MakeFactory extends Command
         return [
             'factoryNamespace'       => 'Database\\' . config('code_generator.factory_path', 'Factories'),
             'relatedModelNamespace'  => 'App\\' . config('code_generator.model_path', 'Models') . "\\" . $modelName,
-            'factory'                => $modelName,
+            'factory'                => $modelName . "Factory",
             'fields'                 => $this->generateFactoryFields($fields),
         ];
     }
@@ -153,8 +139,8 @@ class MakeFactory extends Command
     /**
      * Replace the variables in the stub content with actual values.
      *
-     * @param string $stubPath
-     * @param array $stubVariables
+     * @param  string  $stubPath
+     * @param  array  $stubVariables
      * @return string
      */
     protected function getStubContents(string $stubPath, array $stubVariables): string
@@ -170,8 +156,8 @@ class MakeFactory extends Command
     /**
      * Generate the final content for the factory file.
      *
-     * @param string $modelName
-     * @param array $fields
+     * @param  string  $modelName
+     * @param  array  $fields
      * @return string
      */
     protected function getReplacedContent(string $modelName, array $fields): string
@@ -182,7 +168,7 @@ class MakeFactory extends Command
     /**
      * @param string $path
      */
-    protected function createDirectoryIfMissing(string $path)
+    protected function createDirectoryIfMissing(string $path): void
     {
         if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);

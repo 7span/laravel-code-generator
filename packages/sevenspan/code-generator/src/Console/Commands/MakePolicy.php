@@ -5,13 +5,13 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakePolicy extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     protected $signature = 'codegenerator:policy {modelName : The related model for the policy.}
                                                  {--overwrite : is overwriting this file is selected}';
 
@@ -32,19 +32,12 @@ class MakePolicy extends Command
 
         $content = $this->getReplacedContent($policyClass);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $policyFilePath,
             $content,
-            'Policy'
+            CodeGeneratorFileType::POLICY
         );
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::POLICY,
-            'file_path' => $policyFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**
@@ -63,13 +56,14 @@ class MakePolicy extends Command
      */
     protected function getStubVariables($policyClass): array
     {
-        $relatedModel = $this->option('modelName');
+        $relatedModel = $this->argument('modelName');
+
         return [
-            'namespace' => 'App\\' . config('code_generator.policy_path', 'Policies'),
-            'class' => $policyClass,
-            'model' => Str::studly($relatedModel),
+            'namespace'             => 'App\\' . config('code_generator.policy_path', 'Policies'),
+            'class'                 => $policyClass,
+            'model'                 => Str::studly($relatedModel),
             'relatedModelNamespace' => config('code_generator.model_path', 'Models') . "\\" . Str::studly($relatedModel),
-            'modelInstance' => Str::camel($relatedModel),
+            'modelInstance'         => Str::camel($relatedModel),
         ];
     }
 
@@ -83,6 +77,7 @@ class MakePolicy extends Command
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
         $content = file_get_contents($stubPath);
+
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }

@@ -5,9 +5,7 @@ namespace {{ serviceClassNamespace }};
 use App\{{ relatedModelNamespace }};
 
 class {{ serviceClass }} {
-    public function __construct( {{ modelObject }}) {
-        
-    }
+    public function __construct( {{ modelObject }}) {  }
 
 public  function resource($id,$inputs)
 {

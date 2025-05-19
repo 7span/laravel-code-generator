@@ -5,14 +5,17 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeController extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     private const INDENT = '    ';
+
     protected $signature = 'codegenerator:controller {modelName : The name of the model to associate with the controller} 
                                                      {--methods= : Comma-separated list of methods to include in the controller}  
                                                      {--service : Include a service file for the controller} 
@@ -27,10 +30,7 @@ class MakeController extends Command
         parent::__construct();
     }
 
-    /**
-     * Handle the command execution.
-     */
-    public function handle()
+    public function handle(): void
     {
         $controllerClassName = Str::studly($this->argument('modelName')) . 'Controller';
 
@@ -40,20 +40,14 @@ class MakeController extends Command
 
         $content = $this->getReplacedContent($controllerClassName);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $controllerFilePath,
             $content,
-            'Controller'
+            CodeGeneratorFileType::CONTROLLER
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::CONTROLLER,
-            'file_path' => $controllerFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
+        // append the route to the api routes file
+        $this->appendApiRoute($controllerClassName);
     }
 
     /**
@@ -67,10 +61,10 @@ class MakeController extends Command
     /**
      * Get the replaced content for the controller file.
      *
-     * @param string $controllerClassName
+     * @param  string  $controllerClassName
      * @return string
      */
-    public function getReplacedContent($controllerClassName)
+    public function getReplacedContent(string $controllerClassName): string
     {
         return $this->getStubContents($this->getStubPath(), $this->getStubVariables($controllerClassName));
     }
@@ -78,30 +72,30 @@ class MakeController extends Command
     /**
      * Get the variables to replace in the stub file.
      *
-     * @param string $controllerClassName
+     * @param  string  $controllerClassName
      * @return array
      */
-    public function getStubVariables(string $controllerClassName)
+    public function getStubVariables(string $controllerClassName): array
     {
         $modelName = $this->argument('modelName') ? ucfirst($this->argument('modelName')) : '';
 
         return [
-            'namespace'            => config('code_generator.controller_path', 'Http\Controllers'),
-            'class'                => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
-            'className'            => $controllerClassName,
+            'namespace' => config('code_generator.controller_path', 'Http\Controllers'),
+            'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
+            'className' => $controllerClassName,
             'relatedModelNamespace' => "use App\\" . config('code_generator.model_path', 'Models') . "\\" . $modelName,
-            'modelName'            => $modelName,  // used in generating methods
+            'modelName' => $modelName,  // used in generating methods
         ];
     }
 
     /**
      * Inject additional use statements into the controller file.
      *
-     * @param string $mainContent
-     * @param bool $includeServiceFile
-     * @param bool $includeRequestFile
-     * @param bool $includeResourceFile
-     * @param string $className
+     * @param  string  $mainContent
+     * @param  bool  $includeServiceFile
+     * @param  bool  $includeRequestFile
+     * @param  bool  $includeResourceFile
+     * @param  string  $className
      * @return string
      */
     protected function injectUseStatements(
@@ -149,21 +143,21 @@ class MakeController extends Command
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $mainStub
-     * @param array $stubVariables
+     * @param  string  $mainStub
+     * @param  array  $stubVariables
      * @return string
      */
-    public function getStubContents(string $mainStub, array $stubVariables = [])
+    public function getStubContents(string $mainStub, array $stubVariables = []): string
     {
-        $includeServiceFile  = (bool) $this->option('service');
+        $includeServiceFile = (bool) $this->option('service');
         $includeResourceFile = (bool) $this->option('resource');
-        $includeRequestFile  = (bool) $this->option('request');
-        $mainContent         = file_get_contents($mainStub);
+        $includeRequestFile = (bool) $this->option('request');
+        $mainContent = file_get_contents($mainStub);
 
-        $className         = $stubVariables['class'];
-        $modelName         = $stubVariables['modelName'];
-        $singularInstance  = lcfirst($className);
-        $singularObj       = '$' . $singularInstance . 'Obj';
+        $className = $stubVariables['class'];
+        $modelName = $stubVariables['modelName'];
+        $singularInstance = lcfirst($className);
+        $singularObj = '$' . $singularInstance . 'Obj';
 
         $methods = explode(',', $this->option('methods') ?? '');
 
@@ -199,11 +193,13 @@ class MakeController extends Command
 
         foreach ($methods as $method) {
             $methodStubPath = __DIR__ . "/../../stubs/controller.{$method}.stub";
-            if (!file_exists($methodStubPath)) continue;
+            if (!file_exists($methodStubPath)) {
+                continue;
+            }
 
             $methodContent = file_get_contents($methodStubPath);
-            $pluralVar     = Str::plural($singularInstance);
-            $classObject   = "{$modelName} \${$singularInstance}";
+            $pluralVar = Str::plural($singularInstance);
+            $classObject = "{$modelName} \${$singularInstance}";
 
             // Common replacements
             $methodContent = str_replace(
@@ -251,7 +247,7 @@ class MakeController extends Command
                     break;
 
                 case 'update':
-                    $validated  = $includeRequestFile ? ' $request->validated()' : '';
+                    $validated = $includeRequestFile ? ' $request->validated()' : '';
                     $updateBody = "{$singularObj} = \$this->{$singularInstance}Service->update(\${$singularInstance},{$validated});" . PHP_EOL .
                         self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
 
@@ -280,5 +276,43 @@ class MakeController extends Command
         if (!$this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0755, true);
         }
+    }
+
+
+    /**
+     * Append API route for the model to the routes/api.php file.
+     *
+     * @param string $controllerClassName
+     * @return void
+     */
+    protected function appendApiRoute(string $controllerClassName): void
+    {
+        $methods = $this->option('methods');
+        $methodCount = count(array_map('trim', explode(',', $methods)));
+
+        $resource = Str::plural(Str::kebab($this->argument('modelName')));
+        // Use apiResource if all 5 standard methods are included, otherwise use resource with only()
+        if ($methodCount == 5) {
+            $routeEntry = "Route::apiResource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerClassName}::class);";
+        } else {
+            $routeEntry = "Route::resource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerClassName}::class)->only(['{$methods}']);";
+        }
+
+        $apiPath = base_path('routes/api.php');
+
+        if (!$this->files->exists($apiPath)) {
+            $this->files->put($apiPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n");
+            $this->info("routes/api.php file created.");
+        }
+
+        file_put_contents($apiPath, PHP_EOL . $routeEntry . PHP_EOL, FILE_APPEND);
+        $this->info("Route added for {$controllerClassName} at :{$apiPath}");
+
+        CodeGeneratorFileLog::create([
+            'file_type' => CodeGeneratorFileType::ROUTE,
+            'file_path' => $apiPath,
+            'status' => CodeGeneratorFileLogStatus::SUCCESS,
+            'message' => "API route added for {$controllerClassName} at :{$apiPath}.",
+        ]);
     }
 }

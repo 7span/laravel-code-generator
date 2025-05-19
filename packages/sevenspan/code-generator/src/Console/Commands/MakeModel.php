@@ -5,16 +5,15 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeModel extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
 
     private const INDENT = '    ';
+
     protected $signature = 'codegenerator:model {modelName : The name of the model} 
                                                 {--fields= : Comma-separated fields (e.g., name,age)} 
                                                 {--relations= : Model relationships (e.g., Post:hasMany,User:belongsTo)} 
@@ -23,6 +22,7 @@ class MakeModel extends Command
                                                 {--factory : if factory file is included}
                                                 {--traits= : Comma-separated traits to include in the model}
                                                 {--overwrite : is overwriting this file is selected}';
+
     protected $description = 'Generate a custom Eloquent model with optional fields, relations, soft deletes, and traits.';
 
     public function __construct(protected Filesystem $files)
@@ -38,60 +38,13 @@ class MakeModel extends Command
         $this->createDirectoryIfMissing(dirname($modelFilePath));
         $content = $this->getReplacedContent($modelClass);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $modelFilePath,
             $content,
-            'Model'
+            CodeGeneratorFileType::MODEL
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::MODEL,
-            'file_path' => $modelFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
-
-    /**
-     * Append API route for the model to the routes/api.php file.
-     *
-     * @param string $modelName
-     * @return void
-     */
-    protected function appendApiRoute(string $modelName): void
-    {
-        $controllerName = "{$modelName}Controller";
-        $methods = $this->option('methods');
-        $methodCount = count(array_map('trim', explode(',', $methods)));
-
-        $resource = Str::plural(Str::kebab($modelName));
-        // Use apiResource if all 5 standard methods are included, otherwise use resource with only()
-        if ($methodCount == 5) {
-            $routeEntry = "Route::apiResource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerName}::class);";
-        } else {
-            $routeEntry = "Route::resource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerName}::class)->only(['{$methods}']);";
-        }
-
-        $apiPath = base_path('routes/api.php');
-
-        if (!$this->files->exists($apiPath)) {
-            $this->files->put($apiPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n");
-            $this->info("routes/api.php file created.");
-        }
-
-        file_put_contents($apiPath, PHP_EOL . $routeEntry . PHP_EOL, FILE_APPEND);
-        $this->info("Route added for {$modelName}");
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::ROUTE,
-            'file_path' => $apiPath,
-            'status' => CodeGeneratorFileLogStatus::SUCCESS,
-            'message' => "API route added for {$modelName}.",
-        ]);
-    }
-
 
     /**
      * @return string
@@ -166,7 +119,7 @@ class MakeModel extends Command
             'class' => $modelClass,
             'traitNamespaces' => $traitInfo['uses'],
             'traits' => $traitInfo['apply'],
-            'relatedModelNamespace' => !empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : "",
+            'relatedModelNamespaces' => !empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : "",
             'relation' => $relationMethods,
             'fillableFields' => $fillableFields,
             'deletedAt' => $this->option('softDelete') ? "'deleted_at' => 'datetime'," : '',
@@ -263,7 +216,6 @@ class MakeModel extends Command
             [$model,] = explode(':', $relation);
             $models[] = Str::studly($model);
         }
-
         return array_unique($models);
     }
 

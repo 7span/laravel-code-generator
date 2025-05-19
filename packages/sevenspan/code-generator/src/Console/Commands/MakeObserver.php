@@ -5,16 +5,16 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 
 class MakeObserver extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     protected $signature = 'codegenerator:observer {modelName : The related model for the observer.}
-                                                   {--overwrite : is overwriting this file is selected}';
+                                                   {--overwrite}';
 
     protected $description = 'Generate an observer class for a specified model.';
 
@@ -32,21 +32,14 @@ class MakeObserver extends Command
 
         $this->createDirectoryIfMissing(dirname($observerFilePath));
 
-        $content = $this->getReplacedContent($observerClass);
+        $contents = $this->getReplacedContent($observerClass);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $observerFilePath,
-            $content,
-            'Observer'
+            $contents,
+            CodeGeneratorFileType::OBSERVER
         );
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::OBSERVER,
-            'file_path' => $observerFilePath,
-            'status'    => $logStatus,
-            'message'   => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**
@@ -70,8 +63,8 @@ class MakeObserver extends Command
             'namespace'              => 'App\\' . config('code_generator.observer_path', 'Observers'),
             'class'                  => $observerClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . '\\' . Str::studly($relatedModel),
-            'modelInstance'         => Str::camel($relatedModel),
+            'relatedModelNamespace'  => config('code_generator.model_path', 'Models') . '\\' . Str::studly($relatedModel),
+            'modelInstance'          => Str::camel($relatedModel),
         ];
     }
 

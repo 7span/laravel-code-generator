@@ -5,13 +5,13 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeMigration extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     protected $signature = 'codegenerator:migration {modelName : The name of the migration} 
                                                     {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
                                                     {--softdelete : Include soft delete} 
@@ -19,17 +19,11 @@ class MakeMigration extends Command
 
     protected $description = 'Create a custom migration file with optional fields, soft deletes, and deleted by functionality.';
 
-
     public function __construct(protected Filesystem $files)
     {
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle()
     {
         $tableName = Str::snake($this->argument('modelName'));
@@ -42,22 +36,14 @@ class MakeMigration extends Command
 
         $this->createDirectoryIfMissing(dirname($migrationFilePath));
 
-        $content = $this->getReplacedContent($tableName);
+        $contents = $this->getReplacedContent($tableName);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        [$logStatus, $logMessage] = $this->createOrOverwriteFile(
             $migrationFilePath,
-            $content,
-            'Migration'
+            $contents,
+            CodeGeneratorFileType::MIGRATION
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::MIGRATION,
-            'file_path' => $migrationFilePath,
-            'status'    => $logStatus,
-            'message'   => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**
@@ -123,7 +109,6 @@ class MakeMigration extends Command
         return implode("\n", $fieldLines);
     }
 
-
     /**
      * Generate the final content for the migration file.
      *
@@ -151,6 +136,7 @@ class MakeMigration extends Command
 
         return $content;
     }
+
     /**
      * @param string $path
      */

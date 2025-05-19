@@ -5,13 +5,13 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
+
 
 class MakeResourceCollection extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
     protected $signature = 'codegenerator:resource-collection {modelName : The name of the model for the resource collection}
                                                               {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a resource collection class for a specified model.';
@@ -31,20 +31,12 @@ class MakeResourceCollection extends Command
         $this->createDirectoryIfMissing(dirname($resourceFilePath));
         $content = $this->getReplacedContent($modelName);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->createOrOverwriteFile(
             $resourceFilePath,
             $content,
-            'Resource-Collection'
+            CodeGeneratorFileType::RESOURCE_COLLECTION
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::RESOURCE_COLLECTION,
-            'file_path' => $resourceFilePath,
-            'status'    => $logStatus,
-            'message'   => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**

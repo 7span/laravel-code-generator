@@ -5,13 +5,13 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeNotification extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     const INDENT = '    ';
 
     protected $signature = 'codegenerator:notification {className : Name of the notification class} 
@@ -39,20 +39,12 @@ class MakeNotification extends Command
 
         $content = $this->getReplacedContent($notificationClass);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $notificationFilePath,
             $content,
-            'Notification'
+            CodeGeneratorFileType::NOTIFICATION
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::NOTIFICATION,
-            'file_path' => $notificationFilePath,
-            'status'    => $logStatus,
-            'message'   => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**
@@ -114,11 +106,12 @@ class MakeNotification extends Command
         $dataOption = $this->option('data');
         $parsedData = $this->parseDataOption($dataOption);
         $relatedModel = $this->option('modelName');
+
         return [
             'namespace'              => 'App\\' . config('code_generator.notification_path', 'Notification'),
             'class'                  => $notificationClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace' => config('code_generator.model_path', 'Models') . '\\' . $relatedModel,
+            'relatedModelNamespace'  => config('code_generator.model_path', 'Models') . '\\' . $relatedModel,
             'modelObject'            => '$' . (Str::camel($relatedModel)),
             'subject'                => $this->option('subject'),
             'body'                   => (string) $this->option('body'),
@@ -147,6 +140,7 @@ class MakeNotification extends Command
                 $parsedData[] = "'$key' => '$value'";
             }
         }
+
         return '[' . implode(', ', $parsedData) . ']';
     }
 }

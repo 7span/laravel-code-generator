@@ -5,13 +5,13 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeResource extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     protected $signature = 'codegenerator:resource {modelName : The name of the model for the resource}
                                                    {--overwrite : is overwriting this file is selected}';
 
@@ -21,6 +21,7 @@ class MakeResource extends Command
     {
         parent::__construct();
     }
+
     public function handle()
     {
         $modelName = Str::studly($this->argument('modelName'));
@@ -32,20 +33,12 @@ class MakeResource extends Command
 
         $content = $this->getReplacedContent($modelName);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $resourceFilePath,
             $content,
-            'Resource'
+            CodeGeneratorFileType::RESOURCE
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::RESOURCE,
-            'file_path' => $resourceFilePath,
-            'status'    => $logStatus,
-            'message'   => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**
@@ -65,11 +58,10 @@ class MakeResource extends Command
     protected function getStubVariables($modelName): array
     {
         return [
-            'namespace' => "App\\" . config('code_generator.resource_path', 'Resources') . "\\{$modelName}",
-            'class'     => 'Resource',
-            'modelName' => $modelName,
-            'modelNamespace' => "use App\\" . config('code_generator.model_path', 'Models') . "\\{$modelName};",
-
+            'namespace'       => "App\\" . config('code_generator.resource_path', 'Resources') . "\\{$modelName}",
+            'class'           => 'Resource',
+            'modelName'       => $modelName,
+            'modelNamespace'  => "use App\\" . config('code_generator.model_path', 'Models') . "\\{$modelName};",
         ];
     }
 
@@ -83,6 +75,7 @@ class MakeResource extends Command
     protected function getStubContents(string $stubPath, array $stubVariables): string
     {
         $content = file_get_contents($stubPath);
+
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }

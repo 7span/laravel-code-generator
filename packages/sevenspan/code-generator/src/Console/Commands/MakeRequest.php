@@ -5,13 +5,13 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeRequest extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
+
     private const INDENT = '    ';
 
     protected $signature = 'codegenerator:request  {modelName : The related model for the observer.}
@@ -19,7 +19,6 @@ class MakeRequest extends Command
                                                    {--overwrite : is overwriting this file is selected}';
 
     protected $description = 'Generate a custom form request with validation rules';
-
 
     public function __construct(protected Filesystem $files)
     {
@@ -36,21 +35,13 @@ class MakeRequest extends Command
 
         $content = $this->getReplacedContent($relatedModelName);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
             $requestFilePath,
             $content,
-            'Request'
+            CodeGeneratorFileType::REQUEST
         );
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::REQUEST,
-            'file_path' => $requestFilePath,
-            'status'    => $logStatus,
-            'message'   => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
-
 
     /**
      * @return string
@@ -90,7 +81,7 @@ class MakeRequest extends Command
      */
     protected function getStubVariables($relatedModelName): array
     {
-        $relatedModel = $this->option('model');
+        $relatedModel = $this->argument('modelName');
         return [
             'namespace'        => 'App\\' . config('code_generator.request_path', 'Http\Requests') . '\\' . $relatedModel,
             'class'            => 'Request',

@@ -5,13 +5,12 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
-use Sevenspan\CodeGenerator\Traits\ManagesFileCreationAndOverwrite;
 
 class MakeService extends Command
 {
-    use ManagesFileCreationAndOverwrite;
+    use FileManager;
     const INDENT = '    ';
     protected $signature = 'codegenerator:service {modelName : The name of the service class to generate.}
                                                   {--overwrite : is overwriting this file is selected}';
@@ -32,20 +31,12 @@ class MakeService extends Command
 
         $content = $this->getReplacedContent($serviceClass);
 
-        // Create or overwrite migration file and get the status and message
-        [$logStatus, $logMessage, $isOverwrite] = $this->createOrOverwriteFile(
+        // Create or overwrite file and get log the status and message 
+        $this->saveFile(
             $serviceFilePath,
             $content,
-            'Observer'
+            CodeGeneratorFileType::SERVICE
         );
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::SERVICE,
-            'file_path' => $serviceFilePath,
-            'status' => $logStatus,
-            'message' => $logMessage,
-            'is_overwrite' => $isOverwrite,
-        ]);
     }
 
     /**

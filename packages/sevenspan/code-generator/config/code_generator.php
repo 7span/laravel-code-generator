@@ -35,6 +35,7 @@ return [
     "policy_path" => "Policies",
     "service_path" => "Services",
     "controller_path" => "Http\Controllers",
+    'admin_controller_path' => 'Http\Controllers\Admin',
     "request_path" => "Http\Requests",
     "resource_path" => "Http\Resources",
     "trait_path" => "Traits",
@@ -67,4 +68,6 @@ return [
         "web",
         AuthorizeCodeGenerator::class, // Custom middleware to authorize generator access
     ],
+
+    'class_namespace' => 'Sevenspan\\CodeGenerator',
 ];

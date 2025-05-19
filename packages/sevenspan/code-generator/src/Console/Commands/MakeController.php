@@ -19,7 +19,8 @@ class MakeController extends Command
                                                      {--service : Include a service file for the controller} 
                                                      {--resource : Include resource files for the controller} 
                                                      {--request : Include request files for the controller}
-                                                     {--overwrite : is overwriting this file is selected}';
+                                                     {--overwrite : is overwriting this file is selected}
+                                                     {--adminCrud : is adnimCRUD added}';
 
     protected $description = 'Generate a custom controller with optional methods and service injection';
 
@@ -30,24 +31,38 @@ class MakeController extends Command
 
     public function handle(): void
     {
-        $controllerClassName = Str::studly($this->argument('modelName')) . 'Controller';
-        $isAdminCrudIncluded = $this->option('adminCrud');
+        $modelName = $this->argument('modelName');
+        $isAdminCrudIncluded = (bool) $this->option('adminCrud');
 
-        // Define the controller file path
-        $controllerFilePath = app_path(config('code_generator.controller_path', 'Http/Controllers') . "/{$controllerClassName}.php");
-        $this->createDirectoryIfMissing(dirname($controllerFilePath));
+        //generate the normal controller
+        $this->generateController($modelName, isAdminCrudIncluded: false);
 
-        $content = $this->getReplacedContent($controllerClassName);
-
-        // Create or overwrite file and get log the status and message
-        $this->saveFile(
-            $controllerFilePath,
-            $content,
-            CodeGeneratorFileType::CONTROLLER
-        );
-        // append the route to the api routes file
-        $this->appendApiRoute($controllerClassName);
+        // if admin crud is selected, generate the admin controller
+        if ($isAdminCrudIncluded) {
+            $this->generateController($modelName, isAdminCrudIncluded: true);
+        }
     }
+
+    protected function generateController(string $modelName, bool $isAdminCrudIncluded = false): void
+    {
+        $controllerClassName = Str::studly($modelName) . 'Controller';
+
+        // Determine controller path (normal or admin)
+        $pathKey = $isAdminCrudIncluded ? 'admin_controller_path' : 'controller_path';
+        $controllerPath = config("code_generator.{$pathKey}", $isAdminCrudIncluded ? 'Http/Controllers/Admin' : 'Http/Controllers');
+
+        $fullPath = app_path("{$controllerPath}/{$controllerClassName}.php");
+        $this->createDirectoryIfMissing(dirname($fullPath));
+
+        // Generate content
+        $content = $this->getReplacedContent($controllerClassName, $isAdminCrudIncluded);
+
+        // Save controller file
+        $this->saveFile($fullPath, $content, CodeGeneratorFileType::CONTROLLER);
+
+        $this->appendApiRoute($controllerClassName, $isAdminCrudIncluded);
+    }
+
 
     /**
      * @return string
@@ -63,10 +78,14 @@ class MakeController extends Command
      * @param  string  $controllerClassName
      * @return string
      */
-    public function getReplacedContent(string $controllerClassName): string
+    public function getReplacedContent(string $controllerClassName, bool $isAdminCrudIncluded = false): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($controllerClassName));
+        return $this->getStubContents(
+            $this->getStubPath(),
+            $this->getStubVariables($controllerClassName, $isAdminCrudIncluded)
+        );
     }
+
 
     /**
      * Get the variables to replace in the stub file.
@@ -74,12 +93,12 @@ class MakeController extends Command
      * @param  string  $controllerClassName
      * @return array
      */
-    public function getStubVariables(string $controllerClassName): array
+    public function getStubVariables(string $controllerClassName, bool $isAdminCrudIncluded = false): array
     {
         $modelName = $this->argument('modelName') ? ucfirst($this->argument('modelName')) : '';
 
         return [
-            'namespace' => config('code_generator.controller_path', 'Http\Controllers'),
+            'namespace' => $isAdminCrudIncluded ? config('code_generator.admin_controller_path', 'Http\Controllers\Admin') : config('code_generator.controller_path', 'Http\Controllers'),
             'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
             'className' => $controllerClassName,
             'relatedModelNamespace' => "use App\\" . config('code_generator.model_path', 'Models') . "\\" . $modelName,
@@ -277,34 +296,34 @@ class MakeController extends Command
         }
     }
 
-
     /**
-     * Append API route for the model to the routes/api.php file.
+     * Append API route for the model to the routes file.
      *
      * @param string $controllerClassName
+     * @param bool $isAdminCrudIncluded
      * @return void
      */
-    protected function appendApiRoute(string $controllerClassName): void
+    protected function appendApiRoute(string $controllerClassName, bool $isAdminCrudIncluded = false): void
     {
         $methods = $this->option('methods');
         $methodCount = count(array_map('trim', explode(',', $methods)));
-        $apiPath = base_path('routes/api.php');
-
         $resource = Str::plural(Str::kebab($this->argument('modelName')));
 
-        // Determine the route entry based on method count
-        if ($methodCount == 5) {
-            $routeEntry = "Route::apiResource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerClassName}::class);";
-        } else {
-            $routeEntry = "Route::resource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerClassName}::class)->only(['{$methods}']);";
-        }
+        // Determine paths based on isAdminCrudIncluded parameter
+        $apiPath = base_path($isAdminCrudIncluded ? 'routes/api-admin.php' : 'routes/api.php');
+        $stubPath = __DIR__ . '/../../stubs/' . ($isAdminCrudIncluded ? 'api.admin.route.stub' : 'api.routes.stub');
+        $controllerPath = config(
+            'code_generator.' . ($isAdminCrudIncluded ? 'admin_controller_path' : 'controller_path'),
+            $isAdminCrudIncluded ? 'Http\Controllers\Admin' : 'Http\Controllers'
+        );
 
-        // Load and replace stub content
-        $stubContent = file_get_contents(__DIR__ . '/../../stubs/api.routes.stub');
+        // Create route entry
+        $routeType = $methodCount == 5 ? 'apiResource' : 'resource';
+        $routeOptions = $methodCount == 5 ? '' : "->only(['{$methods}'])";
+        $routeEntry = "Route::{$routeType}('{$resource}', \\App\\{$controllerPath}\\{$controllerClassName}::class){$routeOptions};";
 
-        // Append the route entry to the replaced content
-        $finalContent = $stubContent . PHP_EOL . $routeEntry . PHP_EOL;
-
+        // Create final content and save
+        $finalContent = file_get_contents($stubPath) . PHP_EOL . $routeEntry . PHP_EOL;
         $this->saveFile($apiPath, $finalContent, CodeGeneratorFileType::ROUTE);
     }
 }

@@ -6,9 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Traits\FileManager;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class MakeController extends Command
 {
@@ -33,6 +31,7 @@ class MakeController extends Command
     public function handle(): void
     {
         $controllerClassName = Str::studly($this->argument('modelName')) . 'Controller';
+        $isAdminCrudIncluded = $this->option('adminCrud');
 
         // Define the controller file path
         $controllerFilePath = app_path(config('code_generator.controller_path', 'Http/Controllers') . "/{$controllerClassName}.php");
@@ -289,30 +288,23 @@ class MakeController extends Command
     {
         $methods = $this->option('methods');
         $methodCount = count(array_map('trim', explode(',', $methods)));
+        $apiPath = base_path('routes/api.php');
 
         $resource = Str::plural(Str::kebab($this->argument('modelName')));
-        // Use apiResource if all 5 standard methods are included, otherwise use resource with only()
+
+        // Determine the route entry based on method count
         if ($methodCount == 5) {
             $routeEntry = "Route::apiResource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerClassName}::class);";
         } else {
             $routeEntry = "Route::resource('{$resource}', \\App\\" . config('code_generator.controller_path', 'Http\Controllers') . "\\{$controllerClassName}::class)->only(['{$methods}']);";
         }
 
-        $apiPath = base_path('routes/api.php');
+        // Load and replace stub content
+        $stubContent = file_get_contents(__DIR__ . '/../../stubs/api.routes.stub');
 
-        if (!$this->files->exists($apiPath)) {
-            $this->files->put($apiPath, "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\n");
-            $this->info("routes/api.php file created.");
-        }
+        // Append the route entry to the replaced content
+        $finalContent = $stubContent . PHP_EOL . $routeEntry . PHP_EOL;
 
-        file_put_contents($apiPath, PHP_EOL . $routeEntry . PHP_EOL, FILE_APPEND);
-        $this->info("Route added for {$controllerClassName} at :{$apiPath}");
-
-        CodeGeneratorFileLog::create([
-            'file_type' => CodeGeneratorFileType::ROUTE,
-            'file_path' => $apiPath,
-            'status' => CodeGeneratorFileLogStatus::SUCCESS,
-            'message' => "API route added for {$controllerClassName} at :{$apiPath}.",
-        ]);
+        $this->saveFile($apiPath, $finalContent, CodeGeneratorFileType::ROUTE);
     }
 }

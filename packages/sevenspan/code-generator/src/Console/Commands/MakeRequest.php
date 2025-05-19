@@ -2,101 +2,128 @@
 
 namespace Sevenspan\CodeGenerator\Console\Commands;
 
-use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Illuminate\Support\Str;
+use Illuminate\Console\Command;
+use Illuminate\Filesystem\Filesystem;
+use Sevenspan\CodeGenerator\Traits\FileManager;
+use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
-class MakeRequest extends GeneratorCommand
+class MakeRequest extends Command
 {
-    protected $name = 'make:request-validation';
-    protected $description = 'Create a new form request class with validation rules';
-    protected $type = 'Request';
-    protected $generatedRules = '';
+    use FileManager;
+
+    private const INDENT = '    ';
+
+    protected $signature = 'codegenerator:request  {modelName : The related model for the observer.}
+                                                   {--rules= :comma seperated list of rules (e.g, Name:required,email:nullable )} 
+                                                   {--overwrite : is overwriting this file is selected}';
+
+    protected $description = 'Generate a custom form request with validation rules';
+
+    public function __construct(protected Filesystem $files)
+    {
+        parent::__construct();
+    }
 
     public function handle()
     {
-        $this->generatedRules = $this->buildRules();
-        // - Qualifying the class name
-        // - Determining the path
-        // - Making the directory
-        // - Building the class content (which calls replaceNamespace and our replaceClass)
-        // - Writing the file
-        $result = parent::handle();
+        $relatedModelName = Str::studly($this->argument('modelName'));
 
-        if ($result === false && !$this->option('force')) {
-            return SymfonyCommand::FAILURE;
-        }
+        // Define the path for the request file
+        $requestFilePath = app_path(config('code_generator.request_path', 'Requests') . "/{$relatedModelName}" . "/Request.php");
+        $this->createDirectoryIfMissing(dirname($requestFilePath));
 
-        return SymfonyCommand::SUCCESS;
+        $content = $this->getReplacedContent($relatedModelName);
+
+        // Create or overwrite file and get log the status and message
+        $this->saveFile(
+            $requestFilePath,
+            $content,
+            CodeGeneratorFileType::REQUEST
+        );
     }
 
-    protected function getStub()
+    /**
+     * @return string
+     */
+    protected function getStubPath(): string
     {
         return __DIR__ . '/../../stubs/request.stub';
     }
 
-    protected function getDefaultNamespace($rootNamespace)
+    /**
+     * Generate validation rules fields from command options.
+     *
+     * @return string
+     */
+    protected function getValidationFields(): string
     {
-        return $rootNamespace . '\Http\Requests';
+        $rules = $this->option('rules');
+
+        if (!$rules) return '';
+
+        $fields = explode(',', $rules);
+        $lines = [];
+
+        foreach ($fields as $field) {
+            [$name, $rule] = explode(':', $field);
+            $lines[] = self::INDENT . self::INDENT . "'" . $name . "' => '" . $rule . "',";
+        }
+
+        return implode("\n", $lines);
     }
 
-    protected function getArguments()
+    /**
+     * Get the variables to replace in the stub file.
+     *
+     * @param string $relatedModelName
+     * @return array
+     */
+    protected function getStubVariables($relatedModelName): array
     {
+        $relatedModel = $this->argument('modelName');
         return [
-            ['name', InputArgument::REQUIRED, 'The name of the request class'],
-            ['fields', InputArgument::IS_ARRAY, 'List of fields and their types (e.g., name:string email:email)'],
+            'namespace'        => 'App\\' . config('code_generator.request_path', 'Http\Requests') . '\\' . $relatedModel,
+            'class'            => 'Request',
+            'validationFields' => $this->getValidationFields(),
         ];
     }
-    protected function replaceClass($stub, $name)
-    {
-        $stub = parent::replaceClass($stub, $name);
 
-        return str_replace(
-            ['{{ class }}', '{{ rules }}'],
-            [class_basename($name), $this->generatedRules],
-            $stub
-        );
+    /**
+     * Replace stub variables with actual content.
+     *
+     * @param string $stubPath
+     * @param array $stubVariables
+     * @return string
+     */
+    protected function getStubContents(string $stubPath, array $stubVariables): string
+    {
+        $content = file_get_contents($stubPath);
+        foreach ($stubVariables as $search => $replace) {
+            $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
+        }
+
+        return $content;
     }
-    protected function buildRules(): string
+
+    /**
+     * Generate the final content for the request file.
+     *
+     * @param string $relatedModelName
+     * @return string
+     */
+    protected function getReplacedContent($relatedModelName): string
     {
-        $rules = [];
-        $fieldsArgument = $this->argument('fields');
+        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($relatedModelName));
+    }
 
-        if (empty($fieldsArgument)) {
-            $this->comment('No fields provided. Generating an empty rules array.');
-            return '';
+    /**
+     * @param string $path
+     */
+    protected function createDirectoryIfMissing($path): void
+    {
+        if (! $this->files->isDirectory($path)) {
+            $this->files->makeDirectory($path, 0777, true, true);
         }
-
-        foreach ($fieldsArgument as $field) {
-            $parts = explode(':', $field, 2);
-            $name = trim($parts[0]);
-            $typeDefinition = isset($parts[1]) ? trim($parts[1]) : 'string';
-            if (str_contains($typeDefinition, '|')) {
-                $validation = $typeDefinition;
-            } else {
-                $validation = match (strtolower($typeDefinition)) {
-                    'string' => 'required|string|max:255',
-                    'email' => 'required|string|email|max:255',
-                    'integer', 'int' => 'required|integer',
-                    'boolean', 'bool' => 'required|boolean',
-                    'date' => 'required|date',
-                    'datetime' => 'required|date_format:Y-m-d H:i:s',
-                    'numeric' => 'required|numeric',
-                    'url' => 'required|url',
-                    'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-                    'file' => 'required|file|max:10240',
-                    'password' => 'required|string|min:8|confirmed',
-                    'phone' => 'required|string|regex:/^[0-9\s\-\+\(\)]*$/',
-                    'array' => 'required|array',
-                    'json' => 'required|json',
-                    'ip' => 'required|ip',
-                    'uuid' => 'required|uuid',
-                    // Add more types as needed
-                    default => 'required|string',
-                };
-            }
-            $rules[] = "'$name' => '$validation'";
-        }
-        return implode(",\n            ", $rules);
     }
 }

@@ -1,4 +1,4 @@
-<div>
+<div class="w-full p-6">
     <p class="text-red-500 mb-4">Note: To use this CRUD generator you first need to install <a href=""
             class="underline">spatie</a> package, as we are using it in our BaseModel.php file.</p>
     <!-- model input -->
@@ -22,7 +22,7 @@
     <!-- eloqunet relation -->
     <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
         <div class="flex justify-between items-center mb-3">
-            <h2 class="text-xl font-semibold">Add Eloquent Relationship</h2>
+            <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" 
                 @click="$wire.isAddRelModalOpen=true; $wire.resetForm()" />
         </div>
@@ -31,7 +31,7 @@
     <!-- new fields input -->
     <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
         <div class="flex justify-between items-center mb-3">
-            <h2 class="text-xl font-semibold">Add New Fields </h2>
+            <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add"
                 @click="$wire.isAddFieldModalOpen=true; $wire.resetForm()" />
         </div>
@@ -39,9 +39,18 @@
         <x-code-generator::field-table :$fieldsData />
     </div>
         <x-code-generator::add-files-methods :$errorMessage />
-     @if ($generalError)
-        <p class="text-red-500 mt-2">{{ $generalError }}</p>
+
+    //messages succes or validation error
+     @if (session()->has('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @elseif ($generalError)
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ $generalError }}</span>
+        </div>
     @endif
+
     <div>
         <x-code-generator::button title="Generate REST API Files" wire:click="save" />
     </div>

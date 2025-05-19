@@ -17,14 +17,20 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
-                    <span class="ml-2 text-sm">Soft Delete</span>
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crudFile">
+                    <span class="ml-2 text-sm">Admin CRUD</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crudFile">
-                    <span class="ml-2 text-sm">Admin CRUD</span>
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="policyFile">
+                    <span class="ml-2 text-sm">Policy File</span>
+                </label>
+            </div>
+            <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="observerFile">
+                    <span class="ml-2 text-sm">Observer File</span>
                 </label>
             </div>
         </div>
@@ -53,23 +59,56 @@
                     <span class="ml-2 text-sm">Request File</span>
                 </label>
             </div>
-        </div>
-        <div class="mb-6">
-            <div class="flex items-start mb-2">
-                <input type="checkbox" class="form-checkbox h-4 w-4 mt-1 text-red-500" wire:model.live="traitFiles">
-                <div class="ml-2">
-                    <span class="text-sm">Trait Files</span>
-                    <div class="text-xs ml-2 text-gray-600">
-                        <div>ApiResponse.php</div>
-                        <div>BaseModel.php</div>
-                        <div>BootModel.php</div>
-                        <div>PaginationTrait.php</div>
-                        <div>ResourceFilterable.php</div>
-                    </div>
-                </div>
+            <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="factoryFile">
+                    <span class="ml-2 text-sm">Factory File </span>
+                </label>
             </div>
         </div>
-    </div>
+        <h2 class="text-sm font-medium mb-2">Which Traits do you want to include?</h2>
+        <div class="flex space-x-4">
+            <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="ApiResponse">
+                <span class="ml-1 text-sm">ApiResponse.php</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="BaseModel">
+                <span class="ml-1 text-sm">BaseModel.php</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="BootModel">
+                <span class="ml-1 text-sm">BootModel.php</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="PaginationTrait">
+                <span class="ml-1 text-sm">PaginationTrait.php</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="ResourceFilterable">
+                <span class="ml-1 text-sm">ResourceFilterable.php</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUuid">
+                <span class="ml-1 text-sm">HasUuid.php</span>
+            </label>
+             <label class="flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUserAction">
+                <span class="ml-1 text-sm">HasUserAction.php</span>
+            </label>
+        </div>
+        <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwriteFiles">
+                    <span class="ml-2 text-sm">Overwrite Files?</span>
+                </label>
+        </div>
+        <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
+                    <span class="ml-2 text-sm">Soft Delete</span>
+                </label>
+        </div>
      <div class="mb-6" x-show="!crudFile">
         <h2 class="text-sm font-medium mb-2">Which method do you want to include?</h2>
         <div class="flex space-x-4">

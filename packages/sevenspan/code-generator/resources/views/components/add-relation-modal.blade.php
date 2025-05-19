@@ -4,7 +4,7 @@
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50"
     x-on:click.self="$wire.isAddRelModalOpen=false">
 
-    <x-code-generator::modal modalTitle="Add Eloquent Relation">
+    <x-code-generator::modal modalTitle="Add">
         <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isAddRelModalOpen=false"

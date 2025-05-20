@@ -14,7 +14,10 @@
 
         <!-- Modal footer -->
         <x-slot:footer>
-            <x-code-generator::button wire:click="deleteRelation" title="Delete" />
+            <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isRelDeleteModalOpen=false"/>
+          </div>
+          <x-code-generator::button wire:click="deleteRelation" title="Delete" />
         </x-slot:footer>
         </x-modal>
 </div>

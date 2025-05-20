@@ -84,6 +84,9 @@ class RestApi extends Component
         'column_validation' => 'required',
         'add_scope' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
+        'data' => 'required|regex:/^[A-Za-z_]+:\d+(?:,[A-Za-z_]+:\d+)*$/',
+        'subject' => 'required|regex:/^[A-Za-z ]+$/',
+        'body' => 'required|regex:/^[A-Za-z ]+$/',
         'data' => 'required|regex:/^[A-Za-z]+=>\d+(?:,[A-Za-z]+:\d+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
@@ -182,6 +185,17 @@ class RestApi extends Component
     // Fields Handling
     public function saveField()
     {
+        // Check if column name already exists
+        $columnExists = collect($this->fieldsData)->contains(function ($field) {
+            return $field['column_name'] === $this->column_name &&
+                ($this->fieldId ? $field['id'] !== $this->fieldId : true);
+        });
+
+        if ($columnExists) {
+            $this->addError('column_name', ' You have already taken this column');
+            return;
+        }
+
         $this->validate([
             'data_type' => $this->rules['data_type'],
             'column_name' => $this->rules['column_name'],
@@ -256,13 +270,17 @@ class RestApi extends Component
             'subject' => $this->rules['subject'],
             'body' => $this->rules['body'],
         ]);
-        $this->notificationData[] = [
+
+        // Store notification data
+        $this->notificationData = [
             'class_name' => $this->class_name,
             'data' => $this->data,
             'subject' => $this->subject,
             'body' => $this->body,
         ];
+
         $this->isNotificationModalOpen = false;
+        $this->reset(['class_name', 'data', 'subject', 'body']);
     }
 
     // live Validation
@@ -320,7 +338,7 @@ class RestApi extends Component
 
         $selectedTraits = [];
 
-        if ($this->ApiResponse)         $selectedTraits[] = 'ApiResponser';
+        if ($this->ApiResponse)        $selectedTraits[] = 'ApiResponser';
         if ($this->BaseModel)          $selectedTraits[] = 'BaseModel';
         if ($this->BootModel)          $selectedTraits[] = 'BootModel';
         if ($this->PaginationTrait)    $selectedTraits[] = 'PaginationTrait';
@@ -343,7 +361,6 @@ class RestApi extends Component
         $validModelName = $this->validate([
             'modelName' => $this->rules['modelName'],
         ]);
-
         // Check fields and methods
         if (!$this->check()) {
             session()->flash('error', $this->errorMessage);

@@ -60,7 +60,10 @@
         </div>
         <!-- Modal footer -->
         <x-slot:footer>
-            <x-code-generator::button wire:click="saveField" title="Add" />
+            <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isEditFieldModalOpen=false"/>
+          </div>
+          <x-code-generator::button wire:click="saveField" title="Update" />
         </x-slot:footer>
         </x-modal>
 </div>

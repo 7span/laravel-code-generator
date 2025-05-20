@@ -22,7 +22,7 @@
                     <input wire:model.live="data" type="text" placeholder="Enter Data"
                         class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" />
                     @error('data') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                    <p class="text-xs text-gray-400 mt-1">Example: ['user_id' => 1];</p>
+                    <p class="text-xs text-gray-400 mt-1">Example: user_id: 1</p>
                 </div>
 
                 <div>
@@ -42,6 +42,9 @@
 
         <!-- Modal footer -->
         <x-slot:footer>
+        <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isNotificationModalOpen=false"/>
+          </div>
             <x-code-generator::button wire:click="saveNotification" title="Add" />
         </x-slot:footer>
     </x-modal>

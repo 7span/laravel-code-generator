@@ -126,30 +126,28 @@ class MakeController extends Command
         $additionalUseStatements = [];
 
         // Add service file use statement
-        if ($includeServiceFile) {
-            $mainContent = str_replace(
-                '{{ service }}',
-                'use App\\' . config('code_generator.service_path', 'Services') . '\\' . $className . 'Service;',
-                $mainContent
-            );
-        }
+        $mainContent = str_replace(
+            '{{ service }}',
+            $includeServiceFile ? 'use App\\' . config('code_generator.service_path', 'Services') . '\\' . $className . 'Service;' : "",
+            $mainContent
+        );
 
         // Add request file use statement
-        if ($includeRequestFile) {
-            $mainContent = str_replace(
-                '{{ request }}',
-                "use App\\" . config('code_generator.request_path', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;",
-                $mainContent
-            );
-        }
+        $mainContent = str_replace(
+            '{{ request }}',
+            $includeRequestFile ? "use App\\" . config('code_generator.request_path', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;" : "",
+            $mainContent
+        );
 
         // Add resource file use statements
-        if ($includeResourceFile) {
-            $additionalUseStatements[] = "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Resource;";
-            $additionalUseStatements[] = "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Collection;";
-        }
+        $includeResourceFile ? array_push(
+            $additionalUseStatements,
+            "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Resource;",
+            "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Collection;"
+        ) : null;
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
+
 
         return str_replace(
             'use App\Http\Controllers\Controller;',
@@ -208,7 +206,6 @@ class MakeController extends Command
 
         // Append methods
         $methodContents = '';
-
         foreach ($methods as $method) {
             $methodStubPath = __DIR__ . "/../../stubs/controller.{$method}.stub";
             if (!file_exists($methodStubPath)) {
@@ -306,7 +303,8 @@ class MakeController extends Command
     protected function appendApiRoute(string $controllerClassName, bool $isAdminCrudIncluded = false): void
     {
         $methods = $this->option('methods');
-        $methodCount = count(array_map('trim', explode(',', $methods)));
+        $methodsArray = array_map('trim', explode(',', $methods ?? ''));
+        $methodCount = count($methodsArray);
         $resource = Str::plural(Str::kebab($this->argument('modelName')));
 
         // Determine paths based on isAdminCrudIncluded parameter
@@ -319,7 +317,10 @@ class MakeController extends Command
 
         // Create route entry
         $routeType = $methodCount == 5 ? 'apiResource' : 'resource';
-        $routeOptions = $methodCount == 5 ? '' : "->only(['{$methods}'])";
+
+        // Fix: Format the methods array properly for the only() method
+        $routeOptions = $methodCount == 5 ? '' : "->only(['" . implode("', '", $methodsArray) . "'])";
+
         $routeEntry = "Route::{$routeType}('{$resource}', \\App\\{$controllerPath}\\{$controllerClassName}::class){$routeOptions};";
 
         // Create final content and save

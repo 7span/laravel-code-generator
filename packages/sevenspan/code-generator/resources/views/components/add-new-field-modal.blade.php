@@ -63,6 +63,9 @@
             </div>
         <!-- Modal footer -->
         <x-slot:footer>
+        <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isAddFieldModalOpen=false"/>
+          </div>
             <x-code-generator::button wire:click="saveField" title="Add" />
         </x-slot:footer>
     </x-modal>

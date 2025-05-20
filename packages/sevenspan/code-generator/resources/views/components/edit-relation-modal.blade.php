@@ -74,7 +74,10 @@
             </div>
         <!-- Modal footer -->
         <x-slot:footer>
-            <x-code-generator::button wire:click="addRelation" title="Update" />
+            <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isRelEditModalOpen=false"/>
+          </div>
+          <x-code-generator::button wire:click="addRelation" title="Update" />
         </x-slot:footer>
     </x-modal>
 </div>

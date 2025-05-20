@@ -2,7 +2,7 @@
     x-on:click.self="$wire.isEditFieldModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
 
-    <x-code-generator::modal modalTitle="Edit">
+    <x-code-generator::modal modalTitle="Edit Field">
         <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isEditFieldModalOpen=false"
@@ -61,7 +61,10 @@
             </div>
         <!-- Modal footer -->
         <x-slot:footer>
-            <x-code-generator::button wire:click="saveField" title="Add" />
+            <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isEditFieldModalOpen=false"/>
+          </div>
+          <x-code-generator::button wire:click="saveField" title="Update" />
         </x-slot:footer>
     </x-modal>
 </div>

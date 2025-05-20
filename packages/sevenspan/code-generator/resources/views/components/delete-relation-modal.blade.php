@@ -2,19 +2,22 @@
     x-on:click.self="$wire.isRelDeleteModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
 
-    <x-code-generator::modal modalTitle="Add you Sure?">
+    <x-code-generator::modal modalTitle="Delete Relation">
         <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isRelDeleteModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
             <div class="mt-4 space-y-4">
-                Confirm delete? This action cannot be undone.
+            Are You Sure you want to delete this Relation?
             </div>
 
         <!-- Modal footer -->
         <x-slot:footer>
-            <x-code-generator::button wire:click="deleteRelation" title="Delete" />
+            <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isRelDeleteModalOpen=false"/>
+          </div>
+          <x-code-generator::button wire:click="deleteRelation" title="Delete" />
         </x-slot:footer>
     </x-modal>
 </div>

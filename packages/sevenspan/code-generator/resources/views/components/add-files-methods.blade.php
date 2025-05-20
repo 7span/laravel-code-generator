@@ -1,7 +1,7 @@
 <div x-data="{ crudFile: @entangle('crudFile').live }">
     <!-- Options -->
      <h2 class="text-sm font-medium mb-2">Which Files do you want to include?</h2>
-    <div class="grid grid-cols-3 gap-6 border-b border-gray-300">
+    <div class="grid grid-cols-3 mb-6 gap-6 border-b border-gray-300">
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
@@ -18,19 +18,19 @@
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crudFile">
-                    <span class="ml-2 text-sm">Admin CRUD Controller</span>
+                    <span class="ml-2 text-sm">Admin CRUD Control</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="policyFile">
-                    <span class="ml-2 text-sm">Policy File</span>
+                    <span class="ml-2 text-sm">Policy</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="observerFile">
-                    <span class="ml-2 text-sm">Observer File</span>
+                    <span class="ml-2 text-sm">Observer</span>
                 </label>
             </div>
         </div>
@@ -38,81 +38,80 @@
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="serviceFile">
-                    <span class="ml-2 text-sm">Service File</span>
+                    <span class="ml-2 text-sm">Service</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="notificationFile">
-                    <span class="ml-2 text-sm">Notification File</span>
+                    <span class="ml-2 text-sm">Notification</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="resourceFile">
-                    <span class="ml-2 text-sm">Resource File</span>
+                    <span class="ml-2 text-sm">Resource</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="requestFile">
-                    <span class="ml-2 text-sm">Request File</span>
+                    <span class="ml-2 text-sm">Request</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="factoryFile">
-                    <span class="ml-2 text-sm">Factory File </span>
+                    <span class="ml-2 text-sm">Factory</span>
                 </label>
             </div>
         </div>
-       
         <div>
-        <h2 class="text-sm font-medium">Trait Files:</h2>
-            <div class="mb-2">
+        <h2 class="text-sm font-medium">Traits:</h2>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="ApiResponse">
                     <span class="ml-2 text-sm">ApiResponse.php</span>
                 </label>
-            </div>
-            <div class="mb-2">
+        </div>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="BaseModel">
                     <span class="ml-2 text-sm">BaseModel.php</span>
                 </label>
-            </div>
-            <div class="mb-2">
+         </div>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="BootModel">
                     <span class="ml-2 text-sm">BootModel.php</span>
                 </label>
-            </div>
-            <div class="mb-2">
+        </div>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="PaginationTrait">
                     <span class="ml-2 text-sm">PaginationTrait.php</span>
                 </label>
-            </div>
-            <div class="mb-2">
+        </div>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="ResourceFilterable">
                     <span class="ml-2 text-sm">ResourceFilterable.php</span>
                 </label>
-            </div>
-            <div class="mb-2">
+        </div>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUuid">
                     <span class="ml-2 text-sm">HasUuid.php</span>
                 </label>
-            </div>
-            <div class="mb-2">
+        </div>
+        <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUserAction">
                     <span class="ml-2 text-sm">HasUserAction.php</span>
                 </label>
-            </div>
+        </div>
         </div>       
-</div>
+     </div>
         <h2 class="text-sm font-medium mb-2">Features:</h2>
         <div class="mb-6 flex space-x-4">
             <label class="flex items-center">
@@ -148,8 +147,6 @@
                 <span class="ml-1 text-sm">Destroy</span>
             </label>
         </div>
-        @if($errorMessage)
-        <p class="text-xs text-red-500 mt-1">{{ $errorMessage }}</p>
-        @endif
+      
     </div>
 </div>

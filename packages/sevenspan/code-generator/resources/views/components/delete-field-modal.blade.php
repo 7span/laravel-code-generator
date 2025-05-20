@@ -8,12 +8,15 @@
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
             <div class="mt-4 space-y-4">
-                You want to delete this field?
+               Are You Sure you want to delete this field?
             </div>
 
         <!-- Modal footer -->
         <x-slot:footer>
-            <x-code-generator::button wire:click="deleteField" title="Delete" />
+            <div class="mr-6">
+            <x-code-generator::button title="Cancel" x-on:click="$wire.isDeleteFieldModalOpen=false"/>
+          </div>
+          <x-code-generator::button wire:click="deleteField" title="Delete" />
         </x-slot:footer>
     </x-modal>
 </div>

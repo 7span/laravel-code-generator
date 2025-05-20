@@ -1,7 +1,12 @@
 <div x-data="{ crudFile: @entangle('crudFile').live }">
     <!-- Options -->
+<<<<<<< HEAD
      <h2 class="text-sm font-medium mb-2">Which Files do you want to include?</h2>
     <div class="grid grid-cols-3 mb-6 gap-6 border-b border-gray-300">
+=======
+    <h2 class="text-sm font-medium mb-2">Which Files do you want to include?</h2>
+    <div class="grid grid-cols-3 gap-6 border-b border-gray-300">
+>>>>>>> 17ce72fb4fae5b8d87243176510c3e412a861d8f
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
@@ -43,8 +48,14 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
+<<<<<<< HEAD
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="notificationFile">
                     <span class="ml-2 text-sm">Notification</span>
+=======
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500"
+                        wire:model.live="notificationFile">
+                    <span class="ml-2 text-sm">Notification File</span>
+>>>>>>> 17ce72fb4fae5b8d87243176510c3e412a861d8f
                 </label>
             </div>
             <div class="mb-2">
@@ -94,7 +105,8 @@
         </div>
         <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="ResourceFilterable">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500"
+                        wire:model.live="ResourceFilterable">
                     <span class="ml-2 text-sm">ResourceFilterable.php</span>
                 </label>
         </div>
@@ -109,6 +121,7 @@
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUserAction">
                     <span class="ml-2 text-sm">HasUserAction.php</span>
                 </label>
+<<<<<<< HEAD
         </div>
         </div>       
      </div>
@@ -122,8 +135,23 @@
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
                 <span class="ml-1 text-sm">Soft Delete</span>
             </label>
+=======
+            </div>
+>>>>>>> 17ce72fb4fae5b8d87243176510c3e412a861d8f
         </div>
-     <div class="mb-6" x-show="!crudFile">
+    </div>
+    <h2 class="text-sm font-medium mb-2">Features:</h2>
+    <div class="mb-6 flex space-x-4">
+        <label class="flex items-center">
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwriteFiles">
+            <span class="ml-1 text-sm">Overwrite Files</span>
+        </label>
+        <label class="flex items-center">
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
+            <span class="ml-1 text-sm">Soft Delete</span>
+        </label>
+    </div>
+    <div class="mb-6" x-show="!crudFile">
         <h2 class="text-sm font-medium mb-2">Which method do you want to include?</h2>
         <div class="flex space-x-4">
             <label class="flex items-center">

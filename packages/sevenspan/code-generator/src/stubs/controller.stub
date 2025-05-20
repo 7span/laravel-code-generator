@@ -5,8 +5,8 @@ namespace App\{{ namespace }};
 {{ relatedModelNamespace }};
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
-{{ service }}
 use App\Http\Controllers\Controller;
+{{ service }}
 {{ request }}
 
 class {{ className }} extends Controller
@@ -19,5 +19,5 @@ class {{ className }} extends Controller
     {
         {{ serviceObj }}
     }
-
+ 
     

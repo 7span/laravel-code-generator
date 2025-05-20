@@ -164,7 +164,7 @@ class MakeModel extends Command
 
         return [
             'uses' => implode("\n", $traitUseStatements),
-            'apply' => 'use ' . implode(', ', $traitNames) . ';',
+            'apply' => empty($traitNames) ? '' : 'use ' . implode(', ', $traitNames) . ';',
         ];
     }
 

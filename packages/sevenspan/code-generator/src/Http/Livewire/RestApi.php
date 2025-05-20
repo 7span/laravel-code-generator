@@ -54,7 +54,6 @@ class RestApi extends Component
     public $notificationFile = false;
     public $resourceFile = false;
     public $requestFile = false;
-    public $traitFiles = false;
     public $overwriteFiles = false;
     public $observerFile = false;
     public $factoryFile = false;
@@ -86,8 +85,8 @@ class RestApi extends Component
         'add_scope' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^\\s*\\[\\s*(["\']?[A-Za-z_]+["\']?\\s*=>\\s*\\d+\\s*(?:,\\s*["\']?[A-Za-z]+["\']?\\s*=>\\s*\\d+)*)?\\s*\\]$/',
-        'subject' => 'required|regex:/^[A-Za-z]+$/',
-        'body' => 'required|regex:/^[A-Za-z]+$/',
+        'subject' => 'required|regex:/^[A-Za-z ]+$/',
+        'body' => 'required|regex:/^[A-Za-z ]+$/',
     ];
         public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
@@ -183,34 +182,46 @@ class RestApi extends Component
     // Fields Handling
     public function saveField()
     {
+        // Check if column name already exists
+        $columnExists = collect($this->fieldsData)->contains(function ($field) {
+            return $field['column_name'] === $this->column_name && 
+                   ($this->fieldId ? $field['id'] !== $this->fieldId : true);
+        });
+
+        if ($columnExists) {
+            $this->addError('column_name', 'This column name already exists.');
+            return;
+        }
+
         $this->validate([
             'data_type' => $this->rules['data_type'],
             'column_name' => $this->rules['column_name'],
             'column_validation' => $this->rules['column_validation'],
             'add_scope' => $this->rules['add_scope'],
         ]);
+
         if ($this->fieldId) { // If we are editing
-        $this->fieldsData = collect($this->fieldsData)->map(function ($field) {
-            if ($field['id'] === $this->fieldId) {
-                return [
-                    'id' => $this->fieldId,
-                    'data_type' => $this->data_type,
-                    'column_name' => $this->column_name,
-                    'column_validation' => $this->column_validation,
-                    'add_scope' => $this->add_scope,
-                ];
-            }
-            return $field;
-        })->toArray();
-    } else { // If we are adding a new field
-        $this->fieldsData[] = [
-            'id' => Str::random(8),
-            'data_type' => $this->data_type,
-            'column_name' => $this->column_name,
-            'column_validation' => $this->column_validation,
-            'add_scope' => $this->add_scope,
-        ];
-    }
+            $this->fieldsData = collect($this->fieldsData)->map(function ($field) {
+                if ($field['id'] === $this->fieldId) {
+                    return [
+                        'id' => $this->fieldId,
+                        'data_type' => $this->data_type,
+                        'column_name' => $this->column_name,
+                        'column_validation' => $this->column_validation,
+                        'add_scope' => $this->add_scope,
+                    ];
+                }
+                return $field;
+            })->toArray();
+        } else { // If we are adding a new field
+            $this->fieldsData[] = [
+                'id' => Str::random(8),
+                'data_type' => $this->data_type,
+                'column_name' => $this->column_name,
+                'column_validation' => $this->column_validation,
+                'add_scope' => $this->add_scope,
+            ];
+        }
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
@@ -235,10 +246,12 @@ class RestApi extends Component
  //delete field from table
     public function deleteField(): void
     {
-     $this->fieldsData = array_filter($this->fieldsData, function ($field) {
+        $this->fieldsData = array_filter($this->fieldsData, function ($field) {
             return $field['id'] !== $this->fieldId;
         });
         $this->isDeleteFieldModalOpen = false;
+        $this->fieldId = null;
+        $this->resetForm();
     }
     
     // Notification
@@ -309,6 +322,7 @@ class RestApi extends Component
             'column_name',
             'column_validation',
             'add_scope',
+            'fieldId'
         ]);
         $this->resetErrorBag();
     }
@@ -351,7 +365,6 @@ class RestApi extends Component
             'notification' => $this->notificationFile,
             'resource' => $this->resourceFile,
             'request' => $this->requestFile,
-            'traits' => $this->traitFiles,
             'observer' => $this->observerFile,
             'policy' => $this->policyFile,
             'factory' => $this->factoryFile
@@ -375,9 +388,19 @@ class RestApi extends Component
         }, $relations));
 
         $methods = implode(',', array_keys(array_filter($methods))); 
-        $traits = $files['traits'];
         $softDelete = $files['softDelete'];
         $factory = $files['migration'];
+        // Get selected traits
+        $selectedTraits = [];
+        if ($this->ApiResponse) $selectedTraits[] = 'ApiResponse';
+        if ($this->BaseModel) $selectedTraits[] = 'BaseModel';
+        if ($this->BootModel) $selectedTraits[] = 'BootModel';
+        if ($this->PaginationTrait) $selectedTraits[] = 'PaginationTrait';
+        if ($this->ResourceFilterable) $selectedTraits[] = 'ResourceFilterable';
+        if ($this->HasUuid) $selectedTraits[] = 'HasUuid';
+        if ($this->HasUserAction) $selectedTraits[] = 'HasUserAction';
+
+        $traitsString = implode(',', $selectedTraits);
 
         $selectedMethods = [];
         if ($this->index) $selectedMethods[] = 'index';
@@ -395,8 +418,8 @@ class RestApi extends Component
             '--methods' => implode(',', $selectedMethods),
             '--softDelete' => $softDelete,
             '--factory' => $factory,
-            '--traits' => $traits,
-            '--overwrite' => $overwrite
+            '--traits' => $traitsString,
+            '--overwrite' => $overwrite,
         ]);
       //  $this->generatedFiles[] = "Model: {$modelName}";
     }
@@ -503,8 +526,7 @@ class RestApi extends Component
             '--overwrite' => $overwrite
         ]);
     }
-        // traits
-        if ($files['traits']) {
+        // traits  
             $source = __DIR__ . '/../../TraitsLibrary/Traits';
             $destination = app_path(config('code_generator.trait_path','Traits'));
 
@@ -517,27 +539,21 @@ class RestApi extends Component
                 $this->error('Traits source folder not found: ' . $source);
             }
 
-            // Get selected traits
-            $selectedTraits = [];
-            if ($this->ApiResponse) $selectedTraits[] = 'ApiResponse';
-            if ($this->BaseModel) $selectedTraits[] = 'BaseModel';
-            if ($this->BootModel) $selectedTraits[] = 'BootModel';
-            if ($this->PaginationTrait) $selectedTraits[] = 'PaginationTrait';
-            if ($this->ResourceFilterable) $selectedTraits[] = 'ResourceFilterable';
-            if ($this->HasUuid) $selectedTraits[] = 'HasUuid';
-            if ($this->HasUserAction) $selectedTraits[] = 'HasUserAction';
-
-            // Add selected traits to the model
+            // Copy traits if any are selected
             if (!empty($selectedTraits)) {
-                $traitsString = implode(',', $selectedTraits);
-                Artisan::call('codegenerator:model', [
-                    'modelName' => $modelName,
-                    '--traits' => $traitsString,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-        }
+                $source = __DIR__ . '/../../TraitsLibrary/Traits';
+                $destination = app_path(config('code_generator.trait_path','Traits'));
 
+                // Copy directory if it doesn't exist yet or overwrite if needed
+                if (File::exists($source)) {
+                    File::ensureDirectoryExists($destination);
+                    File::copyDirectory($source, $destination);
+                    Log::info('✔ Traits copied successfully to app/Traits.');
+                } else {
+                    $this->error('Traits source folder not found: ' . $source);
+                }
+            }
+        
         // Show success message
         $this->successMessage = 'Successfully generated Files';
         session()->flash('success', $this->successMessage);

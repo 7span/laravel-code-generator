@@ -36,6 +36,19 @@
                         </button>
                     </td>
                 </tr>
+                <tr>
+                    <td class="px-4 py-2 text-gray-600">updated_at</td>
+                    <td class="px-4 py-2 text-gray-600">date_time_picker</td>
+                    <td class="px-4 py-2 text-gray-600">required</td>
+                    <td class="px-4 py-2 text-gray-600">
+                        <button>
+                            <x-code-generator::delete-svg />
+                        </button>
+                         <button>
+                            <x-code-generator::edit-svg />
+                        </button>
+                    </td>
+                </tr>
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">
                     <td class="px-4 py-2">{{$field['column_name']}}</td>

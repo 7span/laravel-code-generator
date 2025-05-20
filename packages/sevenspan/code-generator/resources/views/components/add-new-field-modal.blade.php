@@ -45,7 +45,7 @@
                 </div>
                 <!-- Add Scope -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Add Scope In The model.live File</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Add Scope</label>
                     <div class="flex items-center gap-6">
                         <label class="inline-flex items-center">
                             <input type="radio" wire:model.live="add_scope" name="option" value="yes"

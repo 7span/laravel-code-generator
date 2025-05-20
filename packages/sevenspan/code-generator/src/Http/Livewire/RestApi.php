@@ -60,24 +60,30 @@ class RestApi extends Component
     public $factoryFile = false;
     public $policyFile = false;
 
+    // Trait checkboxes
+    public $ApiResponse = false;
+    public $BaseModel = false;
+    public $BootModel = false;
+    public $PaginationTrait = false;
+    public $ResourceFilterable = false;
+    public $HasUuid = false;
+    public $HasUserAction = false;
+
     public $errorMessage = "";
     public $successMessage = '';
     public $generatedFiles = [];
     //validation rules
     protected $rules = [
         'modelName' => 'required|regex:/^[A-Z][a-z]+$/',
-
         'related_model' => 'required|regex:/^[A-Z][a-z]+$/',
         'relation_type' => 'required',
         'second_model' => 'required|regex:/^[A-Z][a-z]+$/',
         'foreign_key' => 'required',
         'local_key' => 'required',
-
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[A-Za-z]+$/',
         'column_validation' => 'required',
         'add_scope' => 'required',
-        
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^\\s*\\[\\s*(["\']?[A-Za-z_]+["\']?\\s*=>\\s*\\d+\\s*(?:,\\s*["\']?[A-Za-z]+["\']?\\s*=>\\s*\\d+)*)?\\s*\\]$/',
         'subject' => 'required|regex:/^[A-Za-z]+$/',
@@ -268,11 +274,27 @@ class RestApi extends Component
 
     public function check()
     {
+        $this->errorMessage = "";
+        
+        // Check if both fields and methods are missing
+        if (empty($this->fieldsData) && !($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
+            $this->errorMessage = "Please add at least one field and select at least one method.";
+            return false;
+        }
+
+        // Check only for fields
+        if (empty($this->fieldsData)) {
+            $this->errorMessage = "Please add at least one field.";
+            return false;
+        }
+
+        // Check only for methods
         if (!($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
             $this->errorMessage = "Please select at least one method.";
-        } else {
-            $this->errorMessage = "";
+            return false;
         }
+
+        return true;
     }
   // reset form fields
     public function resetForm()
@@ -304,9 +326,18 @@ class RestApi extends Component
             'One To Many (Polymorphic)' => 'morphMany',
             'Many To Many (Polymorphic)' => 'morphToMany',
         ];
+
+        // Validate model name
         $validModelName = $this->validate([
             'modelName' => $this->rules['modelName'],
         ]);
+
+        // Check fields and methods
+        if (!$this->check()) {
+            session()->flash('error', $this->errorMessage);
+            return;
+        }
+
         $modelName = $validModelName['modelName'];
         $relations = $this->relationData;
         $fields = $this->fieldsData;
@@ -334,168 +365,182 @@ class RestApi extends Component
         ];
         $overwrite = $this->overwriteFiles;
 
-        // validate form inputs
-        if (!empty($fields) && ($this->index || $this->store || $this->show || $this->update || $this->destroy)) {
-            $this->generatedFiles = []; // Reset generated files array
-            $fieldString = collect($fields)->pluck('column_name')->implode(', ');
+        // Generate files
+        $this->generatedFiles = []; // Reset generated files array
+        $fieldString = collect($fields)->pluck('column_name')->implode(', ');
 
-            $relations = implode(', ', array_map(function ($relationData) use ($relationMap) {
-                $method = $relationMap[$relationData['relation_type']] ?? 'unknown';
-                return $relationData['related_model'] . ':' . $method;
-            }, $relations));
+        $relations = implode(', ', array_map(function ($relationData) use ($relationMap) {
+            $method = $relationMap[$relationData['relation_type']] ?? 'unknown';
+            return $relationData['related_model'] . ':' . $method;
+        }, $relations));
 
-            $methods = implode(',', array_keys(array_filter($methods))); 
-            $traits = $files['traits'];
-            $softDelete = $files['softDelete'];
-            $factory = $files['migration'];
+        $methods = implode(',', array_keys(array_filter($methods))); 
+        $traits = $files['traits'];
+        $softDelete = $files['softDelete'];
+        $factory = $files['migration'];
 
-            $selectedMethods = [];
-            if ($this->index) $selectedMethods[] = 'index';
-            if ($this->store) $selectedMethods[] = 'store';
-            if ($this->show) $selectedMethods[] = 'show';
-            if ($this->update) $selectedMethods[] = 'update';
-            if ($this->destroy) $selectedMethods[] = 'destroy';
+        $selectedMethods = [];
+        if ($this->index) $selectedMethods[] = 'index';
+        if ($this->store) $selectedMethods[] = 'store';
+        if ($this->show) $selectedMethods[] = 'show';
+        if ($this->update) $selectedMethods[] = 'update';
+        if ($this->destroy) $selectedMethods[] = 'destroy';
 
-       // Model command
-            if($files['model']) {
-                Artisan::call('codegenerator:model', [
-                'modelName' => $modelName,
-                '--fields' => $fieldString,
-                '--relations' => $relations,
-                '--methods' => implode(',', $selectedMethods),
-                '--softDelete' => $softDelete,
-                '--factory' => $factory,
-                '--traits' => $traits,
-                '--overwrite' => $overwrite
-            ]);
-            $this->generatedFiles[] = "Model: {$modelName}";
-        }
+        // Model command
+        if($files['model']) {
+            Artisan::call('codegenerator:model', [
+            'modelName' => $modelName,
+            '--fields' => $fieldString,
+            '--relations' => $relations,
+            '--methods' => implode(',', $selectedMethods),
+            '--softDelete' => $softDelete,
+            '--factory' => $factory,
+            '--traits' => $traits,
+            '--overwrite' => $overwrite
+        ]);
+      //  $this->generatedFiles[] = "Model: {$modelName}";
+    }
+    //------------------------------------------
+    //controller command 
+    //-----------------------------------------
+        Artisan::call('codegenerator:controller', [
+            'modelName' => $modelName,
+            '--methods' => implode(',', $selectedMethods),
+            '--service' => $files['service'],
+            '--resource' => $files['resource'],
+            '--request' => $files['request'],
+            '--overwrite' => $overwrite
+        ]);
+        $this->generatedFiles[] = "Controller: {$modelName}Controller";
+
         //------------------------------------------
-        //controller command 
+        //resource command 
         //-----------------------------------------
-            Artisan::call('codegenerator:controller', [
-                'modelName' => $modelName,
-                '--methods' => implode(',', $selectedMethods),
-                '--service' => $files['service'],
-                '--resource' => $files['resource'],
-                '--request' => $files['request'],
-                '--overwrite' => $overwrite
-            ]);
-         //   $this->generatedFiles[] = "Controller: {$modelName}Controller";
-
-            //------------------------------------------
-            //resource command 
-            //-----------------------------------------
-            if($files['resource']) {
-            Artisan::call('codegenerator:resource', [
-                'modelName' => $modelName,
-                '--overwrite' => $overwrite
-            ]);
-        }
-            //------------------------------------------
-            //factory command 
-            //-----------------------------------------
-            $fieldString = implode(',', array_map(function ($fields) {
-                    return $fields['column_name'] . ':' . $fields['data_type'];
-                }, $fields));
-
-        if($files['factory']) {
-            Artisan::call('codegenerator:factory', [
-                'modelName' => $modelName,
-                '--fields' => $fieldString,
-                '--overwrite' => $overwrite
-            ]);
-        }
-            
-            //------------------------------------------
-            //
-            //migration command 
-            //-----------------------------------------
-            if($files['migration']) {
-              Artisan::call('codegenerator:migration', [
-                'modelName' => $modelName,
-                '--fields' => $fieldString,
-                '--softdelete' => $files['softDelete'],
-                '--overwrite' => $overwrite
-            ]);
-        }
-            //------------------------------------------
-            //notification command 
-            //-----------------------------------------
-                if($files['notification']) {
-                    Artisan::call('codegenerator:notification', [
-                        'className' => $this->notificationData['class_name'] ?? $modelName . 'Notification',
-                        '--modelName' => $modelName,
-                        '--data' => $this->notificationData['data'] ?? '',
-                        '--body' => $this->notificationData['body'] ?? '',
-                        '--subject' => $this->notificationData['subject'] ?? '',
-                        '--overwrite' => $overwrite
-                    ]);
-                }
-            //----------------------------------------
-            //request command 
-            //----------------------------------------
-
-            $ruleString = implode(',', array_map(function($field) {
-                return $field['column_name'] . ':' . $field['column_validation'];
+        if($files['resource']) {
+        Artisan::call('codegenerator:resource', [
+            'modelName' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
+        //------------------------------------------
+        //factory command 
+        //-----------------------------------------
+        $fieldString = implode(',', array_map(function ($fields) {
+                return $fields['column_name'] . ':' . $fields['data_type'];
             }, $fields));
 
-            if($files['request']) {
-                Artisan::call('codegenerator:request', [
-                    $modelName,
-                    '--rules' => $ruleString,
+    if($files['factory']) {
+        Artisan::call('codegenerator:factory', [
+            'modelName' => $modelName,
+            '--fields' => $fieldString,
+            '--overwrite' => $overwrite
+        ]);
+    }
+        
+        //------------------------------------------
+        //
+        //migration command 
+        //-----------------------------------------
+        if($files['migration']) {
+          Artisan::call('codegenerator:migration', [
+            'modelName' => $modelName,
+            '--fields' => $fieldString,
+            '--softdelete' => $files['softDelete'],
+            '--overwrite' => $overwrite
+        ]);
+    }
+        //------------------------------------------
+        //notification command 
+        //-----------------------------------------
+            if($files['notification']) {
+                Artisan::call('codegenerator:notification', [
+                    'className' => $this->notificationData['class_name'] ?? $modelName . 'Notification',
+                    '--modelName' => $modelName,
+                    '--data' => $this->notificationData['data'] ?? '',
+                    '--body' => $this->notificationData['body'] ?? '',
+                    '--subject' => $this->notificationData['subject'] ?? '',
                     '--overwrite' => $overwrite
                 ]);
+            }
+        //----------------------------------------
+        //request command 
+        //----------------------------------------
 
-            }
-             //SERVICE command 
-             if($files['service']) {
-                Artisan::call('codegenerator:service',[
-                    'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-            //------------------------------------------
-            //observer command 
-            //-----------------------------------------   
-            if($files['observer'])  {
-                Artisan::call('codegenerator:observer',[
-                    'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-            //------------------------------------------
-            //policy command 
-            //-----------------------------------------
-        if($files['policy']) {
-            Artisan::call('codegenerator:policy',[
+        $ruleString = implode(',', array_map(function($field) {
+            return $field['column_name'] . ':' . $field['column_validation'];
+        }, $fields));
+
+        if($files['request']) {
+            Artisan::call('codegenerator:request', [
+                $modelName,
+                '--rules' => $ruleString,
+                '--overwrite' => $overwrite
+            ]);
+
+        }
+         //SERVICE command 
+         if($files['service']) {
+            Artisan::call('codegenerator:service',[
                 'modelName' => $modelName,
                 '--overwrite' => $overwrite
             ]);
         }
-            // traits
-                if ($files['traits']) {
-                    $source = __DIR__ . '/../../TraitsLibrary/Traits';
-
-                    // Define the destination path in the Laravel app
-                    $destination = app_path(config('code_generator.trait_path','Traits'));
-
-                    // Copy directory if it doesn't exist yet or overwrite if needed
-                    if (File::exists($source)) {
-                        File::ensureDirectoryExists($destination);
-                        File::copyDirectory($source, $destination);
-                        Log::info('✔ Traits copied successfully to app/Traits.');
-                    } else {
-                        $this->error('Traits source folder not found: ' . $source);
-                    }
-                }
-                if (!empty($this->generatedFiles)) {
-                    $this->successMessage = 'Successfully generated: ' . implode(', ', $this->generatedFiles);
-                    session()->flash('success', $this->successMessage);
-                }
-        } else {
-            $this->generalError = 'Please add at least one field and select at least one method.';
+        //------------------------------------------
+        //observer command 
+        //-----------------------------------------   
+        if($files['observer'])  {
+            Artisan::call('codegenerator:observer',[
+                'modelName' => $modelName,
+                '--overwrite' => $overwrite
+            ]);
         }
+        //------------------------------------------
+        //policy command 
+        //-----------------------------------------
+    if($files['policy']) {
+        Artisan::call('codegenerator:policy',[
+            'modelName' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
+        // traits
+        if ($files['traits']) {
+            $source = __DIR__ . '/../../TraitsLibrary/Traits';
+            $destination = app_path(config('code_generator.trait_path','Traits'));
+
+            // Copy directory if it doesn't exist yet or overwrite if needed
+            if (File::exists($source)) {
+                File::ensureDirectoryExists($destination);
+                File::copyDirectory($source, $destination);
+                Log::info('✔ Traits copied successfully to app/Traits.');
+            } else {
+                $this->error('Traits source folder not found: ' . $source);
+            }
+
+            // Get selected traits
+            $selectedTraits = [];
+            if ($this->ApiResponse) $selectedTraits[] = 'ApiResponse';
+            if ($this->BaseModel) $selectedTraits[] = 'BaseModel';
+            if ($this->BootModel) $selectedTraits[] = 'BootModel';
+            if ($this->PaginationTrait) $selectedTraits[] = 'PaginationTrait';
+            if ($this->ResourceFilterable) $selectedTraits[] = 'ResourceFilterable';
+            if ($this->HasUuid) $selectedTraits[] = 'HasUuid';
+            if ($this->HasUserAction) $selectedTraits[] = 'HasUserAction';
+
+            // Add selected traits to the model
+            if (!empty($selectedTraits)) {
+                $traitsString = implode(',', $selectedTraits);
+                Artisan::call('codegenerator:model', [
+                    'modelName' => $modelName,
+                    '--traits' => $traitsString,
+                    '--overwrite' => $overwrite
+                ]);
+            }
+        }
+
+        // Show success message
+        $this->successMessage = 'Successfully generated Files';
+        session()->flash('success', $this->successMessage);
     }
 
     public function render()

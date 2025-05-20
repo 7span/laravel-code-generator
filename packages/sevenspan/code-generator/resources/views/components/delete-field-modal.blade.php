@@ -8,7 +8,7 @@
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
             <div class="mt-4 space-y-4">
-                Delete This Field.
+                You want to delete this field?
             </div>
 
         <!-- Modal footer -->

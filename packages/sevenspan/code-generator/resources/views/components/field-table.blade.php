@@ -11,8 +11,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td class="px-4 py-2 text-gray-600">name</td>
-                    <td class="px-4 py-2 text-gray-600">string</td>
+                    <td class="px-4 py-2 text-gray-600">id</td>
+                    <td class="px-4 py-2 text-gray-600">auto_increment</td>
                     <td class="px-4 py-2 text-gray-600">required</td>
                     <td class="px-4 py-2 text-gray-600">
                         <button>
@@ -24,9 +24,9 @@
                     </td>
                 </tr>
                   <tr>
-                    <td class="px-4 py-2 text-gray-600">category</td>
-                    <td class="px-4 py-2 text-gray-600">string</td>
-                    <td class="px-4 py-2 text-gray-600">optional</td>
+                    <td class="px-4 py-2 text-gray-600">created_at</td>
+                    <td class="px-4 py-2 text-gray-600">date_time_picker</td>
+                    <td class="px-4 py-2 text-gray-600">required</td>
                     <td class="px-4 py-2 text-gray-600">
                         <button>
                             <x-code-generator::delete-svg />

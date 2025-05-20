@@ -3,7 +3,7 @@
     x-transition.duration.200ms x-on:click.self="$wire.isRelEditModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
 
-    <x-code-generator::modal modalTitle="Edit">
+    <x-code-generator::modal modalTitle=" Update Eloquent Relation">
 
         <!-- Modal header -->
         <x-slot:closebtn>

@@ -84,9 +84,9 @@ class RestApi extends Component
         'column_validation' => 'required',
         'add_scope' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
-        'data' => 'required|regex:/^\\s*\\[\\s*(["\']?[A-Za-z_]+["\']?\\s*=>\\s*\\d+\\s*(?:,\\s*["\']?[A-Za-z]+["\']?\\s*=>\\s*\\d+)*)?\\s*\\]$/',
-        'subject' => 'required|regex:/^[A-Za-z]+$/',
-        'body' => 'required|regex:/^[A-Za-z]+$/',
+        'data' => 'required|regex:/^[A-Za-z]+=>\d+(?:,[A-Za-z]+:\d+)*$/',
+        'subject' => 'required|regex:/^[A-Za-z ]+$/',
+        'body' => 'required|regex:/^[A-Za-z ]+$/',
     ];
     public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
@@ -437,7 +437,7 @@ class RestApi extends Component
         //-----------------------------------------
         Artisan::call('codegenerator:controller', [
             'modelName' => $modelName,
-            '--methods' => implode(',', $selectedTraits),
+            '--methods' => implode(',', $selectedMethods),
             '--service' => $files['service'],
             '--resource' => $files['resource'],
             '--request' => $files['request'],

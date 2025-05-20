@@ -13,7 +13,7 @@
             </label>
             <label class="flex items-center">
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crudFile">
-                <span class="ml-2 text-sm">Admin CRUD</span>
+                <span class="ml-2 text-sm">AdminCRUD Controller</span>
             </label>
             <label class="flex items-center">
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="policyFile">
@@ -46,9 +46,9 @@
         </div>
     </div>
     <div class="mb-6">
-    <h2 class="text-sm font-medium mb-2">Features:</h2>
-    <div class="flex flex-wrap gap-4">
-    <label class="flex items-center">
+        <h2 class="text-sm font-medium mb-2">Features:</h2>
+        <div class="flex flex-wrap gap-4">
+            <label class="flex items-center">
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
                 <span class="ml-2 text-sm">Soft Delete</span>
             </label>
@@ -56,8 +56,8 @@
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwriteFiles">
                 <span class="ml-2 text-sm">Overwrite</span>
             </label>
-</div>
-</div>
+        </div>
+    </div>
     <!-- Traits Section -->
     <div class="mb-6">
         <h2 class="text-sm font-medium mb-2">Traits:</h2>

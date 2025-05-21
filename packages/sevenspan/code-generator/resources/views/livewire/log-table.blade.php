@@ -40,36 +40,36 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($logs as $log)
-                    <tr>
-                        <td class="px-6 py-4 text-sm text-gray-900 align-top break-words">{{ $log->file_type }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-900 align-top">{{ $log->file_path }}</td>
-                        <td class="px-6 py-4 align-top">
-                            @php
-                            $statusValue = $log->status;
-                            if (is_object($statusValue) && enum_exists(get_class($statusValue)) &&
-                            property_exists($statusValue, 'value')) {
-                            $statusValue = $statusValue->value;
-                            }
-                            $statusValue = (string) $statusValue;
-                            $statusClass = match ($statusValue) {
-                            'success' => 'bg-green-100 text-green-800',
-                            'error' => 'bg-red-100 text-red-800',
-                            'warning' => 'bg-yellow-100 text-yellow-800',
-                            default => 'bg-gray-100 text-gray-800',
-                            };
-                            @endphp
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
-                                {{ ucfirst($statusValue) }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 align-top break-words">{{ $log->message }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-900 align-top text-center">
-                            {{ (int) (bool) $log->is_overwrite}}
-                        </td>
-
-                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap align-top">
-                            @php
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900 align-top break-words"> {{-- break-words is good for type --}}
+                                {{ $log->file_type }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900 align-top"> {{-- break-all for file paths as they often have no spaces --}}
+                                {{ $log->file_path }}
+                            </td>
+                            <td class="px-6 py-4 align-top">
+                                @php
+                                    $statusValue = $log->status;
+                                    if (is_object($statusValue) && enum_exists(get_class($statusValue)) && property_exists($statusValue, 'value')) {
+                                        $statusValue = $statusValue->value;
+                                    }
+                                    $statusValue = (string) $statusValue;
+                                    $statusClass = match ($statusValue) {
+                                        'success' => 'bg-green-100 text-green-800',
+                                        'error'   => 'bg-red-100 text-red-800',
+                                        'warning' => 'bg-yellow-100 text-yellow-800',
+                                        default   => 'bg-gray-100 text-gray-800',
+                                    };
+                                @endphp
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                                    {{ ucfirst($statusValue) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900 align-top break-words"> {{-- break-words for messages --}}
+                                {{ $log->message }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap align-top">
+                                                            @php
                             $created = $log->created_at;
                             $now = now();
 
@@ -87,9 +87,8 @@
                                             @endphp
 
                                             {{ $diff }}
-                        </td>
-
-                    </tr>
+                            </td>
+                        </tr>
                     @empty
                     <tr>
                         <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">

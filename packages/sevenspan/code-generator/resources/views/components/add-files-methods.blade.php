@@ -108,19 +108,8 @@
         </div>
     </div>      
 </div>
-        <h2 class="text-sm font-medium mb-2">General Settings:</h2>
-        <div class="mb-6 flex space-x-4 border-b border-gray-200">
-            <label class="flex items-center mb-2">
-                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwriteFiles">
-                <span class="ml-1 text-sm">Overwrite Files</span>
-            </label>
-            <label class="flex items-center mb-2">
-                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
-                <span class="ml-1 text-sm">Soft Delete</span>
-            </label>
-        </div>
-     <div class="mb-6" x-show="!crudFile">
-        <h2 class="text-sm font-medium mb-2">Which method do you want to include?</h2>
+ <div class="mb-6" x-show="!crudFile">
+        <h2 class="text-sm font-medium mb-2">Which method do you want to include in API Controller?</h2>
         <div class="flex space-x-4">
             <label class="flex items-center">
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="index">
@@ -144,4 +133,15 @@
             </label>
         </div>
     </div>
+        <h2 class="text-sm font-medium mb-2">General Settings:</h2>
+        <div class="mb-6 flex space-x-4 ">
+            <label class="flex items-center mb-2">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwriteFiles">
+                <span class="ml-1 text-sm">Overwrite Files</span>
+            </label>
+            <label class="flex items-center mb-2">
+                <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
+                <span class="ml-1 text-sm">Soft Delete</span>
+            </label>
+        </div>
 </div>

@@ -6,6 +6,7 @@
                     <th class="px-4 py-2 text-left text-sm">Column</th>
                     <th class="px-4 py-2 text-left text-sm">Data Type</th>
                     <th class="px-4 py-2 text-left text-sm">Validation</th>
+                    <th class="px-4 py-2 text-left text-sm">Scope Added</th>
                     <th class="px-4 py-2 text-left text-sm">Action</th>
                 </tr>
             </thead>
@@ -15,11 +16,11 @@
                     <td class="px-4 py-2 text-gray-600">auto_increment</td>
                     <td class="px-4 py-2 text-gray-600">required</td>
                 </tr>
-                  <tr>
+                <tr>
                     <td class="px-4 py-2 text-gray-600">created_at</td>
                     <td class="px-4 py-2 text-gray-600">date_time_picker</td>
                     <td class="px-4 py-2 text-gray-600">required</td>
-                  
+
                 </tr>
                 <tr>
                     <td class="px-4 py-2 text-gray-600">updated_at</td>
@@ -30,19 +31,21 @@
                     <td class="px-4 py-2 text-gray-600">created_by</td>
                     <td class="px-4 py-2 text-gray-600">string</td>
                     <td class="px-4 py-2 text-gray-600">optional</td>
-                    
+
                 </tr>
                 <tr>
                     <td class="px-4 py-2 text-gray-600">updated_by</td>
                     <td class="px-4 py-2 text-gray-600">string</td>
                     <td class="px-4 py-2 text-gray-600">optional</td>
-                    
+
                 </tr>
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">
                     <td class="px-4 py-2">{{$field['column_name']}}</td>
                     <td class="px-4 py-2">{{$field['data_type']}}</td>
                     <td class="px-4 py-2">{{$field['column_validation']}}</td>
+                    <td class="px-4 py-2">{{$field['add_scope'] ? 'Yes' : 'No' }}</td>
+
                     <td class="px-4 py-2">
                         <button wire:click="openDeleteFieldModal('{{ $field['id']}}')">
                             <x-code-generator::delete-svg />

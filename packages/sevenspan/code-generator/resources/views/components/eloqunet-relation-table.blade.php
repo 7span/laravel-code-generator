@@ -25,6 +25,7 @@
                         <x-code-generator::edit-svg />
                     </button>
                 </td>
+
             </tr>
             @endforeach
             @else

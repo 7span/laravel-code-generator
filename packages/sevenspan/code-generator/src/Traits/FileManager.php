@@ -34,20 +34,20 @@ trait FileManager
             if ($shouldOverwrite) {
                 // Overwrite existing file if overwrite option is provided
                 File::put($filePath, $contents);
-                $logMessage = "{$fileType->value} file was overwritten successfully at: {$filePath}";
+                $logMessage = "{$fileType->value} file was overwritten successfully}";
                 $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
                 $isOverwrite = true;
                 $this->info($logMessage);
             } else {
                 // Skip overwriting if overwrite option is not provided
-                $logMessage = "{$fileType->value} file already exists at: {$filePath}";
+                $logMessage = "{$fileType->value} file already exists";
                 $logStatus = CodeGeneratorFileLogStatus::ERROR;
                 $this->warn($logMessage);
             }
         } else {
             // Create new file if it doesn't exist
             File::put($filePath, $contents);
-            $logMessage = "{$fileType->value} file has been created successfully at: {$filePath}";
+            $logMessage = "{$fileType->value} file has been created successfully";
             $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
             $this->info($logMessage);
         }

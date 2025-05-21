@@ -1,6 +1,6 @@
 <div class="mb-6">
     <div class="overflow-x-auto">
-        <table class="w-full border-collapse">
+        <table class="w-full border-collapse  border border-gray-200">
             <thead class="bg-gray-200">
                 <tr>
                     <th class="px-4 py-2 text-left text-sm">Column</th>

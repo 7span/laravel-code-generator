@@ -42,18 +42,10 @@
 
             <!-- Add Scope -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Add Scope In The Model File</label>
-                <div class="flex items-center gap-6">
-                    <label class="inline-flex items-center">
-                        <input type="radio" wire:model="add_scope" name="option" value="yes"
-                            class="form-radio text-orange-500" checked>
-                        <span class="ml-2">Yes</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="radio" wire:model="add_scope" name="option" value="no"
-                            class="form-radio text-orange-500">
-                        <span class="ml-2">No</span>
-                    </label>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" wire:model.live="add_scope" value="yes"
+                        class="form-checkbox text-orange-500">
+                    <span class="text-sm text-gray-800">Do you want to add scope?</span>
                 </div>
                 @error('add_scope') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
@@ -61,9 +53,9 @@
         <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
-            <x-code-generator::button title="Cancel" x-on:click="$wire.isEditFieldModalOpen=false"/>
-          </div>
-          <x-code-generator::button wire:click="saveField" title="Update" />
+                <x-code-generator::button title="Cancel" x-on:click="$wire.isEditFieldModalOpen=false" />
+            </div>
+            <x-code-generator::button wire:click="saveField" title="Update" />
         </x-slot:footer>
         </x-modal>
 </div>

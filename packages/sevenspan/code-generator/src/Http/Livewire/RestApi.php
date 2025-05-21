@@ -60,8 +60,6 @@ class RestApi extends Component
     public $policyFile = false;
 
     // Trait checkboxes
-    public $ApiResponse = false;
-    public $BaseModel = false;
     public $BootModel = false;
     public $PaginationTrait = false;
     public $ResourceFilterable = false;
@@ -82,7 +80,7 @@ class RestApi extends Component
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[A-Za-z]+$/',
         'column_validation' => 'required',
-        'add_scope' => 'required',
+        // 'add_scope' => ',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^[A-Za-z_]+:\d+(?:,[A-Za-z_]+:\d+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
@@ -200,7 +198,7 @@ class RestApi extends Component
             'data_type' => $this->rules['data_type'],
             'column_name' => $this->rules['column_name'],
             'column_validation' => $this->rules['column_validation'],
-            'add_scope' => $this->rules['add_scope'],
+            // 'add_scope' => $this->rules['add_scope'],
         ]);
         if ($this->fieldId) { // If we are editing
             $this->fieldsData = collect($this->fieldsData)->map(function ($field) {
@@ -336,10 +334,8 @@ class RestApi extends Component
     {
 
 
-        $selectedTraits = [];
+        $selectedTraits = ['ApiResponser', 'BaseModel'];
 
-        if ($this->ApiResponse)        $selectedTraits[] = 'ApiResponser';
-        if ($this->BaseModel)          $selectedTraits[] = 'BaseModel';
         if ($this->BootModel)          $selectedTraits[] = 'BootModel';
         if ($this->PaginationTrait)    $selectedTraits[] = 'PaginationTrait';
         if ($this->ResourceFilterable) $selectedTraits[] = 'ResourceFilterable';

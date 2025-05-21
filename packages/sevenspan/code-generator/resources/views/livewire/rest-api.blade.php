@@ -7,6 +7,9 @@
             <h2 class="grey-900 text-xl font-semibold pb-2">Model Name</h2>
             <input type="text" class="border border-gray-300 rounded-lg px-4 py-2 w-full" placeholder="Enter Name"
                 wire:model.live="modelName" />
+            <span class="text-s text-gray-600 italic">
+                Note: Enter your model name like, Project OR Project Category.
+            </span>
             <div>
                 @error('modelName')
                 <span class="text-red-600 text-sm">{{ $message }}</span>
@@ -53,4 +56,4 @@
     <x-code-generator::delete-field-modal />
     <x-code-generator::edit-field-modal />
     <x-code-generator::notification-modal />
-    <div>
+</div>

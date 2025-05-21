@@ -12,14 +12,29 @@
                 setTimeout(() => this.showToast = false, 3000);
             }, 50);
         });
-        Livewire.on('refresh-page', () => {
+         Livewire.on('refresh-page', () => {
             setTimeout(() => {
                 window.location.reload();
             }, 1000); // Wait 1 second to show the success message before refreshing
         });
-
     }
 }">
+
+    <!-- Loading Overlay 
+    <div x-show="$wire.isGenerating" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-gray-700 font-medium">Generating files...</p>
+        </div>
+    </div>   -->
+
     <!-- Toast Message -->
     <div x-show="showToast" x-transion:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 transform translate-y-2"

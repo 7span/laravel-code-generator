@@ -1,4 +1,4 @@
-<div x-data="{ crudFile: @entangle('crudFile').live }">
+<div>
     <!-- Options -->
      <h2 class="text-sm font-medium mb-2">Which files do you want to include?</h2>
     <div class="grid grid-cols-3 mb-6 gap-6 border-b border-gray-300">
@@ -108,7 +108,7 @@
         </div>
     </div>      
 </div>
- <div class="mb-6" x-show="!crudFile">
+ <div class="mb-6" >
         <h2 class="text-sm font-medium mb-2">Which method do you want to include in API Controller?</h2>
         <div class="flex space-x-4">
             <label class="flex items-center">

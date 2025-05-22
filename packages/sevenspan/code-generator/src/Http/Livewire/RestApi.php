@@ -10,12 +10,15 @@ use Illuminate\Support\Facades\Log;
 
 class RestApi extends Component
 {
+    // Data properties
     public array $relationData = [];
     public array $fieldsData = [];
     public array $notificationData = [];
     public $generalError = '';
-    protected $signature = '';
-    // Modal visibility 
+    public $errorMessage = "";
+    public $successMessage = '';
+
+    // Modal visibility properties
     public $isAddRelModalOpen = false;
     public $isRelDeleteModalOpen = false;
     public $isRelEditModalOpen = false;
@@ -24,9 +27,8 @@ class RestApi extends Component
     public $isEditFieldModalOpen = false;
     public $isNotificationModalOpen = false;
 
-    // General form inputs
+    // Form inputs
     public $modelName;
-
     public $relations, $relationId, $fields, $fieldId;
 
     // Relationship form fields
@@ -44,6 +46,8 @@ class RestApi extends Component
     public $show = false;
     public $update = false;
     public $destroy = false;
+
+    // File generation options
     public $modelFile = false;
     public $migrationFile = false;
     public $softDeleteFile = false;
@@ -65,9 +69,7 @@ class RestApi extends Component
     public $HasUuid = false;
     public $HasUserAction = false;
 
-    public $errorMessage = "";
-    public $successMessage = '';
-    //validation rules
+    // Validation rules
     protected $rules = [
         'modelName' => 'required|regex:/^[A-Z][a-z]+$/',
         'related_model' => 'required|regex:/^[A-Z][a-z]+$/',
@@ -79,17 +81,68 @@ class RestApi extends Component
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
-        'data' => 'required|regex:/^[A-Za-z_]+:\d+(?:,[A-Za-z_]+:\d+)*$/',
+        'data' => 'required|regex:/^[A-Za-z]+=>\d+(?:,[A-Za-z]+:\d+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
     ];
+
     public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'data.array' => 'The Data field must be a valid array.',
     ];
 
-    //Relations Handling
+    public function render()
+    {
+        return view('code-generator::livewire.rest-api');
+    }
+
+    /**
+     * Live validation for form fields
+     */
+    public function updated($propertyName)
+    {
+        $this->validateOnly($propertyName);
+    }
+
+    /**
+     * Update notification file checkbox state and open modal if checked
+     */
+    public function updatedNotificationFile(): void
+    {
+        if ($this->notificationFile) {
+            $this->isNotificationModalOpen = true;
+        }
+    }
+
+    /**
+     * Validate fields and methods
+     */
+    public function validateFieldsAndMethods()
+    {
+        $this->errorMessage = "";
+
+        // Check if both fields and methods are missing
+        if (empty($this->fieldsData) && !($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
+            $this->errorMessage = "Please add at least one field and select at least one method.";
+            return false;
+        }
+
+        // Check only for fields
+        if (empty($this->fieldsData)) {
+            $this->errorMessage = "Please add at least one field.";
+            return false;
+        }
+
+        // Check only for methods
+        if (!($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
+            $this->errorMessage = "Please select at least one method.";
+            return false;
+        }
+
+        return true;
+    }
+
     public function openDeleteModal($id): void
     {
         $this->relationId = $id;
@@ -114,182 +167,7 @@ class RestApi extends Component
         }
     }
 
-    public function addRelation(): void
-    {
-        $rules = [
-            'related_model' => $this->rules['related_model'],
-            'relation_type' => $this->rules['relation_type'],
-            'foreign_key' => $this->rules['foreign_key'],
-            'local_key' => $this->rules['local_key'],
-        ];
-        if (in_array($this->relation_type, ['Has One Through', 'Has Many Through'])) {
-            $rules['second_model'] = $this->rules['second_model'];
-        }
-        $this->validate($rules);
-
-        if ($this->relationId) { // If we're editing
-            $this->relationData = collect($this->relationData)->map(function ($relation) {
-                if ($relation['id'] === $this->relationId) {
-                    return [
-                        'id' => $this->relationId,
-                        'related_model' => $this->related_model,
-                        'relation_type' => $this->relation_type,
-                        'second_model' => $this->second_model,
-                        'foreign_key' => $this->foreign_key,
-                        'local_key' => $this->local_key,
-                    ];
-                }
-                return $relation;
-            })->toArray();
-        } else { // If we're adding a new relation
-            $this->relationData[] = [
-                'id' => Str::random(8),
-                'related_model' => $this->related_model,
-                'second_model' => $this->second_model,
-                'relation_type' => $this->relation_type,
-                'foreign_key' => $this->foreign_key,
-                'local_key' => $this->local_key,
-            ];
-        }
-        $this->isAddRelModalOpen = false;
-        $this->isRelEditModalOpen = false;
-        $this->resetForm();
-        $this->relationId = null;
-    }
-
-    // Fields Handling
-    public function saveField()
-    {
-        // Check if column name already exists
-        $columnExists = collect($this->fieldsData)->contains(function ($field) {
-            return $field['column_name'] === $this->column_name &&
-                ($this->fieldId ? $field['id'] !== $this->fieldId : true);
-        });
-
-        if ($columnExists) {
-            $this->addError('column_name', ' You have already taken this column');
-            return;
-        }
-
-        $this->validate([
-            'data_type' => $this->rules['data_type'],
-            'column_name' => $this->rules['column_name'],
-            'column_validation' => $this->rules['column_validation'],
-        ]);
-        if ($this->fieldId) { // If we are editing
-            $this->fieldsData = collect($this->fieldsData)->map(function ($field) {
-                if ($field['id'] === $this->fieldId) {
-                    return [
-                        'id' => $this->fieldId,
-                        'data_type' => $this->data_type,
-                        'column_name' => $this->column_name,
-                        'column_validation' => $this->column_validation,
-                        'add_scope' => $this->add_scope,
-                    ];
-                }
-                return $field;
-            })->toArray();
-        } else { // If we are adding a new field
-            $this->fieldsData[] = [
-                'id' => Str::random(8),
-                'data_type' => $this->data_type,
-                'column_name' => $this->column_name,
-                'column_validation' => $this->column_validation,
-                'add_scope' => $this->add_scope,
-            ];
-        }
-        $this->isAddFieldModalOpen = false;
-        $this->isEditFieldModalOpen = false;
-        $this->fieldId = null;
-        $this->resetForm();
-    }
-    //open editfieldmodal
-    public function openEditFieldModal($fieldId)
-    {
-        $this->fieldId = $fieldId;
-        $this->isEditFieldModalOpen = true;
-        $field = collect($this->fieldsData)->firstWhere('id', $fieldId);
-        if ($field) {
-            $this->fill($field);
-        }
-    }
-    //open delete field modal
-    public function openDeleteFieldModal($id)
-    {
-        $this->fieldId = $id;
-        $this->isDeleteFieldModalOpen = true;
-    }
-
-    //delete field from table
-    public function deleteField(): void
-    {
-        $this->fieldsData = array_filter($this->fieldsData, function ($field) {
-            return $field['id'] !== $this->fieldId;
-        });
-        $this->isDeleteFieldModalOpen = false;
-    }
-
-    // Notification
-    public function updatedNotificationFile(): void
-    {
-        if ($this->notificationFile) {
-            $this->isNotificationModalOpen = true;
-        }
-    }
-
-    public function saveNotification(): void
-    {
-        $this->validate([
-            'class_name' => $this->rules['class_name'],
-            'data' => $this->rules['data'],
-            'subject' => $this->rules['subject'],
-            'body' => $this->rules['body'],
-        ]);
-
-        // Store notification data
-        $this->notificationData = [
-            'class_name' => $this->class_name,
-            'data' => $this->data,
-            'subject' => $this->subject,
-            'body' => $this->body,
-        ];
-
-        $this->isNotificationModalOpen = false;
-        $this->reset(['class_name', 'data', 'subject', 'body']);
-    }
-
-    // live Validation
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-    }
-
-    public function check()
-    {
-        $this->errorMessage = "";
-
-        // Check if both fields and methods are missing
-        if (empty($this->fieldsData) && !($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
-            $this->errorMessage = "Please add at least one field and select at least one method.";
-            return false;
-        }
-
-        // Check only for fields
-        if (empty($this->fieldsData)) {
-            $this->errorMessage = "Please add at least one field.";
-            return false;
-        }
-
-        // Check only for methods
-        if (!($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
-            $this->errorMessage = "Please select at least one method.";
-            return false;
-        }
-
-        return true;
-    }
-    // reset form fields
-     public function resetForm()
+    public function resetForm()
     {
         $this->reset([
             'modelName',
@@ -331,284 +209,462 @@ class RestApi extends Component
         $this->resetErrorBag();
     }
 
-    //pass form data and calls commands
+    public function addRelation(): void
+    {
+        $rules = [
+            'related_model' => $this->rules['related_model'],
+            'relation_type' => $this->rules['relation_type'],
+            'foreign_key' => $this->rules['foreign_key'],
+            'local_key' => $this->rules['local_key'],
+        ];
+
+        // Add second_model rule if needed
+        if (in_array($this->relation_type, ['Has One Through', 'Has Many Through'])) {
+            $rules['second_model'] = $this->rules['second_model'];
+        }
+
+        $this->validate($rules);
+        $relationData = [
+            'related_model' => $this->related_model,
+            'relation_type' => $this->relation_type,
+            'foreign_key' => $this->foreign_key,
+            'local_key' => $this->local_key,
+        ];
+
+        if (isset($rules['second_model'])) {
+            $relationData['second_model'] = $this->second_model;
+        }
+
+        // Update or add relation
+        if ($this->relationId) {
+            foreach ($this->relationData as &$relation) {
+                if ($relation['id'] === $this->relationId) {
+                    $relation = array_merge(['id' => $this->relationId], $relationData);
+                    break;
+                }
+            }
+            unset($relation);  // break reference
+        } else {
+            $this->relationData[] = ['id' => Str::random(8)] + $relationData;
+        }
+        $this->isAddRelModalOpen = false;
+        $this->isRelEditModalOpen = false;
+        $this->reset(['related_model', 'relation_type', 'second_model', 'foreign_key', 'local_key',]);
+        $this->relationId = null;
+    }
+
+    public function openEditFieldModal($fieldId)
+    {
+        $this->fieldId = $fieldId;
+        $this->isEditFieldModalOpen = true;
+        $field = collect($this->fieldsData)->firstWhere('id', $fieldId);
+        if ($field) {
+            $this->fill($field);
+        }
+    }
+
+    public function openDeleteFieldModal($id)
+    {
+        $this->fieldId = $id;
+        $this->isDeleteFieldModalOpen = true;
+    }
+
+    public function deleteField(): void
+    {
+        $this->fieldsData = array_filter($this->fieldsData, function ($field) {
+            return $field['id'] !== $this->fieldId;
+        });
+        $this->isDeleteFieldModalOpen = false;
+    }
+
+    public function saveField()
+    {
+        // Check for duplicate column name, excluding the current edited field by ID
+        $columnExists = false;
+        foreach ($this->fieldsData as $field) {
+            if (
+                $field['column_name'] === $this->column_name &&
+                (!$this->fieldId || $field['id'] !== $this->fieldId)
+            ) {
+                $columnExists = true;
+                break;
+            }
+        }
+
+        if ($columnExists) {
+            $this->addError('column_name', 'You have already taken this column');
+            return;
+        }
+
+        $this->validate([
+            'data_type' => $this->rules['data_type'],
+            'column_name' => $this->rules['column_name'],
+            'column_validation' => $this->rules['column_validation'],
+        ]);
+
+        $fieldData = [
+            'data_type' => $this->data_type,
+            'column_name' => $this->column_name,
+            'column_validation' => $this->column_validation,
+            'add_scope' => $this->add_scope,
+        ];
+
+        // Update existing field or add new one
+        if ($this->fieldId) {
+            foreach ($this->fieldsData as &$field) {
+                if ($field['id'] === $this->fieldId) {
+                    $field = ['id' => $this->fieldId] + $fieldData;
+                    break;
+                }
+            }
+            unset($field); // break reference
+        } else {
+            $this->fieldsData[] = array_merge(['id' => Str::random(8)], $fieldData);
+        }
+        $this->isAddFieldModalOpen = false;
+        $this->isEditFieldModalOpen = false;
+        $this->fieldId = null;
+        $this->reset(['column_name', 'data_type', 'column_validation', 'add_scope']);
+    }
+
+    public function saveNotification(): void
+    {
+        $this->validate([
+            'class_name' => $this->rules['class_name'],
+            'data' => $this->rules['data'],
+            'subject' => $this->rules['subject'],
+            'body' => $this->rules['body'],
+        ]);
+
+        // Store notification data
+        $this->notificationData = [
+            [
+                'class_name' => $this->class_name,
+                'data' => $this->data,
+                'subject' => $this->subject,
+                'body' => $this->body,
+            ]
+        ];
+
+        $this->isNotificationModalOpen = false;
+        $this->reset(['class_name', 'data', 'subject', 'body']);
+    }
+
+    /**
+     * Validate inputs before generation
+     */
+    private function validateInputs(): bool
+    {
+        // Validate model name
+        $this->validate(['modelName' => $this->rules['modelName']]);
+
+        // Check fields and methods validation
+        if (!$this->validateFieldsAndMethods()) {
+            session()->flash('error', $this->errorMessage);
+            return false;
+        }
+
+        return true;
+    }
+
     public function save(): void
     {
         try {
-             session()->put('form_data', [
-                'modelName' => $this->modelName,
-                'fieldsData' => $this->fieldsData,
-                'relationData' => $this->relationData,
-                'notificationData' => $this->notificationData,
-                'index' => $this->index,
-                'store' => $this->store,
-                'show' => $this->show,
-                'update' => $this->update,
-                'destroy' => $this->destroy,
-                'modelFile' => $this->modelFile,
-                'migrationFile' => $this->migrationFile,
-                'softDeleteFile' => $this->softDeleteFile,
-                'serviceFile' => $this->serviceFile,
-                'notificationFile' => $this->notificationFile,
-                'resourceFile' => $this->resourceFile,
-                'requestFile' => $this->requestFile,
-                'overwriteFiles' => $this->overwriteFiles,
-                'observerFile' => $this->observerFile,
-                'factoryFile' => $this->factoryFile,
-                'policyFile' => $this->policyFile,
-                'BootModel' => $this->BootModel,
-                'PaginationTrait' => $this->PaginationTrait,
-                'ResourceFilterable' => $this->ResourceFilterable,
-                'HasUuid' => $this->HasUuid,
-                'HasUserAction' => $this->HasUserAction
-            ]);
-            $selectedTraits = ['ApiResponser', 'BaseModel'];
-
-            if ($this->BootModel)          $selectedTraits[] = 'BootModel';
-            if ($this->PaginationTrait)    $selectedTraits[] = 'PaginationTrait';
-            if ($this->ResourceFilterable) $selectedTraits[] = 'ResourceFilterable';
-            if ($this->HasUuid)            $selectedTraits[] = 'HasUuid';
-            if ($this->HasUserAction)      $selectedTraits[] = 'HasUserAction';
-
-            $relationMap = [
-                'One to One' => 'hasOne',
-                'One to Many' => 'hasMany',
-                'Many to Many' => 'belongsToMany',
-                'Has One Through' => 'hasOneThrough',
-                'Has Many Through' => 'hasManyThrough',
-                'One To One (Polymorphic)' => 'morphOne',
-                'One To Many (Polymorphic)' => 'morphMany',
-                'Many To Many (Polymorphic)' => 'morphToMany',
-            ];
-
-            // Validate model name
-            $validModelName = $this->validate([
-                'modelName' => $this->rules['modelName'],
-            ]);
-            // Check fields and methods
-            if (!$this->check()) {
-                session()->flash('error', $this->errorMessage);
+            // Validate all inputs first
+            if (!$this->validateInputs()) {
                 return;
             }
-
-            $modelName = $validModelName['modelName'];
-            $relations = $this->relationData;
-            $fields = $this->fieldsData;
-            $files = [
-                'model' => $this->modelFile,
-                'migration' => $this->migrationFile,
-                'softDelete' => $this->softDeleteFile,
-                'adminCRUDFile' => $this->crudFile,
-                'service' => $this->serviceFile,
-                'notification' => $this->notificationFile,
-                'resource' => $this->resourceFile,
-                'request' => $this->requestFile,
-                'traits' => $this->traitFiles,
-                'observer' => $this->observerFile,
-                'policy' => $this->policyFile,
-                'factory' => $this->factoryFile
-            ];
-            $methods = [
-                'index' => $this->index,
-                'store' => $this->store,
-                'show' => $this->show,
-                'update' => $this->update,
-                'destroy' => $this->destroy,
-            ];
-            $overwrite = $this->overwriteFiles;
-
             // Generate files
-            $fieldString = collect($fields)->pluck('column_name')->implode(', ');
-
-            $relations = implode(', ', array_map(function ($relationData) use ($relationMap) {
-                $method = $relationMap[$relationData['relation_type']] ?? 'unknown';
-                return $relationData['related_model'] . ':' . $method;
-            }, $relations));
-
-            $methods = implode(',', array_keys(array_filter($methods)));
-            $traits = $files['traits'];
-            $softDelete = $files['softDelete'];
-            // Fix: Use the factory flag directly instead of migration flag
-            $factory = $files['factory'];
-
-            $selectedMethods = [];
-            if ($this->index) $selectedMethods[] = 'index';
-            if ($this->store) $selectedMethods[] = 'store';
-            if ($this->show) $selectedMethods[] = 'show';
-            if ($this->update) $selectedMethods[] = 'update';
-            if ($this->destroy) $selectedMethods[] = 'destroy';
-
-            // Model command
-            if ($files['model']) {
-                Artisan::call('codegenerator:model', [
-                    'modelName' => $modelName,
-                    '--fields' => $fieldString,
-                    '--relations' => $relations,
-                    '--methods' => implode(',', $selectedMethods),
-                    '--softDelete' => $softDelete,
-                    '--factory' => $factory,
-                    '--traits' => implode(',', $selectedTraits),
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //migration command
-            if ($files['migration']) {
-                // Create a properly formatted field string for migration with data types
-                $migrationFieldString = collect($fields)->map(function ($field) {
-                    return $field['column_name'] . ':' . $field['data_type'];
-                })->implode(',');
-
-                Artisan::call('codegenerator:migration', [
-                    'modelName' => $modelName,
-                    '--fields' => $migrationFieldString,
-                    '--softdelete' => $files['softDelete'],
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //controller command
-            Artisan::call('codegenerator:controller', [
-                'modelName' => $modelName,
-                '--methods' => implode(',', $selectedMethods),
-                '--service' => $files['service'],
-                '--resource' => $files['resource'],
-                '--request' => $files['request'],
-                '--overwrite' => $overwrite,
-                '--adminCrud' => $files['adminCRUDFile'],
-            ]);
-
-            //policy command
-            if ($files['policy']) {
-                Artisan::call('codegenerator:policy', [
-                    'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //migration command 
-            if ($files['migration']) {
-                // Create a properly formatted field string for migration with data types
-                $migrationFieldString = collect($fields)->map(function ($field) {
-                    return $field['column_name'] . ':' . $field['data_type'];
-                })->implode(',');
-
-                Artisan::call('codegenerator:migration', [
-                    'modelName' => $modelName,
-                    '--fields' => $migrationFieldString,
-                    '--softdelete' => $files['softDelete'],
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-
-            //observer command
-            if ($files['observer']) {
-                Artisan::call('codegenerator:observer', [
-                    'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-            //SERVICE command
-            if ($files['service']) {
-                Artisan::call('codegenerator:service', [
-                    'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //notification command
-            if ($files['notification']) {
-                // Get the first notification data if available
-                $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
-
-                Artisan::call('codegenerator:notification', [
-                    'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
-                    '--modelName' => $modelName,
-                    '--data' => $notificationData['data'] ?? '',
-                    '--body' => $notificationData['body'] ?? '',
-                    '--subject' => $notificationData['subject'] ?? '',
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //resource command
-            if ($files['resource']) {
-                Artisan::call('codegenerator:resource', [
-                    'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //request command
-            $ruleString = implode(',', array_map(function ($field) {
-                return $field['column_name'] . ':' . $field['column_validation'];
-            }, $fields));
-
-            if ($files['request']) {
-                Artisan::call('codegenerator:request', [
-                    'modelName' => $modelName,
-                    '--rules' => $ruleString,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            //factory command
-            $fieldString = implode(',', array_map(function ($fields) {
-                return $fields['column_name'] . ':' . $fields['data_type'];
-            }, $fields));
-
-            if ($files['factory']) {
-                Artisan::call('codegenerator:factory', [
-                    'modelName' => $modelName,
-                    '--fields' => $fieldString,
-                    '--overwrite' => $overwrite
-                ]);
-            }
-
-            // traits
-            if (!empty($selectedTraits)) {
-                $source = __DIR__ . '/../../TraitsLibrary/Traits';
-                $destination = app_path(config('code_generator.trait_path', 'Traits'));
-
-                if (!File::exists($source)) {
-                    $this->error('Traits source folder not found: ' . $source);
-                } else {
-                    File::ensureDirectoryExists($destination);
-
-                    foreach ($selectedTraits as $trait) {
-                        $fileName = $trait . '.php';
-                        $sourceFile = $source . DIRECTORY_SEPARATOR . $fileName;
-                        $destinationFile = $destination . DIRECTORY_SEPARATOR . $fileName;
-
-                        if (File::exists($sourceFile)) {
-                            File::copy($sourceFile, $destinationFile);
-                            Log::info("✔ Trait $fileName copied to app/Traits.");
-                        } else {
-                            Log::warning("⚠ Trait file not found: $fileName");
-                        }
-                    }
-                }
-            }
-
-            // Show success message
+            $this->generateFiles();
             session()->flash('success', 'Files generated successfully!');
             $this->dispatch('show-toast', ['message' => 'Files generated successfully!', 'type' => 'success']);
-
-            // Reset form and refresh
-            session()->forget('form_data');
-            $this->resetForm();
-
-            // Refresh the page after a short delay to show the success message
-            $this->dispatch('refresh-page');
+            // Reset form
+            $this->reset();
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
             session()->flash('error', $e->getMessage());
             $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
         }
     }
-    public function render()
+
+
+    /**
+     * Generate all selected files
+     */
+    private function generateFiles(): void
     {
-        return view('code-generator::livewire.rest-api');
+        $selectedTraits = array_filter([
+            'ApiResponser',
+            'BaseModel',
+            $this->BootModel ? 'BootModel' : null,
+            $this->PaginationTrait ? 'PaginationTrait' : null,
+            $this->ResourceFilterable ? 'ResourceFilterable' : null,
+            $this->HasUuid ? 'HasUuid' : null,
+            $this->HasUserAction ? 'HasUserAction' : null,
+        ]);
+        // Relation mapping
+        $relationMap = [
+            'One to One' => 'hasOne',
+            'One to Many' => 'hasMany',
+            'Many to Many' => 'belongsToMany',
+            'Has One Through' => 'hasOneThrough',
+            'Has Many Through' => 'hasManyThrough',
+            'One To One (Polymorphic)' => 'morphOne',
+            'One To Many (Polymorphic)' => 'morphMany',
+            'Many To Many (Polymorphic)' => 'morphToMany',
+        ];
+
+        $modelName = $this->modelName;
+
+        // Prepare selected methods
+        $selectedMethods = array_filter([
+            $this->index ? 'index' : null,
+            $this->store ? 'store' : null,
+            $this->show ? 'show' : null,
+            $this->update ? 'update' : null,
+            $this->destroy ? 'destroy' : null,
+        ]);
+
+        // Prepare files config for generation
+        $files = [
+            'model' => $this->modelFile,
+            'migration' => $this->migrationFile,
+            'softDelete' => $this->softDeleteFile,
+            'adminCRUDFile' => $this->crudFile,
+            'service' => $this->serviceFile,
+            'notification' => $this->notificationFile,
+            'resource' => $this->resourceFile,
+            'request' => $this->requestFile,
+            'traits' => $this->traitFiles,
+            'observer' => $this->observerFile,
+            'policy' => $this->policyFile,
+            'factory' => $this->factoryFile,
+        ];
+
+        // Format field and relation strings
+        $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
+        $relationsString = implode(', ', array_map(
+            fn($relation) => ($relation['related_model'] ?? 'unknown') . ':' . ($relationMap[$relation['relation_type']] ?? 'unknown'),
+            $this->relationData
+        ));
+
+        // Generate files based on flags
+        if ($files['model']) {
+            $this->generateModel($modelName, $fieldString, $relationsString, $selectedMethods, $files['softDelete'], $files['factory'], $selectedTraits, $this->overwriteFiles);
+        }
+
+        if ($files['migration']) {
+            $this->generateMigration($modelName, $this->fieldsData, $files['softDelete'], $this->overwriteFiles);
+        }
+
+        $this->generateController($modelName, $selectedMethods, $files['service'], $files['resource'], $files['request'], $this->overwriteFiles, $files['adminCRUDFile']);
+
+        if ($files['policy']) {
+            $this->generatePolicy($modelName, $this->overwriteFiles);
+        }
+
+        if ($files['observer']) {
+            $this->generateObserver($modelName, $this->overwriteFiles);
+        }
+
+        if ($files['service']) {
+            $this->generateService($modelName, $this->overwriteFiles);
+        }
+
+        if ($files['notification']) {
+            $this->generateNotification($modelName, $this->overwriteFiles);
+        }
+
+        if ($files['resource']) {
+            $this->generateResource($modelName, $this->overwriteFiles);
+        }
+
+        if ($files['request']) {
+            $this->generateRequest($modelName, $this->fieldsData, $this->overwriteFiles);
+        }
+
+        if ($files['factory']) {
+            $this->generateFactory($modelName, $this->fieldsData, $this->overwriteFiles);
+        }
+
+        if ($selectedTraits) {
+            $this->copyTraits($selectedTraits);
+        }
+    }
+
+    /**
+     * HELPER METHODS FOR FILE GENERATION
+     */
+
+    /**
+     * Generate model file
+     */
+    private function generateModel($modelName, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
+    {
+        Artisan::call('codegenerator:model', [
+            'modelName' => $modelName,
+            '--fields' => $fieldString,
+            '--relations' => $relations,
+            '--methods' => implode(',', $selectedMethods),
+            '--softDelete' => $softDelete,
+            '--factory' => $factory,
+            '--traits' => implode(',', $selectedTraits),
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate migration file
+     */
+    private function generateMigration($modelName, $fields, $softDelete, $overwrite)
+    {
+        $migrationFieldString = collect($fields)->map(function ($field) {
+            return $field['column_name'] . ':' . $field['data_type'];
+        })->implode(',');
+
+        Artisan::call('codegenerator:migration', [
+            'modelName' => $modelName,
+            '--fields' => $migrationFieldString,
+            '--softdelete' => $softDelete,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate controller file
+     */
+    private function generateController($modelName, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
+    {
+        Artisan::call('codegenerator:controller', [
+            'modelName' => $modelName,
+            '--methods' => implode(',', $selectedMethods),
+            '--service' => $service,
+            '--resource' => $resource,
+            '--request' => $request,
+            '--overwrite' => $overwrite,
+            '--adminCrud' => $adminCrud,
+        ]);
+    }
+
+    /**
+     * Generate policy file
+     */
+    private function generatePolicy($modelName, $overwrite)
+    {
+        Artisan::call('codegenerator:policy', [
+            'modelName' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate observer file
+     */
+    private function generateObserver($modelName, $overwrite)
+    {
+        Artisan::call('codegenerator:observer', [
+            'modelName' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate service file
+     */
+    private function generateService($modelName, $overwrite)
+    {
+        Artisan::call('codegenerator:service', [
+            'modelName' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate notification file
+     */
+    private function generateNotification($modelName, $overwrite)
+    {
+        $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
+
+        Artisan::call('codegenerator:notification', [
+            'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
+            '--modelName' => $modelName,
+            '--data' => $notificationData['data'] ?? '',
+            '--body' => $notificationData['body'] ?? '',
+            '--subject' => $notificationData['subject'] ?? '',
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate resource file
+     */
+    private function generateResource($modelName, $overwrite)
+    {
+        Artisan::call('codegenerator:resource', [
+            'modelName' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate request file
+     */
+    private function generateRequest($modelName, $fields, $overwrite)
+    {
+        $ruleString = implode(',', array_map(function ($field) {
+            return $field['column_name'] . ':' . $field['column_validation'];
+        }, $fields));
+
+        Artisan::call('codegenerator:request', [
+            'modelName' => $modelName,
+            '--rules' => $ruleString,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Generate factory file
+     */
+    private function generateFactory($modelName, $fields, $overwrite)
+    {
+        $fieldString = implode(',', array_map(function ($field) {
+            return $field['column_name'] . ':' . $field['data_type'];
+        }, $fields));
+
+        Artisan::call('codegenerator:factory', [
+            'modelName' => $modelName,
+            '--fields' => $fieldString,
+            '--overwrite' => $overwrite
+        ]);
+    }
+
+    /**
+     * Copy traits to application
+     */
+    private function copyTraits($selectedTraits)
+    {
+        $source = __DIR__ . '/../../TraitsLibrary/Traits';
+        $destination = app_path(config('code_generator.trait_path', 'Traits'));
+
+        if (!File::exists($source)) {
+            Log::warning('Traits source folder not found: ' . $source);
+            return;
+        }
+
+        File::ensureDirectoryExists($destination);
+
+        foreach ($selectedTraits as $trait) {
+            $fileName = $trait . '.php';
+            $sourceFile = $source . DIRECTORY_SEPARATOR . $fileName;
+            $destinationFile = $destination . DIRECTORY_SEPARATOR . $fileName;
+
+            if (File::exists($sourceFile)) {
+                File::copy($sourceFile, $destinationFile);
+                Log::info("Trait $fileName copied to app/Traits.");
+            } else {
+                Log::warning("Trait file not found: $fileName");
+            }
+        }
     }
 }

@@ -15,7 +15,6 @@ class RestApi extends Component
     public array $notificationData = [];
     public $generalError = '';
     protected $signature = '';
-    // public $isGenerating = false;
     // Modal visibility 
     public $isAddRelModalOpen = false;
     public $isRelDeleteModalOpen = false;
@@ -68,7 +67,6 @@ class RestApi extends Component
 
     public $errorMessage = "";
     public $successMessage = '';
-    public $generatedFiles = [];
     //validation rules
     protected $rules = [
         'modelName' => 'required|regex:/^[A-Z][a-z]+$/',
@@ -78,13 +76,10 @@ class RestApi extends Component
         'foreign_key' => 'required',
         'local_key' => 'required',
         'data_type' => 'required',
-        'column_name' => 'required|regex:/^[A-Za-z]+$/',
+        'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^[A-Za-z_]+:\d+(?:,[A-Za-z_]+:\d+)*$/',
-        'subject' => 'required|regex:/^[A-Za-z ]+$/',
-        'body' => 'required|regex:/^[A-Za-z ]+$/',
-        'data' => 'required|regex:/^[A-Za-z]+=>\d+(?:,[A-Za-z]+:\d+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
     ];
@@ -93,24 +88,6 @@ class RestApi extends Component
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'data.array' => 'The Data field must be a valid array.',
     ];
-
-
-    /*   public function updatedCrudFile(): void
-    {
-        if ($this->crudFile) {
-            $this->index = true;
-            $this->store = true;
-            $this->show = true;
-            $this->update = true;
-            $this->destroy = true;
-        } else {
-            $this->index = false;
-            $this->store = false;
-            $this->show = false;
-            $this->update = false;
-            $this->destroy = false;
-        }
-    } */
 
     //Relations Handling
     public function openDeleteModal($id): void
@@ -198,7 +175,6 @@ class RestApi extends Component
             'data_type' => $this->rules['data_type'],
             'column_name' => $this->rules['column_name'],
             'column_validation' => $this->rules['column_validation'],
-            // 'add_scope' => $this->rules['add_scope'],
         ]);
         if ($this->fieldId) { // If we are editing
             $this->fieldsData = collect($this->fieldsData)->map(function ($field) {
@@ -243,6 +219,7 @@ class RestApi extends Component
         $this->fieldId = $id;
         $this->isDeleteFieldModalOpen = true;
     }
+
     //delete field from table
     public function deleteField(): void
     {
@@ -312,9 +289,34 @@ class RestApi extends Component
         return true;
     }
     // reset form fields
-    public function resetForm()
+     public function resetForm()
     {
         $this->reset([
+            'modelName',
+            'fieldsData',
+            'relationData',
+            'notificationData',
+            'index',
+            'store',
+            'show',
+            'update',
+            'destroy',
+            'modelFile',
+            'migrationFile',
+            'softDeleteFile',
+            'serviceFile',
+            'notificationFile',
+            'resourceFile',
+            'requestFile',
+            'overwriteFiles',
+            'observerFile',
+            'factoryFile',
+            'policyFile',
+            'BootModel',
+            'PaginationTrait',
+            'ResourceFilterable',
+            'HasUuid',
+            'HasUserAction',
             'related_model',
             'relation_type',
             'second_model',
@@ -324,16 +326,42 @@ class RestApi extends Component
             'column_name',
             'column_validation',
             'add_scope',
+            'fieldId'
         ]);
         $this->resetErrorBag();
     }
 
-
     //pass form data and calls commands
     public function save(): void
     {
-
         try {
+             session()->put('form_data', [
+                'modelName' => $this->modelName,
+                'fieldsData' => $this->fieldsData,
+                'relationData' => $this->relationData,
+                'notificationData' => $this->notificationData,
+                'index' => $this->index,
+                'store' => $this->store,
+                'show' => $this->show,
+                'update' => $this->update,
+                'destroy' => $this->destroy,
+                'modelFile' => $this->modelFile,
+                'migrationFile' => $this->migrationFile,
+                'softDeleteFile' => $this->softDeleteFile,
+                'serviceFile' => $this->serviceFile,
+                'notificationFile' => $this->notificationFile,
+                'resourceFile' => $this->resourceFile,
+                'requestFile' => $this->requestFile,
+                'overwriteFiles' => $this->overwriteFiles,
+                'observerFile' => $this->observerFile,
+                'factoryFile' => $this->factoryFile,
+                'policyFile' => $this->policyFile,
+                'BootModel' => $this->BootModel,
+                'PaginationTrait' => $this->PaginationTrait,
+                'ResourceFilterable' => $this->ResourceFilterable,
+                'HasUuid' => $this->HasUuid,
+                'HasUserAction' => $this->HasUserAction
+            ]);
             $selectedTraits = ['ApiResponser', 'BaseModel'];
 
             if ($this->BootModel)          $selectedTraits[] = 'BootModel';
@@ -390,7 +418,6 @@ class RestApi extends Component
             $overwrite = $this->overwriteFiles;
 
             // Generate files
-            $this->generatedFiles = []; // Reset generated files array
             $fieldString = collect($fields)->pluck('column_name')->implode(', ');
 
             $relations = implode(', ', array_map(function ($relationData) use ($relationMap) {
@@ -423,13 +450,9 @@ class RestApi extends Component
                     '--traits' => implode(',', $selectedTraits),
                     '--overwrite' => $overwrite
                 ]);
-                //  $this->generatedFiles[] = "Model: {$modelName}";
             }
 
-            //------------------------------------------
-            //
             //migration command
-            //-----------------------------------------
             if ($files['migration']) {
                 // Create a properly formatted field string for migration with data types
                 $migrationFieldString = collect($fields)->map(function ($field) {
@@ -444,10 +467,7 @@ class RestApi extends Component
                 ]);
             }
 
-
-            //------------------------------------------
             //controller command
-            //-----------------------------------------
             Artisan::call('codegenerator:controller', [
                 'modelName' => $modelName,
                 '--methods' => implode(',', $selectedMethods),
@@ -457,11 +477,8 @@ class RestApi extends Component
                 '--overwrite' => $overwrite,
                 '--adminCrud' => $files['adminCRUDFile'],
             ]);
-            // $this->generatedFiles[] = "Controller: {$modelName}Controller";
 
-            //------------------------------------------
             //policy command
-            //-----------------------------------------
             if ($files['policy']) {
                 Artisan::call('codegenerator:policy', [
                     'modelName' => $modelName,
@@ -469,10 +486,7 @@ class RestApi extends Component
                 ]);
             }
 
-            //------------------------------------------
-            //
             //migration command 
-            //-----------------------------------------
             if ($files['migration']) {
                 // Create a properly formatted field string for migration with data types
                 $migrationFieldString = collect($fields)->map(function ($field) {
@@ -488,9 +502,7 @@ class RestApi extends Component
             }
 
 
-            //------------------------------------------
             //observer command
-            //-----------------------------------------
             if ($files['observer']) {
                 Artisan::call('codegenerator:observer', [
                     'modelName' => $modelName,
@@ -505,9 +517,7 @@ class RestApi extends Component
                 ]);
             }
 
-            //------------------------------------------
             //notification command
-            //-----------------------------------------
             if ($files['notification']) {
                 // Get the first notification data if available
                 $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
@@ -522,11 +532,7 @@ class RestApi extends Component
                 ]);
             }
 
-
-
-            //------------------------------------------
             //resource command
-            //-----------------------------------------
             if ($files['resource']) {
                 Artisan::call('codegenerator:resource', [
                     'modelName' => $modelName,
@@ -534,10 +540,7 @@ class RestApi extends Component
                 ]);
             }
 
-            //----------------------------------------
             //request command
-            //----------------------------------------
-
             $ruleString = implode(',', array_map(function ($field) {
                 return $field['column_name'] . ':' . $field['column_validation'];
             }, $fields));
@@ -549,9 +552,8 @@ class RestApi extends Component
                     '--overwrite' => $overwrite
                 ]);
             }
-            //------------------------------------------
+
             //factory command
-            //-----------------------------------------
             $fieldString = implode(',', array_map(function ($fields) {
                 return $fields['column_name'] . ':' . $fields['data_type'];
             }, $fields));
@@ -594,7 +596,7 @@ class RestApi extends Component
             $this->dispatch('show-toast', ['message' => 'Files generated successfully!', 'type' => 'success']);
 
             // Reset form and refresh
-            $this->reset(['modelName', 'fieldsData', 'relationData', 'notificationData']);
+            session()->forget('form_data');
             $this->resetForm();
 
             // Refresh the page after a short delay to show the success message
@@ -604,10 +606,7 @@ class RestApi extends Component
             session()->flash('error', $e->getMessage());
             $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
         }
-        /* finally {
-            $this->isGenerating = false; // End loading
-        } */
-    
+    }
     public function render()
     {
         return view('code-generator::livewire.rest-api');

@@ -10,9 +10,9 @@
 
     <div class="flex-grow min-w-0 bg-white shadow-lg shadow-black/5 rounded-lg border border-grey-200 overflow-hidden">
         @if(request()->routeIs('code-generator.index'))
-        <livewire:code-generator::rest-api />
+             <livewire:code-generator::rest-api />
         @elseif(request()->routeIs('code-generator.logs'))
-        <livewire:code-generator::log-table />
+             <livewire:code-generator::log-table />
         @endif
     </div>
 </div>

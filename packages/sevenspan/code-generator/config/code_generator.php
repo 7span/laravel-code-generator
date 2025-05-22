@@ -71,6 +71,4 @@ return [
     ],
 
     'class_namespace' => 'Sevenspan\\CodeGenerator',
-
-     "logs_path" => "code-generator/logs",
 ];

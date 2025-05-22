@@ -75,13 +75,13 @@ class RestApi extends Component
         'related_model' => 'required|regex:/^[A-Z][a-z]+$/',
         'relation_type' => 'required',
         'second_model' => 'required|regex:/^[A-Z][a-z]+$/',
-        'foreign_key' => 'required',
-        'local_key' => 'required',
+        'foreign_key' => 'required|regex:/^[a-zA-Z][a-zA-Z0-9_]/',
+        'local_key' => 'required|regex:/^[a-zA-Z][a-zA-Z0-9_]/',
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
-        'data' => 'required|regex:/^[A-Za-z]+=>\d+(?:,[A-Za-z]+:\d+)*$/',
+        'data' => 'required|regex:/^[A-Za-z0-9]+:[A-Za-z0-9]+(?:,[A-Za-z0-9]+:[A-Za-z0-9]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
     ];
@@ -89,14 +89,65 @@ class RestApi extends Component
     public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
-        'data.array' => 'The Data field must be a valid array.',
     ];
 
     public function render()
     {
         return view('code-generator::livewire.rest-api');
     }
+    /*
+    // Add persist property to maintain state
+    protected $persist = [
+        'modelName',
+        'fieldsData',
+        'relationData',
+        'notificationData',
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+        'modelFile',
+        'migrationFile',
+        'softDeleteFile',
+        'serviceFile',
+        'notificationFile',
+        'resourceFile',
+        'requestFile',
+        'overwriteFiles',
+        'observerFile',
+        'factoryFile',
+        'policyFile',
+        'BootModel',
+        'PaginationTrait',
+        'ResourceFilterable',
+        'HasUuid',
+        'HasUserAction'
+    ];
 
+    // Add mount method to restore state
+    public function mount()
+    {
+        if (session()->has('form_data')) {
+            $formData = session('form_data');
+            foreach ($formData as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+        }
+    }
+
+    // Add dehydrate method to store state before navigation
+    public function dehydrate()
+    {
+        session()->put('form_data', collect($this->persist)
+            ->mapWithKeys(fn($property) => [$property => $this->$property])
+            ->toArray()
+        );
+    }
+    */
+    
     /**
      * Live validation for form fields
      */
@@ -167,34 +218,10 @@ class RestApi extends Component
         }
     }
 
-    public function resetForm()
+    //resets form fields
+   public function resetForm()
     {
         $this->reset([
-            'modelName',
-            'fieldsData',
-            'relationData',
-            'notificationData',
-            'index',
-            'store',
-            'show',
-            'update',
-            'destroy',
-            'modelFile',
-            'migrationFile',
-            'softDeleteFile',
-            'serviceFile',
-            'notificationFile',
-            'resourceFile',
-            'requestFile',
-            'overwriteFiles',
-            'observerFile',
-            'factoryFile',
-            'policyFile',
-            'BootModel',
-            'PaginationTrait',
-            'ResourceFilterable',
-            'HasUuid',
-            'HasUserAction',
             'related_model',
             'relation_type',
             'second_model',
@@ -208,6 +235,7 @@ class RestApi extends Component
         ]);
         $this->resetErrorBag();
     }
+
 
     public function addRelation(): void
     {
@@ -224,6 +252,7 @@ class RestApi extends Component
         }
 
         $this->validate($rules);
+
         $relationData = [
             'related_model' => $this->related_model,
             'relation_type' => $this->relation_type,
@@ -253,7 +282,7 @@ class RestApi extends Component
         $this->relationId = null;
     }
 
-    public function openEditFieldModal($fieldId)
+    public function openEditFieldModal($fieldId): void
     {
         $this->fieldId = $fieldId;
         $this->isEditFieldModalOpen = true;
@@ -263,7 +292,7 @@ class RestApi extends Component
         }
     }
 
-    public function openDeleteFieldModal($id)
+    public function openDeleteFieldModal($id): void
     {
         $this->fieldId = $id;
         $this->isDeleteFieldModalOpen = true;
@@ -277,7 +306,7 @@ class RestApi extends Component
         $this->isDeleteFieldModalOpen = false;
     }
 
-    public function saveField()
+    public function saveField(): void
     {
         // Check for duplicate column name, excluding the current edited field by ID
         $columnExists = false;
@@ -363,7 +392,7 @@ class RestApi extends Component
             session()->flash('error', $this->errorMessage);
             return false;
         }
-
+        
         return true;
     }
 
@@ -386,7 +415,6 @@ class RestApi extends Component
             $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
         }
     }
-
 
     /**
      * Generate all selected files

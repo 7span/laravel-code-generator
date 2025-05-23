@@ -7,7 +7,6 @@
 <button {{ $attributes->merge(['class' => 'bg-red-500 text-white py-3 pl-3 pr-4 rounded-lg flex items-center
     justify-center relative']) }}>
 
-    <!-- Loading spinner for the button -->
     @if ($loadingTarget)
     <svg wire:loading wire:target="{{ $loadingTarget }}" class="animate-spin h-5 w-5 mr-2 text-white"
         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -15,6 +14,7 @@
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
     </svg>
     @endif
+
 
     <span wire:loading.remove wire:target="{{ $loadingTarget }}">
         @if($showPlus)

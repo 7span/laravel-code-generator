@@ -16,7 +16,7 @@
         @elseif(request()->routeIs('code-generator.logs'))
              <livewire:code-generator::logs />
         @endif
-
+        
     </div>
 </div>
 

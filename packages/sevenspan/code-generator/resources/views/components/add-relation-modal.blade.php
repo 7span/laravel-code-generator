@@ -10,8 +10,6 @@
             <button x-on:click="$wire.isAddRelModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
-
-        <!-- Relation Type -->
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col">
                     <select class="w-full p-2 border border-gray-300 rounded-md"
@@ -23,7 +21,6 @@
                     @enderror
                 </div>
 
-                <!-- Related Model -->
             <div class="space-y-3">
                 <div class="flex gap-2">
                     <div class="w-1/2">
@@ -34,7 +31,6 @@
                     @error('related_model') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Second Model -->
                     <div class="w-1/2">
                     <input  type="text" 
                             wire:model.live="second_model" 
@@ -48,8 +44,8 @@
                         </div>
                     </div>
 
-                    <!-- Foreign Key Input -->
                     <div class="flex gap-2">
+                        <!-- Foreign Key Input -->
                         <div class="w-1/2">
                             <input type="text" placeholder="Foreign Key"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
@@ -59,7 +55,7 @@
                             @enderror
                         </div>
 
-                    <!-- Local Key Input -->
+                        <!-- Local Key Input -->
                         <div class="w-1/2">
                             <input type="text" placeholder="Local Key"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
@@ -72,7 +68,6 @@
 
                 </div>
             </div>
-
         <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
@@ -80,7 +75,5 @@
           </div>
           <x-code-generator::button wire:click="addRelation" title="Add" />
         </x-slot:footer>
-
-    <!-- Base Modal -->
-    <x-code-generator::modal />
+    </x-modal>
 </div>

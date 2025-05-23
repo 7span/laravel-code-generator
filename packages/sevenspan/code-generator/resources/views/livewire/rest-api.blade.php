@@ -112,7 +112,7 @@
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetForm()" />
         </div>
-        <x-code-generator::relation-table :$relationData />
+        <x-code-generator::eloqunet-relation-table :$relationData />
     </div>
 
     <!-- checkboxes -->   

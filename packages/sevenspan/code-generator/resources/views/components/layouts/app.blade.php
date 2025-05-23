@@ -14,17 +14,12 @@
 </head>
 
 <body class="bg-gray-50 container max-w-full overflow-x-hidden" style="font-family: 'Nunito Sans'">
-
 <div class="w-full">
-    <!-- Header -->
-    @yield('header')
-
-    <!-- Main Content -->
-    <main>  
-        @yield('content')
-    </main>
-    
-</div>
+ @yield('header')
+<main>
+ @yield('content')
+</main>
+    </div>
     @livewireScripts
 </body>
 </html>

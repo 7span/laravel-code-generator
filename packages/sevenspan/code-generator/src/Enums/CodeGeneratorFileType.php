@@ -34,6 +34,4 @@ enum CodeGeneratorFileType: string
     case REQUEST = "Request";
 
     case NOTIFICATION = "Notification";
-
-    case ROUTE = "Route";
 }

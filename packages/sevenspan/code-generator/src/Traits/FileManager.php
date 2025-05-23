@@ -34,7 +34,7 @@ trait FileManager
             if ($shouldOverwrite) {
                 // Overwrite existing file if overwrite option is provided
                 File::put($filePath, $contents);
-                $logMessage = "{$fileType->value} file was overwritten successfully}";
+                $logMessage = "{$fileType->value} file was overwritten successfully";
                 $logStatus = CodeGeneratorFileLogStatus::SUCCESS;
                 $isOverwrite = true;
                 $this->info($logMessage);

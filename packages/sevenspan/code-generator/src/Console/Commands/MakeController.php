@@ -20,7 +20,7 @@ class MakeController extends Command
                                                      {--resource : Include resource files for the controller} 
                                                      {--request : Include request files for the controller}
                                                      {--overwrite : is overwriting this file is selected}
-                                                     {--adminCrud : is adnimCRUD added}';
+                                                     {--adminCrud : is adminCRUD added}';
 
     protected $description = 'Generate a custom controller with optional methods and service injection';
 
@@ -28,6 +28,7 @@ class MakeController extends Command
     {
         parent::__construct();
     }
+
 
     public function handle(): void
     {
@@ -82,7 +83,8 @@ class MakeController extends Command
     {
         return $this->getStubContents(
             $this->getStubPath(),
-            $this->getStubVariables($controllerClassName, $isAdminCrudIncluded)
+            $this->getStubVariables($controllerClassName, $isAdminCrudIncluded),
+            $isAdminCrudIncluded
         );
     }
 
@@ -163,7 +165,7 @@ class MakeController extends Command
      * @param  array  $stubVariables
      * @return string
      */
-    public function getStubContents(string $mainStub, array $stubVariables = []): string
+    public function getStubContents(string $mainStub, array $stubVariables = [], bool $isAdminCrudIncluded = false): string
     {
         $includeServiceFile = (bool) $this->option('service');
         $includeResourceFile = (bool) $this->option('resource');
@@ -175,8 +177,7 @@ class MakeController extends Command
         $singularInstance = lcfirst($className);
         $singularObj = '$' . $singularInstance . 'Obj';
 
-        $methods = explode(',', $this->option('methods') ?? '');
-
+        $methods = $isAdminCrudIncluded ?  ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
         // Replace stub variables in base content
         foreach ($stubVariables as $search => $replace) {
             $mainContent = str_replace('{{ ' . $search . ' }}', $replace, $mainContent);
@@ -302,12 +303,10 @@ class MakeController extends Command
      */
     protected function appendApiRoute(string $controllerClassName, bool $isAdminCrudIncluded = false): void
     {
-        $methods = $this->option('methods');
-        $methodsArray = array_map('trim', explode(',', $methods ?? ''));
-        $methodCount = count($methodsArray);
         $resource = Str::plural(Str::kebab($this->argument('modelName')));
+        $methodsArray = explode(',', $this->option('methods') ?? '');
+        $methodCount = $isAdminCrudIncluded ? 5 : count($methodsArray);
 
-        // Determine paths based on isAdminCrudIncluded parameter
         $apiPath = base_path($isAdminCrudIncluded ? 'routes/api-admin.php' : 'routes/api.php');
         $stubPath = __DIR__ . '/../../stubs/' . ($isAdminCrudIncluded ? 'api.admin.route.stub' : 'api.routes.stub');
         $controllerPath = config(
@@ -315,16 +314,17 @@ class MakeController extends Command
             $isAdminCrudIncluded ? 'Http\Controllers\Admin' : 'Http\Controllers'
         );
 
-        // Create route entry
-        $routeType = $methodCount == 5 ? 'apiResource' : 'resource';
-
-        // Fix: Format the methods array properly for the only() method
-        $routeOptions = $methodCount == 5 ? '' : "->only(['" . implode("', '", $methodsArray) . "'])";
-
+        $routeType = $methodCount === 5 ? 'apiResource' : 'resource';
+        $routeOptions = $methodCount === 5 ? '' : "->only(['" . implode("', '", $methodsArray) . "'])";
         $routeEntry = "Route::{$routeType}('{$resource}', \\App\\{$controllerPath}\\{$controllerClassName}::class){$routeOptions};";
 
-        // Create final content and save
-        $finalContent = file_get_contents($stubPath) . PHP_EOL . $routeEntry . PHP_EOL;
-        $this->saveFile($apiPath, $finalContent, CodeGeneratorFileType::ROUTE);
+        // Load content (stub if file doesn't exist, else append)
+        $baseContent = file_exists($apiPath)
+            ? file_get_contents($apiPath)
+            : file_get_contents($stubPath);
+
+        $finalContent = rtrim($baseContent) . PHP_EOL . $routeEntry . PHP_EOL;
+
+        file_put_contents($apiPath, $finalContent);
     }
 }

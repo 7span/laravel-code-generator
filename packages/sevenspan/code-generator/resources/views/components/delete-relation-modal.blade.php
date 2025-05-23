@@ -19,5 +19,7 @@
           </div>
           <x-code-generator::button wire:click="deleteRelation" title="Delete" />
         </x-slot:footer>
-    </x-modal>
+
+    <!-- Base Modal -->
+    <x-code-generator-modal />
 </div>

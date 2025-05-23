@@ -6,7 +6,7 @@ use Livewire\Livewire;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Sevenspan\CodeGenerator\Http\Livewire\Index;
-use Sevenspan\CodeGenerator\Http\Livewire\LogTable;
+use Sevenspan\CodeGenerator\Http\Livewire\Logs;
 use Sevenspan\CodeGenerator\Http\Livewire\RestApi;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
@@ -78,6 +78,6 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
         Livewire::component('code-generator::index', Index::class);
         Livewire::component('code-generator::rest-api', RestApi::class);
-        Livewire::component('code-generator::log-table', LogTable::class);
+        Livewire::component('code-generator::log-table', Logs::class);
     }
 }

@@ -1,5 +1,7 @@
 <div class="overflow-x-auto px-0 py-0">
     <table class="w-full border-collapse border border-gray-200">
+
+    <!-- Table Header -->
         <thead class="bg-gray-200 rounded-t-lg">
             <th class="p-3 text-left text-sm">Model Name</th>
             <th class="p-3 text-left text-sm">Data Type</th>
@@ -9,6 +11,7 @@
             <th class="p-3 text-left text-sm">Action</th>
         </thead>
         <tbody>
+            <!-- Added Relations Content -->
             @if($relationData)
             @foreach ($relationData as $relation)
             <tr class="border">
@@ -25,7 +28,6 @@
                         <x-code-generator::edit-svg />
                     </button>
                 </td>
-
             </tr>
             @endforeach
             @else

@@ -1,48 +1,49 @@
 <div class="p-6">
     <!-- Logs Table -->
     <div class="bg-white rounded-lg shadow">
-        {{-- div for horizontal scrolling of the table --}}
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 table-fixed">
                 <colgroup>
-                    {{-- Define explicit column widths. Adjust percentages as needed. Total should be 100%. --}}
-                    {{-- These are more aggressive to force wrapping. --}}
-                    <col style="width: 10%;"> {{-- Type --}}
-                    <col style="width: 25%;"> {{-- File Path --}}
-                    <col style="width: 10%;"> {{-- Status --}}
-                    <col style="width: 30%;"> {{-- Message --}}
-                    <col style="width: 17%">{{-- isOverride--}}
-                    <col style="width: 10%;"> {{-- Date --}}
+                    <col style="width: 10%;"> 
+                    <col style="width: 25%;"> 
+                    <col style="width: 10%;">
+                    <col style="width: 30%;">
+                    <col style="width: 17%">
+                    <col style="width: 10%;">
                 </colgroup>
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Type
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">File
-                            Path</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Status
+                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
+                            Type
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
-                            Message</th>
+                            File Path
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
+                            Message
+                        </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider whitespace-nowrap">
                             Is Override
                         </th>
 
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Date
+                            class="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
+                            Date
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($logs as $log)
                     <tr>
-                        <td class="px-6 py-4 text-sm text-gray-900 align-top break-words"> {{-- break-words is good for
-                            type --}}
+                        <td class="px-6 py-4 text-sm text-gray-900 align-top break-words">
                             {{ $log->file_type }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-900 align-top">
@@ -79,20 +80,18 @@
                             $created = $log->created_at;
                             $now = now();
 
-                            if ($created->diffInSeconds($now) < 60) { $diff=round($created->diffInSeconds($now)) . 's
-                                ago';
-                                } elseif ($created->diffInMinutes($now) < 60) { $diff=round($created->
+                            if ($created->diffInSeconds($now) < 60) { $diff=round($created->diffInSeconds($now)) . 's ago';
+                            } elseif ($created->diffInMinutes($now) < 60) { $diff=round($created->
                                     diffInMinutes($now)) . 'm ago';
-                                    } elseif ($created->diffInHours($now) < 24) { $diff=round($created->
+                            } elseif ($created->diffInHours($now) < 24) { $diff=round($created->
                                         diffInHours($now)) . 'h ago';
-                                        } elseif ($created->diffInDays($now) < 30) { $diff=round($created->
+                            } elseif ($created->diffInDays($now) < 30) { $diff=round($created->
                                             diffInDays($now)) . 'd ago';
-                                            } else {
-                                            $diff = round($created->diffInMonths($now)) . 'mo ago';
-                                            }
-                                            @endphp
-
-                                            {{ $diff }}
+                            } else {
+                                    $diff = round($created->diffInMonths($now)) . 'mo ago';
+                            }
+                            @endphp
+                            {{ $diff }}
                         </td>
                     </tr>
                     @empty

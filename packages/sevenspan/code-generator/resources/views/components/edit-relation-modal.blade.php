@@ -10,6 +10,8 @@
             <button x-on:click="$wire.isRelEditModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
+
+           <!-- Relation Type -->
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col">
                     <select class="w-full p-2 border border-gray-300 rounded-md"
@@ -21,15 +23,15 @@
                     @enderror
                 </div>
 
+                 <!-- Related Model -->
                 <div class="space-y-3">
                     <div class="flex gap-2">
-                        <!-- Relation Type -->
                         <div class="w-1/2">
                         <input type="text" id="relatedModel" 
                             placeholder="Model Name" 
                             wire:model.live="related_model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base">
-                        @error('model_name') 
+                        @error('related_model') 
                             <span class="text-red-600 text-sm">{{ $message }}</span> 
                         @enderror
                     </div>
@@ -72,6 +74,7 @@
                 </div>
 
             </div>
+
         <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
@@ -79,5 +82,7 @@
           </div>
           <x-code-generator::button wire:click="addRelation" title="Update" />
         </x-slot:footer>
-    </x-modal>
+
+        <!-- Base Modal -->
+        <x-code-generator::modal />
 </div>

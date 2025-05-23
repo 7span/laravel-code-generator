@@ -2,13 +2,14 @@
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50"
     x-on:click.self="$wire.isNotificationModalOpen=false">
 
+    <!-- Modal header -->
     <x-code-generator::modal modalTitle="Notification">
-        <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isNotificationModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
 
+        <!-- Modal Inputs -->
         <div class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Class Name</label>
@@ -47,5 +48,7 @@
             </div>
             <x-code-generator::button wire:click="saveNotification" title="Add" />
         </x-slot:footer>
-        </x-modal>
+
+    <!-- Base Modal -->
+    </x-code-generator::modal>
 </div>

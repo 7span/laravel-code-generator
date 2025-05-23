@@ -35,7 +35,7 @@ class RestApi extends Component
     public $related_model, $relation_type, $second_model, $foreign_key, $local_key;
 
     // Field properties
-    public $data_type, $column_name, $column_validation, $add_scope;
+    public $data_type, $column_name, $column_validation;
 
     // Notification properties
     public $class_name, $data, $subject, $body;
@@ -95,7 +95,7 @@ class RestApi extends Component
     {
         return view('code-generator::livewire.rest-api');
     }
-    /*
+    
     // Add persist property to maintain state
     protected $persist = [
         'modelName',
@@ -146,7 +146,7 @@ class RestApi extends Component
             ->toArray()
         );
     }
-    */
+    
     
     /**
      * Live validation for form fields
@@ -230,7 +230,6 @@ class RestApi extends Component
             'data_type',
             'column_name',
             'column_validation',
-            'add_scope',
             'fieldId'
         ]);
         $this->resetErrorBag();
@@ -335,7 +334,6 @@ class RestApi extends Component
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,
             'column_validation' => $this->column_validation,
-            'add_scope' => $this->add_scope,
         ];
 
         // Update existing field or add new one
@@ -353,7 +351,7 @@ class RestApi extends Component
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
-        $this->reset(['column_name', 'data_type', 'column_validation', 'add_scope']);
+        $this->reset(['column_name', 'data_type', 'column_validation']);
     }
 
     public function saveNotification(): void
@@ -392,7 +390,7 @@ class RestApi extends Component
             session()->flash('error', $this->errorMessage);
             return false;
         }
-        
+
         return true;
     }
 
@@ -405,8 +403,8 @@ class RestApi extends Component
             }
             // Generate files
             $this->generateFiles();
-            session()->flash('success', 'Files generated successfully!');
-            $this->dispatch('show-toast', ['message' => 'Files generated successfully!', 'type' => 'success']);
+            session()->flash('success', 'Check Logs of generated Files!');
+    
             // Reset form
             $this->reset();
         } catch (\Exception $e) {
@@ -674,25 +672,31 @@ class RestApi extends Component
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
         $destination = app_path(config('code_generator.trait_path', 'Traits'));
-
+    
         if (!File::exists($source)) {
             Log::warning('Traits source folder not found: ' . $source);
             return;
         }
-
+    
         File::ensureDirectoryExists($destination);
-
+    
         foreach ($selectedTraits as $trait) {
             $fileName = $trait . '.php';
             $sourceFile = $source . DIRECTORY_SEPARATOR . $fileName;
             $destinationFile = $destination . DIRECTORY_SEPARATOR . $fileName;
-
-            if (File::exists($sourceFile)) {
-                File::copy($sourceFile, $destinationFile);
-                Log::info("Trait $fileName copied to app/Traits.");
-            } else {
-                Log::warning("Trait file not found: $fileName");
+    
+            if (!File::exists($sourceFile)) {
+                Log::warning("Trait file not found in source: $fileName");
+                continue;
             }
+    
+            if (File::exists($destinationFile)) {
+                Log::info("Trait $fileName already exists in destination, skipping.");
+                continue;
+            }
+    
+            File::copy($sourceFile, $destinationFile);
+            Log::info("Trait $fileName copied to app/Traits.");
         }
     }
 }

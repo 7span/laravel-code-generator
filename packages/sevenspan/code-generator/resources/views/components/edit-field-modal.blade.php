@@ -2,14 +2,15 @@
     x-on:click.self="$wire.isEditFieldModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
 
+    <!-- Modal header -->
     <x-code-generator::modal modalTitle="Edit Field">
-        <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isEditFieldModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
+
+        <!-- Data Type -->
         <div class="mt-4 space-y-4">
-            <!-- Data Type -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
                 <select id="column_type" class="w-full border rounded-md p-2" name="data_type" wire:model="data_type">
@@ -40,16 +41,6 @@
                 @error('column_validation') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 
-            <!-- Add Scope -->
-            <div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" wire:model.live="add_scope" value="yes"
-                        class="form-checkbox text-orange-500">
-                    <span class="text-sm text-gray-800">Do you want to add scope?</span>
-                </div>
-                @error('add_scope') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-            </div>
-        </div>
         <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
@@ -57,5 +48,7 @@
             </div>
             <x-code-generator::button wire:click="saveField" title="Update" />
         </x-slot:footer>
-        </x-modal>
+
+        <!-- Base Modal -->
+        <x-code-generator::modal />
 </div>

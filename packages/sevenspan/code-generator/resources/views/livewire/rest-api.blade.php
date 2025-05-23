@@ -96,30 +96,37 @@
             </div>
         </div>
     </div>
-    <!-- new fields input -->
+
+    <!-- fields  -->
     <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
         <div class="flex justify-between items-center mb-3">
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetForm()" />
         </div>
-        <x-code-generator::field-table :$fieldsData />
+        <x-code-generator::field-table :$fieldsData  :softDeleteFile="$softDeleteFile"/>
     </div>
-    <!-- eloqunet relation -->
+
+    <!-- eloqunet relations -->
     <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
         <div class="flex justify-between items-center mb-3">
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetForm()" />
         </div>
-        <x-code-generator::eloqunet-relation-table :$relationData />
+        <x-code-generator::relation-table :$relationData />
     </div>
 
+    <!-- checkboxes -->   
     <div class="mb-2">
         <x-code-generator::add-files-methods :$errorMessage />
     </div>
+
+    <!-- Generate files button -->
     <div>
         <x-code-generator::button title="Generate Files" wire:click="save" wire:loading.attr="disabled"
             loadingTarget="save" />
     </div>
+
+    <!-- Modals -->
     <x-code-generator::add-relation-modal />
     <x-code-generator::add-new-field-modal />
     <x-code-generator::edit-relation-modal />

@@ -385,6 +385,15 @@ class RestApi extends Component
         // Validate model name
         $this->validate(['modelName' => $this->rules['modelName']]);
 
+        // Check if model exists and overwrite is not checked
+        $modelPath = app_path('Models/' . $this->modelName . '.php');
+        if (File::exists($modelPath) && !$this->overwriteFiles) {
+            $this->errorMessage = "Model {$this->modelName} already exists. Please check 'Overwrite Files' if you want to overwrite it.";
+            session()->flash('error', $this->errorMessage);
+            $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
+            return false;
+        }
+
         // Check fields and methods validation
         if (!$this->validateFieldsAndMethods()) {
             session()->flash('error', $this->errorMessage);
@@ -403,7 +412,7 @@ class RestApi extends Component
             }
             // Generate files
             $this->generateFiles();
-            session()->flash('success', 'Check Logs of generated Files!');
+            session()->flash('success', 'Files generated Successfully!');
     
             // Reset form
             $this->reset();

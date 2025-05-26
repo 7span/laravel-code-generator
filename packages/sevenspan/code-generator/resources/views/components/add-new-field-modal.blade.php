@@ -5,23 +5,14 @@
 
     <!-- Modal header -->
     <x-code-generator::modal modalTitle="Add Field">
-    
+
         <x-slot:closebtn>
             <button x-on:click="$wire.isAddFieldModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
-           
+
         <!-- Data Type -->
         <div class="mt-4 space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
-                <select id="column_type" class="w-full border rounded-md p-2" name="data_type"
-                    wire:model.live="data_type">
-                    <x-code-generator::data-type-option />
-                </select>
-                @error('data_type') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-            </div>
-
             <!-- Column Name -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Column Name</label>
@@ -32,6 +23,17 @@
                 @enderror
                 <p class="text-xs italic text-gray-500 mt-1">Note: Add without special characters</p>
             </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
+                <select id="column_type" class="w-full border rounded-md p-2" name="data_type"
+                    wire:model.live="data_type">
+                    <x-code-generator::data-type-option />
+                </select>
+                @error('data_type') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+
+
 
             <!-- Validation -->
             <div>
@@ -46,6 +48,56 @@
                 </select>
                 @error('column_validation') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
+            <!-- Foreign Key Option -->
+            <div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" wire:model.live="isForeignKey" class="form-checkbox text-indigo-600">
+                    <span class="text-sm text-gray-800">Make it a foreign key?</span>
+                </div>
+                @error('isForeignKey') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+
+            <!-- Show if Foreign Key is selected -->
+            @if($this->isForeignKey)
+            <!-- Related Model Name -->
+            <div class="mt-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Related Model Name</label>
+
+                @if (!empty($this->tableNames))
+                <select wire:model.live="foreignModelName" class="w-full border rounded-md p-2 text-gray-700">
+                    <option value="">-- Select Table --</option>
+                    @foreach ($this->tableNames as $table)
+                    <option value="{{ $table }}">{{ $table }}</option>
+                    @endforeach
+                </select>
+                @else
+                <input type="text" placeholder="users" wire:model.live="foreignModelName"
+                    class="w-full border rounded-md p-2 placeholder:text-gray-400 placeholder:text-[16px]" />
+                <p class="text-xs italic text-gray-500 mt-1">Note: add in plural case e.g., users</p>
+                @endif
+
+                @error('foreignModelName') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+
+
+            <!-- Local Column Name -->
+            <div class="mt-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Referenced Column</label>
+                @if(!empty($this->fieldNames))
+                <select wire:model.live="referencedColumn" class="w-full border rounded-md p-2 text-gray-700">
+                    <option value="">-- Select field --</option>
+                    @foreach ($this->fieldNames as $field)
+                    <option value="{{ $field }}">{{ $field }}</option>
+                    @endforeach
+                </select>
+                @else
+                <input type="text" placeholder="user_id" wire:model.live="referencedColumn"
+                    class="w-full border rounded-md p-2 placeholder:text-gray-400 placeholder:text-[16px]" />
+                @error('referencedColumn') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                @endif
+            </div>
+            @endif
+
         </div>
 
         <!-- Modal footer -->
@@ -57,5 +109,5 @@
         </x-slot:footer>
 
         <!-- Base Modal -->
-        </x-code-generator::modal>
+    </x-code-generator::modal>
 </div>

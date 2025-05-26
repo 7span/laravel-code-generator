@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class RestApi extends Component
 {
@@ -14,9 +15,18 @@ class RestApi extends Component
     public array $relationData = [];
     public array $fieldsData = [];
     public array $notificationData = [];
+
+    public array $tableNames = [];
+
+    public $fieldNames = [];
     public $generalError = '';
     public $errorMessage = "";
     public $successMessage = '';
+
+    public $isForeignKey = false;
+    public $foreignModelName = '';
+    public $referencedColumn = '';
+
 
     // Modal visibility properties
     public $isAddRelModalOpen = false;
@@ -76,7 +86,7 @@ class RestApi extends Component
         'relation_type' => 'required',
         'second_model' => 'required|regex:/^[A-Z][a-z]+$/',
         'foreign_key' => 'required|regex:/^[a-zA-Z][a-zA-Z0-9_]/',
-        'local_key' => 'required|regex:/^[a-zA-Z][a-zA-Z0-9_]/',
+        'local_key' => 'required|regex:/^[a-z_]+$/',
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
@@ -84,6 +94,7 @@ class RestApi extends Component
         'data' => 'required|regex:/^[A-Za-z0-9]+:[A-Za-z0-9]+(?:,[A-Za-z0-9]+:[A-Za-z0-9]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
+        'foreignModelName' => 'required|regex:/^[a-z0-9_]+$/',
     ];
 
     public $messages = [
@@ -95,7 +106,7 @@ class RestApi extends Component
     {
         return view('code-generator::livewire.rest-api');
     }
-    
+
     // Add persist property to maintain state
     protected $persist = [
         'modelName',
@@ -125,29 +136,45 @@ class RestApi extends Component
         'HasUserAction'
     ];
 
-    // Add mount method to restore state
-    public function mount()
+    public function updatedIsForeignKey($value)
     {
-        if (session()->has('form_data')) {
-            $formData = session('form_data');
-            foreach ($formData as $key => $value) {
-                if (property_exists($this, $key)) {
-                    $this->$key = $value;
-                }
-            }
+        if (!$value) {
+            // Checkbox was unchecked - clear related fields
+            $this->foreignModelName = '';
+            $this->referencedColumn = '';
         }
     }
 
-    // Add dehydrate method to store state before navigation
-    public function dehydrate()
+    public function mount()
     {
-        session()->put('form_data', collect($this->persist)
-            ->mapWithKeys(fn($property) => [$property => $this->$property])
-            ->toArray()
-        );
+        $this->loadMigrationTableNames();
     }
-    
-    
+
+    // Add mount method to restore state
+    // public function mount()
+    // {
+    //     if (session()->has('form_data')) {
+    //         $formData = session('form_data');
+    //         foreach ($formData as $key => $value) {
+    //             if (property_exists($this, $key)) {
+    //                 $this->$key = $value;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // Add dehydrate method to store state before navigation
+    // public function dehydrate()
+    // {
+    //     session()->put(
+    //         'form_data',
+    //         collect($this->persist)
+    //             ->mapWithKeys(fn($property) => [$property => $this->$property])
+    //             ->toArray()
+    //     );
+    // }
+
+
     /**
      * Live validation for form fields
      */
@@ -219,7 +246,7 @@ class RestApi extends Component
     }
 
     //resets form fields
-   public function resetForm()
+    public function resetForm()
     {
         $this->reset([
             'related_model',
@@ -228,9 +255,14 @@ class RestApi extends Component
             'foreign_key',
             'local_key',
             'data_type',
+            'isForeignKey',
             'column_name',
             'column_validation',
-            'fieldId'
+            'fieldId',
+            'isForeignKey',
+            'foreignModelName',
+            'referencedColumn'
+
         ]);
         $this->resetErrorBag();
     }
@@ -284,11 +316,18 @@ class RestApi extends Component
     public function openEditFieldModal($fieldId): void
     {
         $this->fieldId = $fieldId;
-        $this->isEditFieldModalOpen = true;
         $field = collect($this->fieldsData)->firstWhere('id', $fieldId);
+
         if ($field) {
-            $this->fill($field);
+            $this->column_name = $field['column_name'] ?? '';
+            $this->data_type = $field['data_type'] ?? '';
+            $this->column_validation = $field['column_validation'] ?? '';
+            $this->isForeignKey = (bool) ($field['isForeignKey'] ?? false);
+            $this->foreignModelName = $field['foreignModelName'] ?? '';
+            $this->referencedColumn = $field['referencedColumn'] ?? '';
         }
+
+        $this->isEditFieldModalOpen = true;
     }
 
     public function openDeleteFieldModal($id): void
@@ -307,6 +346,7 @@ class RestApi extends Component
 
     public function saveField(): void
     {
+
         // Check for duplicate column name, excluding the current edited field by ID
         $columnExists = false;
         foreach ($this->fieldsData as $field) {
@@ -319,21 +359,34 @@ class RestApi extends Component
             }
         }
 
+
         if ($columnExists) {
             $this->addError('column_name', 'You have already taken this column');
             return;
         }
 
-        $this->validate([
+
+        $rulesToValidate = [
             'data_type' => $this->rules['data_type'],
             'column_name' => $this->rules['column_name'],
             'column_validation' => $this->rules['column_validation'],
-        ]);
+        ];
+
+        if ($this->isForeignKey) {
+            $rulesToValidate['foreignModelName'] = $this->rules['foreignModelName'];
+            $rulesToValidate['referencedColumn'] = $this->rules['local_key'];
+        }
+
+        $this->validate($rulesToValidate);
+
 
         $fieldData = [
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,
             'column_validation' => $this->column_validation,
+            'isForeignKey' => $this->isForeignKey ?? false, // default fallback
+            'foreignModelName' => $this->foreignModelName,
+            'referencedColumn' => $this->referencedColumn,
         ];
 
         // Update existing field or add new one
@@ -348,10 +401,11 @@ class RestApi extends Component
         } else {
             $this->fieldsData[] = array_merge(['id' => Str::random(8)], $fieldData);
         }
+        // dd($this->fieldsData);
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
-        $this->reset(['column_name', 'data_type', 'column_validation']);
+        $this->reset(['column_name', 'data_type', 'column_validation', 'isForeignKey', 'foreignModelName', 'referencedColumn']);
     }
 
     public function saveNotification(): void
@@ -413,7 +467,7 @@ class RestApi extends Component
             // Generate files
             $this->generateFiles();
             session()->flash('success', 'Files generated Successfully!');
-    
+
             // Reset form
             $this->reset();
         } catch (\Exception $e) {
@@ -681,31 +735,54 @@ class RestApi extends Component
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
         $destination = app_path(config('code_generator.trait_path', 'Traits'));
-    
+
         if (!File::exists($source)) {
             Log::warning('Traits source folder not found: ' . $source);
             return;
         }
-    
+
         File::ensureDirectoryExists($destination);
-    
+
         foreach ($selectedTraits as $trait) {
             $fileName = $trait . '.php';
             $sourceFile = $source . DIRECTORY_SEPARATOR . $fileName;
             $destinationFile = $destination . DIRECTORY_SEPARATOR . $fileName;
-    
+
             if (!File::exists($sourceFile)) {
                 Log::warning("Trait file not found in source: $fileName");
                 continue;
             }
-    
+
             if (File::exists($destinationFile)) {
                 Log::info("Trait $fileName already exists in destination, skipping.");
                 continue;
             }
-    
+
             File::copy($sourceFile, $destinationFile);
             Log::info("Trait $fileName copied to app/Traits.");
+        }
+    }
+
+
+    public function loadMigrationTableNames()
+    {
+        $migrationPath = database_path('migrations');
+        $files = File::exists($migrationPath) ? File::files($migrationPath) : [];
+
+        $this->tableNames = collect($files)->map(function ($file) {
+            if (preg_match('/create_(.*?)_table/', $file->getFilename(), $matches)) {
+                return $matches[1];
+            }
+            return null;
+        })->filter()->unique()->values()->toArray();
+    }
+
+    public function updatedForeignModelName($value)
+    {
+        if ($value && Schema::hasTable($value)) {
+            $this->fieldNames = Schema::getColumnListing($value);
+        } else {
+            $this->fieldNames = [];
         }
     }
 }

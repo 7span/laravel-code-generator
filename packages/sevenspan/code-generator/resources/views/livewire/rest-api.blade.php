@@ -103,7 +103,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetForm()" />
         </div>
-        <x-code-generator::field-table :$fieldsData  :softDeleteFile="$softDeleteFile"/>
+        <x-code-generator::field-table :$fieldsData :softDeleteFile="$softDeleteFile" />
     </div>
 
     <!-- eloqunet relations -->
@@ -115,7 +115,7 @@
         <x-code-generator::eloqunet-relation-table :$relationData />
     </div>
 
-    <!-- checkboxes -->   
+    <!-- checkboxes -->
     <div class="mb-2">
         <x-code-generator::add-files-methods :$errorMessage />
     </div>

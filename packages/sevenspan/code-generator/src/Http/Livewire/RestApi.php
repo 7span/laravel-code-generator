@@ -145,34 +145,30 @@ class RestApi extends Component
         }
     }
 
-    public function mount()
-    {
-        $this->loadMigrationTableNames();
-    }
-
     // Add mount method to restore state
-    // public function mount()
-    // {
-    //     if (session()->has('form_data')) {
-    //         $formData = session('form_data');
-    //         foreach ($formData as $key => $value) {
-    //             if (property_exists($this, $key)) {
-    //                 $this->$key = $value;
-    //             }
-    //         }
-    //     }
-    // }
+     public function mount()
+     {
+         if (session()->has('form_data')) {
+             $formData = session('form_data');
+             foreach ($formData as $key => $value) {
+                 if (property_exists($this, $key)) {
+                     $this->$key = $value;
+                 }
+             }
+         }
+         $this->loadMigrationTableNames();
+     }
 
     // Add dehydrate method to store state before navigation
-    // public function dehydrate()
-    // {
-    //     session()->put(
-    //         'form_data',
-    //         collect($this->persist)
-    //             ->mapWithKeys(fn($property) => [$property => $this->$property])
-    //             ->toArray()
-    //     );
-    // }
+     public function dehydrate()
+     {
+         session()->put(
+             'form_data',
+         collect($this->persist)
+                 ->mapWithKeys(fn($property) => [$property => $this->$property])
+                 ->toArray()
+         );
+     }
 
 
     /**

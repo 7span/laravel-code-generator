@@ -54,39 +54,82 @@
 
             <!-- Show if Foreign Key is selected -->
             @if($this->isForeignKey)
-            <!-- Related Model Name -->
-            <div class="mt-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Related Model Name</label>
-                @if (!empty($this->tableNames))
-                <select wire:model.live="foreignModelName" class="w-full border rounded-md p-2 text-gray-700">
-                    <option value="">-- Select Table --</option>
-                    @foreach ($this->tableNames as $table)
-                    <option value="{{ $table }}">{{ $table }}</option>
-                    @endforeach
-                </select>
-                @else
-                <input type="text" placeholder="users" wire:model.live="foreignModelName"
-                    class="w-full border rounded-md p-2 placeholder:text-gray-400 placeholder:text-[16px]" />
-                <p class="text-xs italic text-gray-500 mt-1">Note: add in plural case e.g., users</p>
-                @endif
-                @error('foreignModelName') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-            </div>
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-md p-6 mt-6">
 
-            <!-- Local Column Name -->
-            <div class="mt-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Referenced Column</label>
-                @if(!empty($this->fieldNames))
-                <select wire:model.live="referencedColumn" class="w-full border rounded-md p-2 text-gray-700">
-                    <option value="">-- Select field --</option>
-                    @foreach ($this->fieldNames as $field)
-                    <option value="{{ $field }}">{{ $field }}</option>
-                    @endforeach
-                </select>
-                @else
-                <input type="text" placeholder="user_id" wire:model.live="referencedColumn"
-                    class="w-full border rounded-md p-2 placeholder:text-gray-400 placeholder:text-[16px]" />
-                @endif
-                @error('referencedColumn') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                <!-- Related Table Name -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Related Table Name</label>
+
+                    @if (!empty($this->tableNames))
+                    <select wire:model.live="foreignModelName"
+                        class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
+                        <option value="">-- Select Table --</option>
+                        @foreach ($this->tableNames as $table)
+                        <option value="{{ $table }}">{{ $table }}</option>
+                        @endforeach
+                    </select>
+                    @else
+                    <input type="text" placeholder="users" wire:model.live="foreignModelName"
+                        class="w-full border border-gray-300 rounded-md p-2 placeholder:text-gray-400 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
+                    <p class="text-xs italic text-gray-500 mt-1">Note: use plural form, e.g., <code>users</code></p>
+                    @endif
+
+                    @error('foreignModelName') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Referenced Column -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Referenced Column</label>
+                    @if (!empty($this->fieldNames))
+                    <select wire:model.live="referencedColumn"
+                        class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
+                        <option value="">-- Select Field --</option>
+                        @foreach ($this->fieldNames as $field)
+                        <option value="{{ $field }}">{{ $field }}</option>
+                        @endforeach
+                    </select>
+                    @else
+                    <input type="text" placeholder="user_id" wire:model.live="referencedColumn"
+                        class="w-full border border-gray-300 rounded-md p-2 placeholder:text-gray-400 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
+                    @endif
+
+                    @error('referencedColumn') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Actions -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- ON UPDATE -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">On Update Action</label>
+                        <select wire:model.live="onUpdateAction"
+                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
+                            <option value="">Select</option>
+                            <option value="cascade">Cascade</option>
+                            <option value="set null">Set Null</option>
+                            <option value="restrict">Restrict</option>
+                            <option value="no action">No Action</option>
+                        </select>
+                        @error('onUpdateAction') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- ON DELETE -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">On Delete Action</label>
+                        <select wire:model.live="onDeleteAction"
+                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
+                            <option value="">Select</option>
+                            <option value="cascade">Cascade</option>
+                            <option value="set null">Set Null</option>
+                            <option value="restrict">Restrict</option>
+                            <option value="no action">No Action</option>
+                        </select>
+                        @error('onDeleteAction') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
             </div>
             @endif
         </div>

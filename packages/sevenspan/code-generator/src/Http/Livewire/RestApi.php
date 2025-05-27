@@ -22,10 +22,11 @@ class RestApi extends Component
     public $generalError = '';
     public $errorMessage = "";
     public $successMessage = '';
-
     public $isForeignKey = false;
     public $foreignModelName = '';
     public $referencedColumn = '';
+    public $onDeleteAction = '';
+    public $onUpdateAction = '';
 
 
     // Modal visibility properties
@@ -95,11 +96,13 @@ class RestApi extends Component
         'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
         'foreignModelName' => 'required|regex:/^[a-z0-9_]+$/',
+        'onDeleteAction' => 'nullable|in:restrict,cascade,set null,no action',
+        'onUpdateAction' => 'nullable|in:restrict,cascade,set null,no action',
     ];
 
     public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
-        'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
+        'related_model.regex' => 'The Model Name must start with anuppercase letter and contain only letters.',
     ];
 
     public function render()
@@ -375,6 +378,8 @@ class RestApi extends Component
         if ($this->isForeignKey) {
             $rulesToValidate['foreignModelName'] = $this->rules['foreignModelName'];
             $rulesToValidate['referencedColumn'] = $this->rules['local_key'];
+            $rulesToValidate['onDeleteAction'] = $this->rules['onDeleteAction'];
+            $rulesToValidate['onUpdateAction'] = $this->rules['onUpdateAction'];
         }
 
         $this->validate($rulesToValidate);
@@ -387,6 +392,8 @@ class RestApi extends Component
             'isForeignKey' => $this->isForeignKey ?? false, // default fallback
             'foreignModelName' => $this->foreignModelName,
             'referencedColumn' => $this->referencedColumn,
+            'onDeleteAction' => $this->onDeleteAction,
+            'onUpdateAction' => $this->onUpdateAction,
         ];
 
         // Update existing field or add new one
@@ -401,7 +408,6 @@ class RestApi extends Component
         } else {
             $this->fieldsData[] = array_merge(['id' => Str::random(8)], $fieldData);
         }
-        // dd($this->fieldsData);
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
@@ -533,9 +539,10 @@ class RestApi extends Component
         // Format field and relation strings
         $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
         $relationsString = implode(', ', array_map(
-            fn($relation) => ($relation['related_model'] ?? 'unknown') . ':' . ($relationMap[$relation['relation_type']] ?? 'unknown'),
+            fn($relation) => ($relation['related_model']) . ':' . ($relationMap[$relation['relation_type']]) . ':' . ($relation['foreign_key']) . ':' . ($relation['local_key']),
             $this->relationData
         ));
+
 
         // Generate files based on flags
         if ($files['model']) {
@@ -605,15 +612,15 @@ class RestApi extends Component
     /**
      * Generate migration file
      */
-    private function generateMigration($modelName, $fields, $softDelete, $overwrite)
+    private function generateMigration($modelName, $fieldsData, $softDelete, $overwrite)
     {
-        $migrationFieldString = collect($fields)->map(function ($field) {
-            return $field['column_name'] . ':' . $field['data_type'];
-        })->implode(',');
+        // $migrationFieldString = collect($fields)->map(function ($field) {
+        //     return $field['column_name'] . ':' . $field['data_type'];
+        // })->implode(',');
 
         Artisan::call('codegenerator:migration', [
-            'modelName' => $modelName,
-            '--fields' => $migrationFieldString,
+            'model' => $modelName,
+            '--fields' => $fieldsData,
             '--softdelete' => $softDelete,
             '--overwrite' => $overwrite
         ]);

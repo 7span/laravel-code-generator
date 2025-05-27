@@ -13,7 +13,6 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Default Fields -->
                 <tr>
                     <td class="px-4 py-2 text-gray-600">id</td>
                     <td class="px-4 py-2 text-gray-600">auto_increment</td>
@@ -39,6 +38,8 @@
                     <td class="px-4 py-2 text-gray-600">string</td>
                     <td class="px-4 py-2 text-gray-600">optional</td>
                 </tr>
+
+                <!-- Show If Soft Delete is enabled -->
                 @if($softDeleteFile)
                 <tr>
                     <td class="px-4 py-2 text-gray-600">deleted_by</td>
@@ -51,9 +52,6 @@
                     <td class="px-4 py-2 text-gray-600">optional</td>
                 </tr>
                 @endif
-
-                <!-- Custom Fields -->
-
 
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">

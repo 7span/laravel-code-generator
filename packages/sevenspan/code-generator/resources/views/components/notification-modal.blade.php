@@ -3,7 +3,6 @@
     x-on:click.self="$wire.isNotificationModalOpen=false">
 
     <x-code-generator::modal modalTitle="Notification">
-        <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isNotificationModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
@@ -40,7 +39,6 @@
             </div>
         </div>
 
-        <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
                 <x-code-generator::button title="Cancel" x-on:click="$wire.isNotificationModalOpen=false" />

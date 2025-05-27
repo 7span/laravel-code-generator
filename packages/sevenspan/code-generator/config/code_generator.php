@@ -70,7 +70,11 @@ return [
         AuthorizeCodeGenerator::class, // Custom middleware to authorize generator access
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Code Generator Class Namespace
+    |--------------------------------------------------------------------------
+    */
+    
     'class_namespace' => 'Sevenspan\\CodeGenerator',
-
-    'log_retention_days' => 7, // Delete logs older than 7 days
 ];

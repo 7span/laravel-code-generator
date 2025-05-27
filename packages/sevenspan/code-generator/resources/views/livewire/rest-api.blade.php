@@ -101,7 +101,7 @@
     <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
         <div class="flex justify-between items-center mb-3">
             <h2 class="text-xl font-semibold">Fields </h2>
-            <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetForm()" />
+            <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
         <x-code-generator::field-table :$fieldsData :softDeleteFile="$softDeleteFile" />
     </div>
@@ -110,7 +110,7 @@
     <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
         <div class="flex justify-between items-center mb-3">
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
-            <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetForm()" />
+            <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetModal()" />
         </div>
         <x-code-generator::eloqunet-relation-table :$relationData />
     </div>

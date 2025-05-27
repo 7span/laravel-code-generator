@@ -3,7 +3,6 @@
 namespace Sevenspan\CodeGenerator\Http\Livewire;
 
 use Livewire\Component;
-use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 
 class Index extends Component
 {

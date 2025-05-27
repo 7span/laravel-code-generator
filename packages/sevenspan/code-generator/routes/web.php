@@ -11,6 +11,7 @@ Route::get(
     }
 )->middleware("codeGeneratorMiddleware")->name('code-generator.index');
 
+// Define the route for logs
 Route::get(
     'codegenerator/logs',
     function () {

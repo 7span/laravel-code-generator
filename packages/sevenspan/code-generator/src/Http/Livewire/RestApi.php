@@ -40,6 +40,7 @@ class RestApi extends Component
 
     // Form inputs
     public $modelName;
+
     public $relations, $relationId, $fields, $fieldId;
 
     // Relationship form fields
@@ -100,11 +101,13 @@ class RestApi extends Component
         'onUpdateAction' => 'nullable|in:restrict,cascade,set null,no action',
     ];
 
+    // Custom validation messages
     public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'related_model.regex' => 'The Model Name must start with anuppercase letter and contain only letters.',
     ];
 
+    // Initialize component
     public function render()
     {
         return view('code-generator::livewire.rest-api');
@@ -139,6 +142,7 @@ class RestApi extends Component
         'HasUserAction'
     ];
 
+    // Add updated method for foreign key checkbox
     public function updatedIsForeignKey($value)
     {
         if (!$value) {
@@ -148,47 +152,39 @@ class RestApi extends Component
         }
     }
 
-    public function mount()
-    {
-        $this->loadMigrationTableNames();
-    }
-
-    // Add mount method to restore state
-    // public function mount()
-    // {
-    //     if (session()->has('form_data')) {
-    //         $formData = session('form_data');
-    //         foreach ($formData as $key => $value) {
-    //             if (property_exists($this, $key)) {
-    //                 $this->$key = $value;
-    //             }
-    //         }
-    //     }
-    // }
+    // Add mount method to restore state of form
+     public function mount()
+     {
+         if (session()->has('form_data')) {
+             $formData = session('form_data');
+             foreach ($formData as $key => $value) {
+                 if (property_exists($this, $key)) {
+                     $this->$key = $value;
+                 }
+             }
+         }
+         $this->loadMigrationTableNames();
+     }
 
     // Add dehydrate method to store state before navigation
-    // public function dehydrate()
-    // {
-    //     session()->put(
-    //         'form_data',
-    //         collect($this->persist)
-    //             ->mapWithKeys(fn($property) => [$property => $this->$property])
-    //             ->toArray()
-    //     );
-    // }
+     public function dehydrate()
+     {
+         session()->put(
+             'form_data',
+         collect($this->persist)
+                 ->mapWithKeys(fn($property) => [$property => $this->$property])
+                 ->toArray()
+         );
+     }
 
-
-    /**
-     * Live validation for form fields
-     */
+     // Live validation for form fields
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
     }
 
-    /**
-     * Update notification file checkbox state and open modal if checked
-     */
+
+    // Update notification file checkbox state and open modal if checked
     public function updatedNotificationFile(): void
     {
         if ($this->notificationFile) {
@@ -196,9 +192,7 @@ class RestApi extends Component
         }
     }
 
-    /**
-     * Validate fields and methods
-     */
+    //  Validate fields and methods
     public function validateFieldsAndMethods()
     {
         $this->errorMessage = "";
@@ -224,12 +218,14 @@ class RestApi extends Component
         return true;
     }
 
+    // Open delete modal
     public function openDeleteModal($id): void
     {
         $this->relationId = $id;
         $this->isRelDeleteModalOpen = true;
     }
 
+    // Delete relation in table
     public function deleteRelation(): void
     {
         $this->relationData = array_filter($this->relationData, function ($relation) {
@@ -238,6 +234,7 @@ class RestApi extends Component
         $this->isRelDeleteModalOpen = false;
     }
 
+    // Open edit relation modal
     public function openEditRelationModal($relationId): void
     {
         $this->relationId = $relationId;
@@ -248,8 +245,8 @@ class RestApi extends Component
         }
     }
 
-    //resets form fields
-    public function resetForm()
+    // Resets modal form fields
+    public function resetModal()
     {
         $this->reset([
             'related_model',
@@ -270,8 +267,8 @@ class RestApi extends Component
         $this->resetErrorBag();
     }
 
-
-    public function addRelation(): void
+    // Save relation data
+    public function saveRelation(): void
     {
         $rules = [
             'related_model' => $this->rules['related_model'],
@@ -316,6 +313,7 @@ class RestApi extends Component
         $this->relationId = null;
     }
 
+    // Open Edit Field Modal
     public function openEditFieldModal($fieldId): void
     {
         $this->fieldId = $fieldId;
@@ -333,12 +331,14 @@ class RestApi extends Component
         $this->isEditFieldModalOpen = true;
     }
 
+    // Opens delete  Field Modal
     public function openDeleteFieldModal($id): void
     {
         $this->fieldId = $id;
         $this->isDeleteFieldModalOpen = true;
     }
 
+    // Deletes field from table
     public function deleteField(): void
     {
         $this->fieldsData = array_filter($this->fieldsData, function ($field) {
@@ -347,9 +347,9 @@ class RestApi extends Component
         $this->isDeleteFieldModalOpen = false;
     }
 
+    // Save Fields Data
     public function saveField(): void
     {
-
         // Check for duplicate column name, excluding the current edited field by ID
         $columnExists = false;
         foreach ($this->fieldsData as $field) {
@@ -389,7 +389,7 @@ class RestApi extends Component
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,
             'column_validation' => $this->column_validation,
-            'isForeignKey' => $this->isForeignKey ?? false, // default fallback
+            'isForeignKey' => $this->isForeignKey ?? false, 
             'foreignModelName' => $this->foreignModelName,
             'referencedColumn' => $this->referencedColumn,
             'onDeleteAction' => $this->onDeleteAction,
@@ -414,6 +414,7 @@ class RestApi extends Component
         $this->reset(['column_name', 'data_type', 'column_validation', 'isForeignKey', 'foreignModelName', 'referencedColumn']);
     }
 
+    // Save notification data
     public function saveNotification(): void
     {
         $this->validate([
@@ -436,10 +437,8 @@ class RestApi extends Component
         $this->isNotificationModalOpen = false;
         $this->reset(['class_name', 'data', 'subject', 'body']);
     }
-
-    /**
-     * Validate inputs before generation
-     */
+ 
+    //Validate inputs before generation 
     private function validateInputs(): bool
     {
         // Validate model name
@@ -463,6 +462,7 @@ class RestApi extends Component
         return true;
     }
 
+    // Save Form and generate files
     public function save(): void
     {
         try {
@@ -483,9 +483,7 @@ class RestApi extends Component
         }
     }
 
-    /**
-     * Generate all selected files
-     */
+     // Generate all selected files
     private function generateFiles(): void
     {
         $selectedTraits = array_filter([
@@ -592,9 +590,7 @@ class RestApi extends Component
      * HELPER METHODS FOR FILE GENERATION
      */
 
-    /**
-     * Generate model file
-     */
+    // Generate model file
     private function generateModel($modelName, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
     {
         Artisan::call('codegenerator:model', [
@@ -609,9 +605,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate migration file
-     */
+
     private function generateMigration($modelName, $fieldsData, $softDelete, $overwrite)
     {
         // $migrationFieldString = collect($fields)->map(function ($field) {
@@ -626,9 +620,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate controller file
-     */
+    // Generate controller file
     private function generateController($modelName, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
     {
         Artisan::call('codegenerator:controller', [
@@ -642,9 +634,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate policy file
-     */
+    // Generate policy file
     private function generatePolicy($modelName, $overwrite)
     {
         Artisan::call('codegenerator:policy', [
@@ -653,9 +643,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate observer file
-     */
+    // Generate observer file
     private function generateObserver($modelName, $overwrite)
     {
         Artisan::call('codegenerator:observer', [
@@ -664,9 +652,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate service file
-     */
+    // Generate service file
     private function generateService($modelName, $overwrite)
     {
         Artisan::call('codegenerator:service', [
@@ -675,9 +661,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate notification file
-     */
+    //Generate notification file
     private function generateNotification($modelName, $overwrite)
     {
         $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
@@ -692,9 +676,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate resource file
-     */
+    // Generate resource file
     private function generateResource($modelName, $overwrite)
     {
         Artisan::call('codegenerator:resource', [
@@ -703,9 +685,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate request file
-     */
+    // Generate request file
     private function generateRequest($modelName, $fields, $overwrite)
     {
         $ruleString = implode(',', array_map(function ($field) {
@@ -719,9 +699,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Generate factory file
-     */
+    //Generate factory file
     private function generateFactory($modelName, $fields, $overwrite)
     {
         $fieldString = implode(',', array_map(function ($field) {
@@ -735,9 +713,7 @@ class RestApi extends Component
         ]);
     }
 
-    /**
-     * Copy traits to application
-     */
+    //Copy traits to application
     private function copyTraits($selectedTraits)
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
@@ -770,7 +746,7 @@ class RestApi extends Component
         }
     }
 
-
+    //Load migration table names from the migrations directory
     public function loadMigrationTableNames()
     {
         $migrationPath = database_path('migrations');
@@ -784,6 +760,7 @@ class RestApi extends Component
         })->filter()->unique()->values()->toArray();
     }
 
+    // Update field names based on foreign model name
     public function updatedForeignModelName($value)
     {
         if ($value && Schema::hasTable($value)) {

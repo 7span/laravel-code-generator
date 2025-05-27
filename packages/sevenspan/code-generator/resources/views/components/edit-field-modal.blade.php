@@ -3,14 +3,13 @@
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
 
     <x-code-generator::modal modalTitle="Edit Field">
-        <!-- Modal header -->
+
         <x-slot:closebtn>
             <button x-on:click="$wire.isEditFieldModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
 
         <div class="mt-4 space-y-4">
-            <!-- Column Name -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Column Name</label>
                 <input type="text" placeholder="Enter Name" wire:model.live="column_name"
@@ -19,7 +18,6 @@
                 <p class="text-xs italic text-gray-500 mt-1">Note: Add without special characters</p>
             </div>
 
-            <!-- Data Type -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
                 <select id="column_type" class="w-full border rounded-md p-2" name="data_type"
@@ -29,7 +27,6 @@
                 @error('data_type') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 
-            <!-- Validation -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Validation</label>
                 <select wire:model.live="column_validation" id="column_validation"
@@ -43,7 +40,6 @@
                 @error('column_validation') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 
-            <!-- Foreign Key Option -->
             <div>
                 <div class="flex items-center gap-2">
                     <input type="checkbox" wire:model.live="isForeignKey" class="form-checkbox text-indigo-600">
@@ -134,12 +130,12 @@
             @endif
         </div>
 
-        <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
                 <x-code-generator::button title="Cancel" x-on:click="$wire.isEditFieldModalOpen=false" />
             </div>
             <x-code-generator::button wire:click="saveField" title="Update" />
         </x-slot:footer>
+
     </x-code-generator::modal>
 </div>

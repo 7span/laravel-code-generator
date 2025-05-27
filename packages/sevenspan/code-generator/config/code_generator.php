@@ -70,5 +70,11 @@ return [
         AuthorizeCodeGenerator::class, // Custom middleware to authorize generator access
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Code Generator Class Namespace
+    |--------------------------------------------------------------------------
+    */
+    
     'class_namespace' => 'Sevenspan\\CodeGenerator',
 ];

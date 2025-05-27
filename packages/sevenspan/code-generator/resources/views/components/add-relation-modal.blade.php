@@ -5,7 +5,7 @@
     x-on:click.self="$wire.isAddRelModalOpen=false">
 
     <x-code-generator::modal modalTitle="Add Eloquent Relation">
-        <!-- Modal header -->
+
         <x-slot:closebtn>
             <button x-on:click="$wire.isAddRelModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
@@ -45,7 +45,6 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <!-- Foreign Key Input -->
                         <div class="w-1/2">
                             <input type="text" placeholder="Foreign Key"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
@@ -55,7 +54,6 @@
                             @enderror
                         </div>
 
-                        <!-- Local Key Input -->
                         <div class="w-1/2">
                             <input type="text" placeholder="Local Key"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
@@ -68,12 +66,13 @@
 
                 </div>
             </div>
-        <!-- Modal footer -->
+
         <x-slot:footer>
             <div class="mr-6">
             <x-code-generator::button title="Cancel" x-on:click="$wire.isAddRelModalOpen=false"/>
           </div>
-          <x-code-generator::button wire:click="addRelation" title="Add" />
+          <x-code-generator::button wire:click="saveRelation" title="Add" />
         </x-slot:footer>
-    </x-modal>
+
+    </x-code-generator::modal>
 </div>

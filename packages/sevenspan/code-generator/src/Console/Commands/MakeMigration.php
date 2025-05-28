@@ -12,10 +12,12 @@ class MakeMigration extends Command
 {
     use FileManager;
 
-    protected $signature = 'codegenerator:migration {modelName : The name of the migration} 
-                                                    {--fields= : A of fields with their types (e.g., name:string,age:integer)} 
+    private const INDENT = '    ';
+
+    protected $signature = 'codegenerator:migration {model : The name of the migration} 
+                                                    {--fields=* : Array of field definitions with options like column_name, data_type, isForeignKey, foreignModelName, referencedColumn, onDeleteAction, onUpdateAction} 
                                                     {--softdelete : Include soft delete} 
-                                                    {--overwrite : is overwriting this file is selected}';
+                                                    {--overwrite : Overwrite the file if it exists}';
 
     protected $description = 'Create a custom migration file with optional fields, soft deletes, and deleted by functionality.';
 
@@ -26,8 +28,7 @@ class MakeMigration extends Command
 
     public function handle()
     {
-        $tableName = Str::snake($this->argument('modelName'));
-
+        $tableName = Str::snake($this->argument('model'));
         $timestamp = now()->format('Y_m_d_His');
 
         // Define the migration file name and path
@@ -51,7 +52,7 @@ class MakeMigration extends Command
      */
     protected function getStubPath(): string
     {
-        return __DIR__ . '/../../stubs/migration.create.stub';
+        return __DIR__ . '/../../stubs/migration.stub';
     }
 
     /**
@@ -62,51 +63,64 @@ class MakeMigration extends Command
      */
     protected function getStubVariables(string $tableName): array
     {
-        $fieldsOption = $this->option('fields');
-
-        $fieldDefinitions = $this->parseFields($fieldsOption, $hasDeletedBy);
-
         $includeSoftDeletes = $this->option('softdelete');
 
         return [
             'tableName'        => $tableName,
-            'fieldDefinitions' => $fieldDefinitions,
-            'softdelete'       => $includeSoftDeletes ? "  \$table->softDeletes();" : '',
-            'deletedBy'        => $hasDeletedBy ? "\$table->integer('deleted_by')->nullable();" : '',
+            'fieldDefinitions' => $this->parseFieldsAndForeignKeys(),
+            'softdelete'       => $includeSoftDeletes ? self::INDENT . "\$table->softDeletes();" : '',
+            'deletedBy'        => $includeSoftDeletes ? "\$table->integer('deleted_by')->nullable();" : '',
         ];
     }
 
     /**
-     * Parse the --fields option into migration field definitions.
-     *
-     * @param string|null $fieldsOption
-     * @param bool &$hasDeletedBy - Outputs true if 'deleted_by' field is present
+     * Parse fields and foreign keys from the fields option.
      * @return string
      */
-    protected function parseFields(?string $fieldsOption, &$hasDeletedBy = false): string
+    protected function parseFieldsAndForeignKeys(): string
     {
-        $hasDeletedBy = false;
-
-        if (!$fieldsOption) {
+        $fieldsOption = $this->option('fields');
+        if (empty($fieldsOption)) {
             return '';
         }
 
         $fieldLines = [];
-        $fields = explode(',', $fieldsOption);
 
-        foreach ($fields as $field) {
-            [$name, $type] = array_map('trim', explode(':', $field));
+        foreach ($fieldsOption as $field) {
+            $name = $field['column_name'] ?? null;
+            $type = $field['data_type'] ?? 'string';
+            $isForeignKey = $field['isForeignKey'] ?? false;
 
-            // Detect if 'deleted_by' is in the fields
-            if (Str::lower($name) === 'deleted_by') {
-                $hasDeletedBy = true;
+            if (!$name) {
                 continue;
             }
 
-            $fieldLines[] = "            \$table->{$type}('{$name}');";
-        }
+            if ($isForeignKey && isset($field['foreignModelName'])) {
+                $relatedModel = $field['foreignModelName'];
+                $referenceKey = $field['referencedColumn'] ?? 'id';
+                $relatedTable = Str::snake(Str::plural($relatedModel));
 
-        return implode("\n", $fieldLines);
+                $foreignLine = self::INDENT . self::INDENT . self::INDENT . "\$table->foreignId('{$name}')->constrained('{$relatedTable}')->references('{$referenceKey}')";
+
+                // Add ON DELETE action if provided
+                if (!empty($field['onDeleteAction'])) {
+                    $action = strtolower($field['onDeleteAction']);
+                    $foreignLine .= "->onDelete('{$action}')";
+                }
+
+                // Add ON UPDATE action if provided
+                if (!empty($field['onUpdateAction'])) {
+                    $action = strtolower($field['onUpdateAction']);
+                    $foreignLine .= "->onUpdate('{$action}')";
+                }
+
+                $foreignLine .= ';';
+                $fieldLines[] = $foreignLine;
+            } else {
+                $fieldLines[] = self::INDENT . self::INDENT . self::INDENT . "\$table->{$type}('{$name}');";
+            }
+        }
+        return implode(PHP_EOL, $fieldLines);
     }
 
     /**
@@ -133,7 +147,6 @@ class MakeMigration extends Command
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
-
         return $content;
     }
 
@@ -142,7 +155,7 @@ class MakeMigration extends Command
      */
     protected function createDirectoryIfMissing($path)
     {
-        if (! $this->files->isDirectory($path)) {
+        if (!$this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0777, true, true);
         }
     }

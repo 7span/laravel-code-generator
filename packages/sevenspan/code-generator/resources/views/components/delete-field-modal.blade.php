@@ -17,5 +17,5 @@
           </div>
           <x-code-generator::button wire:click="deleteField" title="Delete" />
         </x-slot:footer>
-    </x-modal>
+    </x-code-generator::modal>
 </div>

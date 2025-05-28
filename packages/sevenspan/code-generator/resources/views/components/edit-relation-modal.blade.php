@@ -24,7 +24,7 @@
                     <div class="flex gap-2">
                         <div class="w-1/2">
                         <input type="text" id="relatedModel" 
-                            placeholder="Model Name" 
+                            placeholder="Related Model" 
                             wire:model.live="related_model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base">
                         @error('related_model') 
@@ -65,7 +65,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
         <x-slot:footer>
@@ -74,5 +73,5 @@
           </div>
           <x-code-generator::button wire:click="saveRelation" title="Update" />
         </x-slot:footer>
-    </x-modal>
+    </x-code-generator::modal>
 </div>

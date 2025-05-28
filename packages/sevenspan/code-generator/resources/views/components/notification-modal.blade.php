@@ -45,5 +45,5 @@
             </div>
             <x-code-generator::button wire:click="saveNotification" title="Add" />
         </x-slot:footer>
-        </x-modal>
+        </x-code-generator::modal>
 </div>

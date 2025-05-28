@@ -26,7 +26,7 @@
                     <div class="w-1/2">
                     <input type="text" id="relatedModel"
                         class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
-                        placeholder="Model Name"
+                        placeholder="Related Model"
                         wire:model.live="related_model" />
                     @error('related_model') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -63,7 +63,32 @@
                             @enderror
                         </div>
                     </div>
+                    <!-- Extra keys -->
+                      <div  x-show="['Has One Through', 'Has Many Through'].includes($wire.relation_type)" class="flex gap-2">
+                        <!-- Foreign Key Input -->
+                        <div class="w-1/2">
+                            <input type="text"
+                                wire:model.live="via_foreign_key"
+                                placeholder="Foreign Key on second_model"
+                                class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
+                                 />
+                            @error('foreign_key')
+                            <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
+                            @enderror
+                        </div>
 
+                        <!-- Local Key Input -->
+                        <div class="w-1/2">
+                            <input type="text"
+                                wire:model.live="via_local_key"
+                                placeholder="Local Key on second_model"
+                                class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
+                                 />
+                            @error('local_key')
+                            <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>    
                 </div>
             </div>
 

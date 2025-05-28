@@ -15,29 +15,20 @@
     }
 }">
 
-    <!-- Toast Message -->
-    <div x-show="showToast" x-transion:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate-y-2"
-        x-transition:enter-end="opacity-100 transform translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate-y-0"
-        x-transition:leave-end="opacity-0 transform translate-y-2"
-        :class="toastType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'"
-        class="fixed top-4 right-4 border px-4 py-3 rounded z-50 shadow-lg" role="alert">
-        <div class="flex items-center">
-            <svg x-show="toastType === 'success'" class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd" />
-            </svg>
-            <svg x-show="toastType === 'error'" class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span class="block sm:inline" x-text="toastMessage"></span>
+    <!-- Loading Overlay  -->
+    <div  x-show="$wire.isGenerating" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-50"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
+            <p class="text-gray-700 font-medium text-lg">Generating files...</p>
         </div>
-    </div>
+    </div>   
 
     <!-- Session Messages -->
     @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
@@ -112,7 +103,7 @@
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::eloqunet-relation-table :$relationData />
+        <x-code-generator::eloqunet-relation-table :$relationData :$second_model :$via_foreign_key :$via_local_key />
     </div>
 
     <!-- checkboxes -->

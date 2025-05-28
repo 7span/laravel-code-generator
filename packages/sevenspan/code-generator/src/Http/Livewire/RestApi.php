@@ -44,7 +44,7 @@ class RestApi extends Component
     public $relations, $relationId, $fields, $fieldId;
 
     // Relationship form fields
-    public $related_model, $relation_type, $second_model, $foreign_key, $local_key;
+    public $related_model, $relation_type, $second_model, $foreign_key, $local_key,$via_foreign_key,$via_local_key;
 
     // Field properties
     public $data_type, $column_name, $column_validation;
@@ -81,14 +81,21 @@ class RestApi extends Component
     public $HasUuid = false;
     public $HasUserAction = false;
 
+    public $isGenerating = false;
+
     // Validation rules
     protected $rules = [
         'modelName' => 'required|regex:/^[A-Z][a-z]+$/',
         'related_model' => 'required|regex:/^[A-Z][a-z]+$/',
         'relation_type' => 'required',
-        'second_model' => 'required|regex:/^[A-Z][a-z]+$/',
-        'foreign_key' => 'required|regex:/^[a-zA-Z][a-zA-Z0-9_]/',
-        'local_key' => 'required|regex:/^[a-z_]+$/',
+
+        'second_model' => 'required|different:modelName|different:related_model|regex:/^[A-Z][a-z]+$/',
+        'foreign_key' => 'required|alpha_dash',
+        'local_key' => 'required|alpha_dash',
+
+        'via_foreign_key' => 'required|alpha_dash',
+        'via_local_key' => 'required|alpha_dash',
+
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
@@ -261,8 +268,9 @@ class RestApi extends Component
             'fieldId',
             'isForeignKey',
             'foreignModelName',
-            'referencedColumn'
-
+            'referencedColumn',
+            'via_foreign_key',
+            'via_local_key'
         ]);
         $this->resetErrorBag();
     }
@@ -278,21 +286,68 @@ class RestApi extends Component
         ];
 
         // Add second_model rule if needed
-        if (in_array($this->relation_type, ['Has One Through', 'Has Many Through'])) {
+      /*  if (in_array($this->relation_type, ['Has One Through', 'Has Many Through'])) {
             $rules['second_model'] = $this->rules['second_model'];
-        }
+        } */
 
         $this->validate($rules);
+        // Prevent exact self-referencing with same key names
+        if (
+            $this->foreign_key === $this->local_key &&
+            $this->related_model === $this->modelName
+        ) {
+            $this->addError('local_key', 'Foreign key and local key cannot be the same as base model for self-relation.');
+            return;
+        }
 
         $relationData = [
             'related_model' => $this->related_model,
             'relation_type' => $this->relation_type,
             'foreign_key' => $this->foreign_key,
             'local_key' => $this->local_key,
+             'second_model' => $this->second_model ?: '',
+            'via_foreign_key' => $this->via_foreign_key ?: '',
+            'via_local_key' => $this->via_local_key ?:'',
         ];
 
+        // Check for duplicates
+    foreach ($this->relationData as $existing) {
+    if (
+        $existing['related_model'] === $this->related_model &&
+        $existing['relation_type'] === $this->relation_type &&
+        $existing['foreign_key'] === $this->foreign_key &&
+        $existing['local_key'] === $this->local_key &&
+        (!isset($existing['second_model']) || $existing['second_model'] === $this->second_model)
+    ) {
+        $this->addError('related_model', 'This exact relation already exists.');
+        return;
+    }
+}
         if (isset($rules['second_model'])) {
             $relationData['second_model'] = $this->second_model;
+        }
+
+        // Prevent exact self-referencing with same key names
+         if (
+            $this->foreign_key === $this->local_key &&
+            $this->related_model === $this->modelName
+        ) {
+            $this->addError('local_key', 'Foreign key and local key cannot be the same as base model for self-relation.');
+            return;
+        }
+
+        // Check for duplicates
+        foreach ($this->relationData as $existing) {
+         if (
+            $existing['related_model'] === $this->related_model &&
+            $existing['relation_type'] === $this->relation_type &&
+            $existing['foreign_key'] === $this->foreign_key &&
+            $existing['local_key'] === $this->local_key &&
+            (!isset($existing['second_model']) || $existing['second_model'] === $this->second_model)
+            ) {
+        $this->addError('related_model', 'This exact relation already exists.');
+        return;
+            }
         }
 
         // Update or add relation
@@ -309,7 +364,7 @@ class RestApi extends Component
         }
         $this->isAddRelModalOpen = false;
         $this->isRelEditModalOpen = false;
-        $this->reset(['related_model', 'relation_type', 'second_model', 'foreign_key', 'local_key',]);
+        $this->reset(['related_model', 'relation_type', 'second_model', 'foreign_key', 'local_key','via_foreign_key', 'via_local_key']);
         $this->relationId = null;
     }
 
@@ -464,12 +519,15 @@ class RestApi extends Component
 
     // Save Form and generate files
     public function save(): void
-    {
+    {    
+        // dd($relationData);
         try {
             // Validate all inputs first
             if (!$this->validateInputs()) {
                 return;
             }
+            $this->isGenerating = true;
+
             // Generate files
             $this->generateFiles();
             session()->flash('success', 'Files generated Successfully!');
@@ -480,6 +538,8 @@ class RestApi extends Component
             $this->errorMessage = $e->getMessage();
             session()->flash('error', $e->getMessage());
             $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
+        } finally {
+            $this->isGenerating = false;
         }
     }
 
@@ -605,13 +665,9 @@ class RestApi extends Component
         ]);
     }
 
-
+    // Generate migration file
     private function generateMigration($modelName, $fieldsData, $softDelete, $overwrite)
     {
-        // $migrationFieldString = collect($fields)->map(function ($field) {
-        //     return $field['column_name'] . ':' . $field['data_type'];
-        // })->implode(',');
-
         Artisan::call('codegenerator:migration', [
             'model' => $modelName,
             '--fields' => $fieldsData,

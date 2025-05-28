@@ -33,8 +33,8 @@
 
                     <div class="w-1/2">
                     <input  type="text" 
-                            wire:model.live="second_model" 
-                            placeholder="Second Model"
+                            wire:model.live="intermediate_model" 
+                            placeholder="Intermediate Model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
                             :disabled="!['Has One Through', 'Has Many Through'].includes(relationType)" 
                             :class="{ 'bg-gray-100 text-gray-400': !['Has One Through', 'Has Many Through'].includes(relationType) }" />
@@ -46,7 +46,7 @@
 
                     <div class="flex gap-2">
                         <div class="w-1/2">
-                            <input type="text" placeholder="Foreign Key"
+                            <input type="text" placeholder="Foreign Key on Related Model"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
                                 wire:model.live="foreign_key" />
                             @error('foreign_key')
@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="w-1/2">
-                            <input type="text" placeholder="Local Key"
+                            <input type="text" placeholder="Local Key on Base Model"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
                                 wire:model.live="local_key" />
                             @error('local_key')
@@ -68,8 +68,8 @@
                         <!-- Foreign Key Input -->
                         <div class="w-1/2">
                             <input type="text"
-                                wire:model.live="via_foreign_key"
-                                placeholder="Foreign Key on second_model"
+                                wire:model.live="intermediate_foreign_key"
+                                placeholder="Intermediate Foreign Key"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
                                  />
                             @error('foreign_key')
@@ -80,8 +80,8 @@
                         <!-- Local Key Input -->
                         <div class="w-1/2">
                             <input type="text"
-                                wire:model.live="via_local_key"
-                                placeholder="Local Key on second_model"
+                                wire:model.live="intermediate_local_key"
+                                placeholder="Intermediate Local Key"
                                 class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
                                  />
                             @error('local_key')

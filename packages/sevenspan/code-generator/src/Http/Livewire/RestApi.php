@@ -44,7 +44,7 @@ class RestApi extends Component
     public $relations, $relationId, $fields, $fieldId;
 
     // Relationship form fields
-    public $related_model, $relation_type, $second_model, $foreign_key, $local_key,$via_foreign_key,$via_local_key;
+    public $related_model, $relation_type, $intermediate_model, $foreign_key, $local_key,$intermediate_foreign_key,$intermediate_local_key;
 
     // Field properties
     public $data_type, $column_name, $column_validation;
@@ -93,8 +93,8 @@ class RestApi extends Component
         'foreign_key' => 'required|alpha_dash',
         'local_key' => 'required|alpha_dash',
 
-        'via_foreign_key' => 'required|alpha_dash',
-        'via_local_key' => 'required|alpha_dash',
+        'intermediate_foreign_key' => 'required|alpha_dash',
+        'intermediate_local_key' => 'required|alpha_dash',
 
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
@@ -269,8 +269,8 @@ class RestApi extends Component
             'isForeignKey',
             'foreignModelName',
             'referencedColumn',
-            'via_foreign_key',
-            'via_local_key'
+            'intermediate_foreign_key',
+            'intermediate_local_key'
         ]);
         $this->resetErrorBag();
     }
@@ -306,8 +306,8 @@ class RestApi extends Component
             'foreign_key' => $this->foreign_key,
             'local_key' => $this->local_key,
              'second_model' => $this->second_model ?: '',
-            'via_foreign_key' => $this->via_foreign_key ?: '',
-            'via_local_key' => $this->via_local_key ?:'',
+            'intermediate_foreign_key' => $this->intermediate_foreign_key ?: '',
+            'intermediate_local_key' => $this->intermediate_local_key ?:'',
         ];
 
         // Check for duplicates
@@ -364,7 +364,7 @@ class RestApi extends Component
         }
         $this->isAddRelModalOpen = false;
         $this->isRelEditModalOpen = false;
-        $this->reset(['related_model', 'relation_type', 'second_model', 'foreign_key', 'local_key','via_foreign_key', 'via_local_key']);
+        $this->reset(['related_model', 'relation_type', 'second_model', 'foreign_key', 'local_key','intermediate_foreign_key', 'intermediate_local_key']);
         $this->relationId = null;
     }
 
@@ -596,6 +596,7 @@ class RestApi extends Component
 
         // Format field and relation strings
         $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
+
         $relationsString = implode(', ', array_map(
             fn($relation) => ($relation['related_model']) . ':' . ($relationMap[$relation['relation_type']]) . ':' . ($relation['foreign_key']) . ':' . ($relation['local_key']),
             $this->relationData

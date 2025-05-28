@@ -14,7 +14,7 @@ class MakeController extends Command
 
     private const INDENT = '    ';
 
-    protected $signature = 'codegenerator:controller {modelName : The name of the model to associate with the controller} 
+    protected $signature = 'codegenerator:controller {model : The name of the model to associate with the controller} 
                                                      {--methods= : Comma-separated list of methods to include in the controller}  
                                                      {--service : Include a service file for the controller} 
                                                      {--resource : Include resource files for the controller} 
@@ -32,7 +32,7 @@ class MakeController extends Command
 
     public function handle(): void
     {
-        $modelName = $this->argument('modelName');
+        $modelName = $this->argument('model');
         $isAdminCrudIncluded = (bool) $this->option('adminCrud');
 
         //generate the normal controller

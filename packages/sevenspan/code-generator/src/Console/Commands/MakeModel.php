@@ -14,9 +14,9 @@ class MakeModel extends Command
 
     private const INDENT = '    ';
 
-    protected $signature = 'codegenerator:model {modelName : The name of the model} 
+    protected $signature = 'codegenerator:model {model : The name of the model} 
                                                 {--fields= : Comma-separated fields (e.g., name,age)} 
-                                                {--relations= : Model relationships (e.g., Post:hasMany,User:belongsTo)} 
+                                                {--relations= : Model relationships with their foreign key and local key (e.g., Post:hasMany:user_id:id,User:belongsTo:post_id:id)} 
                                                 {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
                                                 {--softDelete : Include soft delete} 
                                                 {--factory : if factory file is included}
@@ -32,7 +32,7 @@ class MakeModel extends Command
 
     public function handle(): void
     {
-        $modelClass = Str::studly($this->argument('modelName'));
+        $modelClass = Str::studly($this->argument('model'));
         $modelFilePath = app_path(config('code_generator.model_path', 'Models') . "/{$modelClass}.php");
 
         $this->createDirectoryIfMissing(dirname($modelFilePath));
@@ -81,38 +81,8 @@ class MakeModel extends Command
     protected function getStubVariables(string $modelClass): array
     {
         $traitInfo = $this->getTraitInfo();
-        $fieldsOption = $this->option('fields');
         $relationMethods = $this->getRelations();
         $relatedModelImports = $this->getRelatedModels();
-
-        // Check if deleted_by field exists
-        $hasDeletedBy = false;
-        if ($fieldsOption) {
-            $fields = explode(',', $fieldsOption);
-            foreach ($fields as $field) {
-                if (trim(explode(':', $field)[0]) === 'deleted_by') {
-                    $hasDeletedBy = true;
-                    break;
-                }
-            }
-        }
-
-        // Process fillable fields from the fields option
-        $fillableFields = '';
-        if ($fieldsOption) {
-            $fields = explode(',', $fieldsOption);
-            $fieldNames = [];
-
-            foreach ($fields as $field) {
-                $fieldName = explode(':', $field)[0];
-                // Skip deleted_by field
-                if (trim($fieldName) !== 'deleted_by') {
-                    $fieldNames[] = "'" . trim($fieldName) . "',";
-                }
-            }
-
-            $fillableFields = implode(",\n        ", $fieldNames);
-        }
 
         return [
             'namespace' => 'App\\' . config('code_generator.model_path', 'Models'),
@@ -121,10 +91,33 @@ class MakeModel extends Command
             'traits' => $traitInfo['apply'],
             'relatedModelNamespaces' => !empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : "",
             'relation' => $relationMethods,
-            'fillableFields' => $fillableFields,
+            'fillableFields' => $this->getFillableFields($this->option('fields')),
             'deletedAt' => $this->option('softDelete') ? "'deleted_at' => 'datetime'," : '',
-            'deletedBy' => $hasDeletedBy ? "'deleted_by'," : ''
+            'deletedBy' => $this->option('softDelete') ? "'deleted_by'," : ''
         ];
+    }
+
+    /**
+     * Prepare fillable fields for the model.
+     *
+     * @param string|null $fieldsOption
+     * @return string
+     */
+    protected function getFillableFields($fieldsOption): string
+    {
+        $fillableFields = '';
+        if ($fieldsOption) {
+            $fields = explode(',', $fieldsOption);
+            $fieldNames = [];
+
+            foreach ($fields as $field) {
+                $fieldName = explode(':', $field)[0];
+                $fieldNames[] = "'" . trim($fieldName) . "',";
+            }
+
+            $fillableFields = implode(",\n        ", $fieldNames);
+        }
+        return $fillableFields;
     }
 
     /**
@@ -183,15 +176,14 @@ class MakeModel extends Command
         foreach (explode(',', $relations) as $relation) {
             if (!str_contains($relation, ':')) continue;
 
-            [$model, $type] = explode(':', $relation);
+            [$model, $type, $foreignKey, $localKey] = explode(':', $relation);
             $methodName = Str::camel($model);
             $relatedClass = Str::studly($model);
 
-            // Generate the relation method
+            // Generate the relation method with foreign key and local key
             $methods[] =
                 self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL .
-                self::INDENT . '{' . PHP_EOL .
-                self::INDENT . self::INDENT . 'return $this->' . $type . '(' . $relatedClass . '::class);' . PHP_EOL .
+                self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $type . '(' . $relatedClass . '::class' . ($foreignKey ? ", '$foreignKey'" : '') . ($localKey ? ", '$localKey'" : '') . ');' . PHP_EOL .
                 self::INDENT . '}' . PHP_EOL;
         }
 
@@ -220,6 +212,8 @@ class MakeModel extends Command
     }
 
     /**
+     * Create the directory if it does not exist.
+     *
      * @param string $path
      * @return void
      */

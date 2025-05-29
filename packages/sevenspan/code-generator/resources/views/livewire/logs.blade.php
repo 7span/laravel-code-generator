@@ -49,19 +49,21 @@
                             {{ $log->file_path }}
                         </td>
                         <td class="px-6 py-4 align-top">
+                            <!-- Determine the status class based on the status value -->
                             @php
                             $statusValue = $log->status;
                             if (is_object($statusValue) && enum_exists(get_class($statusValue)) &&
-                            property_exists($statusValue, 'value')) {
-                            $statusValue = $statusValue->value;
-                            }
+                                 property_exists($statusValue, 'value')) {
+                                            $statusValue = $statusValue->value;
+                                }
                             $statusValue = (string) $statusValue;
+
                             $statusClass = match ($statusValue) {
-                            'success' => 'bg-green-100 text-green-800',
-                            'error' => 'bg-red-100 text-red-800',
-                            'warning' => 'bg-yellow-100 text-yellow-800',
-                            default => 'bg-gray-100 text-gray-800',
-                            };
+                                        'success' => 'bg-green-100 text-green-800',
+                                        'error' => 'bg-red-100 text-red-800',
+                                        'warning' => 'bg-yellow-100 text-yellow-800',
+                                        default => 'bg-gray-100 text-gray-800',
+                                    };
                             @endphp
                             <span
                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
@@ -75,6 +77,7 @@
                             {{ (int) (bool) $log->is_overwrite}}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap align-top">
+                            <!-- Calculate the time difference -->
                             @php
                             $created = $log->created_at;
                             $now = now();

@@ -10,6 +10,7 @@
             <button x-on:click="$wire.isRelEditModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
+
         <!-- Relation Type -->
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col">
@@ -35,7 +36,7 @@
                         @enderror
                     </div>
 
-                        <!-- Second Model -->
+                        <!-- Intermediate Model -->
                         <div class="w-1/2">
                             <input type="text" 
                             wire:model.live="intermediate_model" 

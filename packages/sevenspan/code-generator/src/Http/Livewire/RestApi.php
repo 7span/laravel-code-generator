@@ -81,12 +81,11 @@ class RestApi extends Component
     public $ResourceFilterable = false;
     public $HasUuid = false;
     public $HasUserAction = false;
-    public $isGenerating = false;
 
-       // Validation rules
+    // Validation rules
     protected $rules = [
         'modelName' => 'required|regex:/^[A-Z][a-z]+$/',
-        'related_model' => 'required|different:modelName|regex:/^[A-Z][a-z]+$/',
+        'related_model' => 'required|regex:/^[A-Z][a-z]+$/',
         'relation_type' => 'required',
         'intermediate_model' => 'required|different:modelName|different:related_model|regex:/^[A-Z][a-z]+$/',
         'foreign_key' => 'required|string|regex:/^[a-z_]+$/',
@@ -127,61 +126,6 @@ class RestApi extends Component
         }
     }
 
-     // Add persist property to maintain state
-     protected $persist = [
-        'modelName',
-        'fieldsData',
-        'relationData',
-        'notificationData',
-        'index',
-        'store',
-        'show',
-        'update',
-        'destroy',
-        'modelFile',
-        'migrationFile',
-        'softDeleteFile',
-        'serviceFile',
-        'notificationFile',
-        'resourceFile',
-        'requestFile',
-        'overwriteFiles',
-        'observerFile',
-        'factoryFile',
-        'policyFile',
-        'BootModel',
-        'PaginationTrait',
-        'ResourceFilterable',
-        'HasUuid',
-        'HasUserAction'
-    ];
-
-    // Add mount method to restore state of form
-    /* public function mount()
-     {
-        
-         if (session()->has('form_data')) {
-             $formData = session('form_data');
-             foreach ($formData as $key => $value) {
-                 if (property_exists($this, $key)) {
-                     $this->$key = $value;
-                 }
-             }
-         }
-         $this->loadMigrationTableNames();
-     } */
-
-    // Add dehydrate method to store state before navigation
-     public function dehydrate()
-     {
-         session()->put(
-             'form_data',
-         collect($this->persist)
-                 ->mapWithKeys(fn($property) => [$property => $this->$property])
-                 ->toArray()
-         );
-     }
-
      // Live validation for form fields
     public function updated($propertyName)
     {
@@ -202,15 +146,12 @@ class RestApi extends Component
     {
         $this->errorMessage = "";
 
-        // Check if both fields and methods are missing
-        if (empty($this->fieldsData) && !($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
-            $this->errorMessage = "Please add at least one field and select at least one method.";
-            return false;
-        }
-
-        // Check only for fields
-        if (empty($this->fieldsData)) {
-            $this->errorMessage = "Please add at least one field.";
+        // Check if any file that requires fields is selected
+        $requiresFields = $this->modelFile || $this->migrationFile || $this->requestFile || $this->factoryFile;
+    
+        // If fields are required but none are added
+        if ($requiresFields && empty($this->fieldsData)) {
+            $this->errorMessage = "Please add at least one field for the selected file types.";
             return false;
         }
 
@@ -319,7 +260,7 @@ class RestApi extends Component
         ) {
         $this->addError('related_model', 'This exact relation already exists.');
         return;
-          }
+        }
     }
 
         // Update or add relation
@@ -486,13 +427,11 @@ class RestApi extends Component
     // Save Form and generate files
     public function save(): void
     { 
-       // dd($this->relationData);
         try {
             // Validate all inputs first
             if (!$this->validateInputs()) {
                 return;
             }
-            $this->isGenerating = true;
             // Generate files
             $this->generateFiles();
             session()->flash('success', 'Files generated Successfully!');
@@ -504,9 +443,6 @@ class RestApi extends Component
             session()->flash('error', $e->getMessage());
             $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
         } 
-        finally {
-            $this->isGenerating = false;
-        }
     }
 
      // Generate all selected files
@@ -521,6 +457,7 @@ class RestApi extends Component
             $this->HasUuid ? 'HasUuid' : null,
             $this->HasUserAction ? 'HasUserAction' : null,
         ]);
+
         // Relation mapping
         $relationMap = [
             'One to One' => 'hasOne',
@@ -562,13 +499,7 @@ class RestApi extends Component
 
         // Format field and relation strings
         $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
-      //dd($this->relationData);
-        $relationsString = implode(', ', array_map(
-            fn($relation) => ($relation['related_model'] ?? 'unknown') . ':' . ($relationMap[$relation['relation_type']] ?? 'unknown'),
-            $this->relationData
-        ));
-       
-
+    
         // Generate files based on flags
         if ($files['model']) {
             $this->generateModel($modelName, $fieldString, $this->relationData, $selectedMethods, $files['softDelete'], $files['factory'], $selectedTraits, $this->overwriteFiles);

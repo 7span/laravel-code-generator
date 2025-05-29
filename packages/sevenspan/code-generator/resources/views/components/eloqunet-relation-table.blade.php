@@ -5,11 +5,11 @@
         <thead class="bg-gray-200 rounded-t-lg">
             <th class="p-3 text-left text-sm">Related Model</th>
             <th class="p-3 text-left text-sm">Data Type</th>
-            <th class="p-3 text-left text-sm">Intermediate Model</th>
             <th class="p-3 text-left text-sm">Foreign Key</th>
             <th class="p-3 text-left text-sm">Local Key</th>
-            <th class="p-3 text-left text-sm">Intermediate_foreign_key</th>
-            <th class="p-3 text-left text-sm">Intermediate_local_key</th>
+            <th class="p-3 text-left text-sm">Intermediate Model</th>
+            <th class="p-3 text-left text-sm">Intermediate Foreign Key</th>
+            <th class="p-3 text-left text-sm">Intermediate Local Key</th>
             <th class="p-3 text-left text-sm">Action</th>
         </thead>
         <tbody>
@@ -19,9 +19,9 @@
             <tr class="border">
                 <td class="px-4 py-2 text-gray-600">{{$relation['related_model']}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['relation_type']}}</td>
-                <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_model'] ?? '-'}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['foreign_key']}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['local_key']}}</td>
+                <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_model'] ?? '-'}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_foreign_key'] ?? '-'}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_local_key'] ?? '-'}}</td>
                 <td class="px-4 py-2 flex items-center">

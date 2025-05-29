@@ -32,7 +32,6 @@
             </div>
 
             <!-- Validation -->
-
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Validation</label>
                 <select class="form-control w-full border rounded-md p-2" wire:model.live="column_validation"
@@ -144,6 +143,5 @@
             </div>
             <x-code-generator::button wire:click="saveField" title="Add" />
         </x-slot:footer>
-
     </x-code-generator::modal>
 </div>

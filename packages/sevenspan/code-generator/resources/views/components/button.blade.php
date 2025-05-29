@@ -15,7 +15,6 @@
     </svg>
     @endif
 
-
     <span wire:loading.remove wire:target="{{ $loadingTarget }}">
         @if($showPlus)
         <span class="mr-1">+</span>

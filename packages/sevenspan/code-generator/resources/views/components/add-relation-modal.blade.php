@@ -10,6 +10,8 @@
             <button x-on:click="$wire.isAddRelModalOpen=false"
                 class="text-gray-500 hover:text-black text-xl">&times;</button>
         </x-slot:closebtn>
+
+        <!-- Relation Type -->
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col">
                     <select class="w-full p-2 border border-gray-300 rounded-md"
@@ -21,6 +23,7 @@
                     @enderror
                 </div>
 
+            <!-- Related Model and Intermediate Model Inputs -->
             <div class="space-y-3">
                 <div class="flex gap-2">
                     <div class="w-1/2">
@@ -102,9 +105,9 @@
         <!-- Modal footer -->
         <x-slot:footer>
             <div class="mr-6">
-            <x-code-generator::button title="Cancel" x-on:click="$wire.isAddRelModalOpen=false"/>
-          </div>
-          <x-code-generator::button wire:click="saveRelation" title="Add" />
+                <x-code-generator::button title="Cancel" x-on:click="$wire.isAddRelModalOpen=false"/>
+            </div>
+            <x-code-generator::button wire:click="saveRelation" title="Add" />
         </x-slot:footer>
     </x-code-generator::modal>
 </div>

@@ -9,14 +9,14 @@
             this.showToast = false; // Reset first
             setTimeout(() => {
                 this.showToast = true;
-                setTimeout(() => this.showToast = false, 3000);
+                setTimeout(() => this.showToast = false, 1000);
             }, 50);
         });
     }
-}">
+}" >
 
     <!-- Loading Overlay  -->
-    <div  x-show="$wire.isGenerating" 
+    <div  wire:loading wire:target="save"
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
@@ -29,6 +29,7 @@
             <p class="text-gray-700 font-medium text-lg">Generating files...</p>
         </div>
     </div>   
+
 
     <!-- Session Messages -->
     @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
@@ -94,7 +95,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::field-table :$fieldsData :softDeleteFile="$softDeleteFile" />
+        <x-code-generator::field-table :$fieldsData  :$softDeleteFile/>
     </div>
 
     <!-- eloqunet relations -->
@@ -103,25 +104,26 @@
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::eloqunet-relation-table :$relationData :$second_model :$via_foreign_key :$via_local_key />
+        <x-code-generator::eloqunet-relation-table :$relationData :$intermediate_model :$intermediate_foreign_key :$intermediate_local_key />
     </div>
 
-    <!-- checkboxes -->
+    <!-- checkboxes -->   
     <div class="mb-2">
         <x-code-generator::add-files-methods :$errorMessage />
     </div>
 
     <!-- Generate files button -->
     <div>
-        <x-code-generator::button title="Generate Files" wire:click="save" wire:loading.attr="disabled"
-            loadingTarget="save" />
+        <x-code-generator::button title="Generate Files" wire:click="save"  />
     </div>
 
     <!-- Modals -->
     <x-code-generator::add-relation-modal />
     <x-code-generator::add-new-field-modal />
-    <x-code-generator::edit-relation-modal />
+    <x-code-generator::edit-relation-modal :$intermediate_model :$intermediate_foreign_key :$intermediate_local_key />
     <x-code-generator::delete-relation-modal />
     <x-code-generator::delete-field-modal />
     <x-code-generator::edit-field-modal />
     <x-code-generator::notification-modal />
+
+</div>

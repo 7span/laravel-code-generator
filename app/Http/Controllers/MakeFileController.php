@@ -103,7 +103,6 @@ class MakeFileController extends Controller
         if ($trait == 1) {
             // Make folder in Generated_files and copy traits files into it
             Storage::disk('local')->makeDirectory($generatedFilesPath . '/Traits');
-
             File::copyDirectory(base_path('app/Traits/'), storage_path('app/' . $generatedFilesPath . '/Traits'));
         }
 

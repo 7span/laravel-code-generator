@@ -12,9 +12,7 @@
       "name": "sevenspan"
     }
   ],
-  "require": {
-    "livewire/livewire": "^3.6"
-  },
+  "require": {},
   "extra": {
     "laravel": {
       "providers": [

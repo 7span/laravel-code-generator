@@ -5,7 +5,7 @@ You can clear generated logs either manually or automatically.
 php artisan code-generator:clear-logs
 
 Add env variable in .env file like this:
- CODE_GENERATOR_LOG_RETENTION_DAYS = 7,
+ CODE_GENERATOR_LOG_RETENTION_DAYS = 2,
 
 🔹 Automatically (Laravel 12+)
 

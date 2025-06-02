@@ -26,7 +26,7 @@ class RestApi extends Component
     public $intermediateFields = [];
 
 
-    public $generalError = ''; 
+    public $generalError = '';
     public $errorMessage = "";
     public $successMessage = '';
 
@@ -51,7 +51,7 @@ class RestApi extends Component
     public $relations, $relationId, $fields, $fieldId;
 
     // Relationship form fields
-    public $related_model, $relation_type, $intermediate_model, $foreign_key, $local_key,$intermediate_foreign_key,$intermediate_local_key;
+    public $related_model, $relation_type, $intermediate_model, $foreign_key, $local_key, $intermediate_foreign_key, $intermediate_local_key;
 
     // Field properties
     public $data_type, $column_name, $column_validation;
@@ -114,7 +114,7 @@ class RestApi extends Component
     ];
 
     // Custom validation messages
-        public $messages = [
+    public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
     ];
@@ -136,13 +136,13 @@ class RestApi extends Component
     }
 
     // Add mount method to restore state of form
-     public function mount()
-     {
+    public function mount()
+    {
         $this->loadMigrationTableNames();
         $this->loadModelNames();
-     } 
+    }
 
-     // Live validation for form fields
+    // Live validation for form fields
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
@@ -160,22 +160,22 @@ class RestApi extends Component
     public function validateFieldsAndMethods()
     {
         $this->errorMessage = "";
-    
+
         // Check if any file that requires fields is selected
         $requiresFields = $this->modelFile || $this->migrationFile || $this->requestFile || $this->factoryFile;
-    
+
         // If fields are required but none are added
         if ($requiresFields && empty($this->fieldsData)) {
             $this->errorMessage = "Please add at least one field for the selected file types.";
             return false;
         }
-    
+
         // Check for methods
         if (!($this->index || $this->store || $this->show || $this->destroy || $this->update)) {
             $this->errorMessage = "Please select at least one method.";
             return false;
         }
-    
+
         return true;
     }
 
@@ -240,13 +240,13 @@ class RestApi extends Component
         ];
 
         $isThroughRelation = in_array($this->relation_type, ['Has One Through', 'Has Many Through']);
-        
+
         // Add intermediate model rules only for through relations
         if ($isThroughRelation) {
             $rules['intermediate_model'] = $this->rules['intermediate_model'];
             $rules['intermediate_foreign_key'] = $this->rules['intermediate_foreign_key'];
             $rules['intermediate_local_key'] = $this->rules['intermediate_local_key'];
-        } 
+        }
 
         $this->validate($rules);
 
@@ -259,11 +259,11 @@ class RestApi extends Component
         }
 
         //// Custom Logic Validation for "Through" Relationships
-      if ($isThroughRelation) {
-        if ($this->foreign_key === $this->intermediate_foreign_key) {
-            $this->addError('intermediate_foreign_key', 'The "Foreign Key on Intermediate Model" must be different from the "Foreign Key on Related Model"');
+        if ($isThroughRelation) {
+            if ($this->foreign_key === $this->intermediate_foreign_key) {
+                $this->addError('intermediate_foreign_key', 'The "Foreign Key on Intermediate Model" must be different from the "Foreign Key on Related Model"');
+            }
         }
-    }
 
         $relationData = [
             'related_model' => $this->related_model,
@@ -275,19 +275,19 @@ class RestApi extends Component
             'intermediate_local_key' => $isThroughRelation ? $this->intermediate_local_key : '',
         ];
 
-    // Check for duplicates
-    foreach ($this->relationData as $existing) {
-      if (
-        $existing['related_model'] === $this->related_model &&
-        $existing['relation_type'] === $this->relation_type &&
-        $existing['foreign_key'] === $this->foreign_key &&
-        $existing['local_key'] === $this->local_key &&
-        (!isset($existing['intermediate_model']) || $existing['intermediate_model'] === $this->intermediate_model)
-        ) {
-        $this->addError('related_model', 'This exact relation already exists.');
-        return;
-          }
-    }
+        // Check for duplicates
+        foreach ($this->relationData as $existing) {
+            if (
+                $existing['related_model'] === $this->related_model &&
+                $existing['relation_type'] === $this->relation_type &&
+                $existing['foreign_key'] === $this->foreign_key &&
+                $existing['local_key'] === $this->local_key &&
+                (!isset($existing['intermediate_model']) || $existing['intermediate_model'] === $this->intermediate_model)
+            ) {
+                $this->addError('related_model', 'This exact relation already exists.');
+                return;
+            }
+        }
 
         // Update or add relation
         if ($this->relationId) {
@@ -300,10 +300,10 @@ class RestApi extends Component
             unset($relation);  // break reference
         } else {
             $this->relationData[] = ['id' => Str::random(8)] + $relationData;
-    }
+        }
         $this->isAddRelModalOpen = false;
         $this->isRelEditModalOpen = false;
-        $this->reset(['related_model', 'relation_type', 'intermediate_model', 'foreign_key', 'local_key','intermediate_foreign_key', 'intermediate_local_key']);
+        $this->reset(['related_model', 'relation_type', 'intermediate_model', 'foreign_key', 'local_key', 'intermediate_foreign_key', 'intermediate_local_key']);
         $this->relationId = null;
     }
 
@@ -355,7 +355,7 @@ class RestApi extends Component
                 break;
             }
         }
-    
+
         if ($columnExists) {
             $this->addError('column_name', 'You have already taken this column');
             return;
@@ -381,7 +381,7 @@ class RestApi extends Component
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,
             'column_validation' => $this->column_validation,
-            'isForeignKey' => $this->isForeignKey ?? false, 
+            'isForeignKey' => $this->isForeignKey ?? false,
             'foreignModelName' => $this->foreignModelName,
             'referencedColumn' => $this->referencedColumn,
             'onDeleteAction' => $this->onDeleteAction,
@@ -419,17 +419,17 @@ class RestApi extends Component
         // Store notification data
         $this->notificationData = [
             [
-            'class_name' => $this->class_name,
-            'data' => $this->data,
-            'subject' => $this->subject,
-            'body' => $this->body,
+                'class_name' => $this->class_name,
+                'data' => $this->data,
+                'subject' => $this->subject,
+                'body' => $this->body,
             ]
         ];
 
         $this->isNotificationModalOpen = false;
         $this->reset(['class_name', 'data', 'subject', 'body']);
     }
- 
+
     //Validate inputs before generation 
     private function validateInputs(): bool
     {
@@ -472,12 +472,12 @@ class RestApi extends Component
             $this->errorMessage = $e->getMessage();
             session()->flash('error', $e->getMessage());
             $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
-        } 
+        }
     }
 
-     // Generate all selected files
+    // Generate all selected files
     private function generateFiles(): void
-    { 
+    {
         $selectedTraits = array_filter([
             'ApiResponser',
             'BaseModel',
@@ -516,7 +516,7 @@ class RestApi extends Component
         ];
 
         // Format field and relation strings
-        $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');   
+        $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
 
         // Generate files based on flags
         if ($files['model']) {
@@ -569,7 +569,7 @@ class RestApi extends Component
     // Generate model file
     private function generateModel($modelName, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
     {
-            Artisan::call('codegenerator:model', [
+        Artisan::call('codegenerator:model', [
             'model' => $modelName,
             '--fields' => $fieldString,
             '--relations' => $relations,
@@ -581,7 +581,7 @@ class RestApi extends Component
         ]);
     }
 
-   //Generate migration file
+    //Generate migration file
     private function generateMigration($modelName, $fields, $softDelete, $overwrite)
     {
         $migrationFieldString = collect($fields)->map(function ($field) {
@@ -589,7 +589,7 @@ class RestApi extends Component
         })->implode(',');
 
         Artisan::call('codegenerator:migration', [
-            'modelName' => $modelName,
+            'model' => $modelName,
             '--fields' => $migrationFieldString,
             '--softdelete' => $softDelete,
             '--overwrite' => $overwrite
@@ -600,7 +600,7 @@ class RestApi extends Component
     private function generateController($modelName, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
     {
         Artisan::call('codegenerator:controller', [
-            'modelName' => $modelName,
+            'model' => $modelName,
             '--methods' => implode(',', $selectedMethods),
             '--service' => $service,
             '--resource' => $resource,
@@ -614,7 +614,7 @@ class RestApi extends Component
     private function generatePolicy($modelName, $overwrite)
     {
         Artisan::call('codegenerator:policy', [
-            'modelName' => $modelName,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
@@ -623,16 +623,16 @@ class RestApi extends Component
     private function generateObserver($modelName, $overwrite)
     {
         Artisan::call('codegenerator:observer', [
-            'modelName' => $modelName,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
-        
+
     // Generate service file
     private function generateService($modelName, $overwrite)
     {
         Artisan::call('codegenerator:service', [
-            'modelName' => $modelName,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
@@ -642,9 +642,9 @@ class RestApi extends Component
     {
         $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
 
-                Artisan::call('codegenerator:notification', [
+        Artisan::call('codegenerator:notification', [
             'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
-                    '--modelName' => $modelName,
+            '--model' => $modelName,
             '--data' => $notificationData['data'] ?? '',
             '--body' => $notificationData['body'] ?? '',
             '--subject' => $notificationData['subject'] ?? '',
@@ -656,10 +656,10 @@ class RestApi extends Component
     private function generateResource($modelName, $overwrite)
     {
         Artisan::call('codegenerator:resource', [
-            'modelName' => $modelName,
-                    '--overwrite' => $overwrite
-                ]);
-            }
+            'model' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+    }
 
     // Generate request file
     private function generateRequest($modelName, $fields, $overwrite)
@@ -668,11 +668,11 @@ class RestApi extends Component
             return $field['column_name'] . ':' . $field['column_validation'];
         }, $fields));
 
-            Artisan::call('codegenerator:request', [
-            'modelName' => $modelName,
-                '--rules' => $ruleString,
-                '--overwrite' => $overwrite
-            ]);
+        Artisan::call('codegenerator:request', [
+            'model' => $modelName,
+            '--rules' => $ruleString,
+            '--overwrite' => $overwrite
+        ]);
     }
 
     //Generate factory file
@@ -683,7 +683,7 @@ class RestApi extends Component
         }, $fields));
 
         Artisan::call('codegenerator:factory', [
-            'modelName' => $modelName,
+            'model' => $modelName,
             '--fields' => $fieldString,
             '--overwrite' => $overwrite
         ]);
@@ -692,7 +692,7 @@ class RestApi extends Component
     //Copy traits to application
     private function copyTraits($selectedTraits)
     {
-            $source = __DIR__ . '/../../TraitsLibrary/Traits';
+        $source = __DIR__ . '/../../TraitsLibrary/Traits';
         $destination = app_path(config('code_generator.trait_path', 'Traits'));
 
         if (!File::exists($source)) {
@@ -700,7 +700,7 @@ class RestApi extends Component
             return;
         }
 
-                File::ensureDirectoryExists($destination);
+        File::ensureDirectoryExists($destination);
 
         foreach ($selectedTraits as $trait) {
             $fileName = $trait . '.php';
@@ -741,75 +741,75 @@ class RestApi extends Component
     {
         if ($value && Schema::hasTable($value)) {
             $this->fieldNames = Schema::getColumnListing($value);
-                } else {
+        } else {
             $this->fieldNames = [];
         }
     }
 
-   // Add this method to load model names from migrations
-   private function loadModelNames()
-   {
-    $migrationPath = database_path('migrations');
-    if (File::exists($migrationPath)) {
-        $files = File::files($migrationPath);
-        $this->modelNames = collect($files)
-            ->map(function ($file) {
-                // Extract table name from migration file
-                if (preg_match('/create_(.*?)_table/', $file->getFilename(), $matches)) {
-                    $tableName = $matches[1];
-                    // Convert table name to model name (e.g., user_profiles -> UserProfile)
-                    return Str::studly(Str::singular($tableName));
-                }
-                return null;
-            })->filter()->unique()->values()->toArray();
+    // Add this method to load model names from migrations
+    private function loadModelNames()
+    {
+        $migrationPath = database_path('migrations');
+        if (File::exists($migrationPath)) {
+            $files = File::files($migrationPath);
+            $this->modelNames = collect($files)
+                ->map(function ($file) {
+                    // Extract table name from migration file
+                    if (preg_match('/create_(.*?)_table/', $file->getFilename(), $matches)) {
+                        $tableName = $matches[1];
+                        // Convert table name to model name (e.g., user_profiles -> UserProfile)
+                        return Str::studly(Str::singular($tableName));
+                    }
+                    return null;
+                })->filter()->unique()->values()->toArray();
+        }
     }
-   } 
 
-   // Add this method to load field names when related model changes
-   public function updatedRelatedModel($value)
-   {
-    if ($value) {
-        // Convert model name to table name (plural, snake_case)
-        $tableName = Str::plural(Str::snake($value));
-        
-        // Get column names from the database schema
-        if (Schema::hasTable($tableName)) {
-            $this->columnNames = Schema::getColumnListing($tableName);
+    // Add this method to load field names when related model changes
+    public function updatedRelatedModel($value)
+    {
+        if ($value) {
+            // Convert model name to table name (plural, snake_case)
+            $tableName = Str::plural(Str::snake($value));
+
+            // Get column names from the database schema
+            if (Schema::hasTable($tableName)) {
+                $this->columnNames = Schema::getColumnListing($tableName);
+            } else {
+                $this->columnNames = [];
+            }
         } else {
             $this->columnNames = [];
         }
-    } else {
-        $this->columnNames = [];
     }
-   }
 
-   // Add this method to load intermediate fields when intermediate model changes
-   public function updatedIntermediateModel($value)
-   {
-    if ($value) {
-        // Convert model name to table name (plural, snake_case)
-        $tableName = Str::plural(Str::snake($value));
-        
-        // Get column names from the database schema
-        if (Schema::hasTable($tableName)) {
-            $this->intermediateFields = Schema::getColumnListing($tableName);
+    // Add this method to load intermediate fields when intermediate model changes
+    public function updatedIntermediateModel($value)
+    {
+        if ($value) {
+            // Convert model name to table name (plural, snake_case)
+            $tableName = Str::plural(Str::snake($value));
+
+            // Get column names from the database schema
+            if (Schema::hasTable($tableName)) {
+                $this->intermediateFields = Schema::getColumnListing($tableName);
+            } else {
+                $this->intermediateFields = [];
+            }
         } else {
             $this->intermediateFields = [];
         }
-    } else {
-        $this->intermediateFields = [];
     }
-   }
 
-   // Add this method to handle relation type changes
-   public function updatedRelationType($value)
-   {
-    // If the relation type is not a "through" relation, clear intermediate fields
-    if (!in_array($value, ['Has One Through', 'Has Many Through'])) {
-        $this->intermediate_model = '';
-        $this->intermediate_foreign_key = '';
-        $this->intermediate_local_key = '';
-        $this->intermediateFields = [];
-    }
+    // Add this method to handle relation type changes
+    public function updatedRelationType($value)
+    {
+        // If the relation type is not a "through" relation, clear intermediate fields
+        if (!in_array($value, ['Has One Through', 'Has Many Through'])) {
+            $this->intermediate_model = '';
+            $this->intermediate_foreign_key = '';
+            $this->intermediate_local_key = '';
+            $this->intermediateFields = [];
+        }
     }
 }

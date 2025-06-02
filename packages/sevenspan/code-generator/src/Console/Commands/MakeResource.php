@@ -12,7 +12,7 @@ class MakeResource extends Command
 {
     use FileManager;
 
-    protected $signature = 'codegenerator:resource {modelName : The name of the model for the resource}
+    protected $signature = 'codegenerator:resource {model : The name of the model for the resource}
                                                    {--overwrite : is overwriting this file is selected}';
 
     protected $description = 'Generate a resource class for a specified model.';
@@ -24,7 +24,7 @@ class MakeResource extends Command
 
     public function handle()
     {
-        $modelName = Str::studly($this->argument('modelName'));
+        $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource file
         $resourceFilePath = app_path(config('code_generator.resource_path', 'Resources') . "/{$modelName}/Resource.php");

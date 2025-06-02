@@ -20,7 +20,7 @@ class {{ class }} extends Model
         {{ deletedBy }}
     ];
 
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = [{{ hiddenFields }}];
 
     protected function casts()
     {

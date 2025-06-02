@@ -16,7 +16,7 @@ class MakeModel extends Command
 
     protected $signature = 'codegenerator:model {model : The name of the model} 
                                                 {--fields= : Comma-separated fields (e.g., name,age)} 
-                                                {--relations= : Model relationships with their foreign key and local key (e.g., Post:hasMany:user_id:id,User:belongsTo:post_id:id)} 
+                                                {--relations=* : Model relationships with their foreign key and local key (e.g., Post:hasMany:user_id:id,User:belongsTo:post_id:id)} 
                                                 {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
                                                 {--softDelete : Include soft delete} 
                                                 {--factory : if factory file is included}
@@ -46,9 +46,6 @@ class MakeModel extends Command
         );
     }
 
-    /**
-     * @return string
-     */
     protected function getStubPath(): string
     {
         return __DIR__ . '/../../stubs/model.stub';
@@ -56,9 +53,6 @@ class MakeModel extends Command
 
     /**
      * Generate the final content for the model file.
-     *
-     * @param string $modelClass
-     * @return string
      */
     protected function getReplacedContent(string $modelClass): string
     {
@@ -74,12 +68,14 @@ class MakeModel extends Command
 
     /**
      * Get the variables to replace in the stub file.
-     *
-     * @param string $modelClass
-     * @return array
      */
     protected function getStubVariables(string $modelClass): array
     {
+        $isSoftDeleteIncluded = $this->option('softDelete');
+        $hiddenFields = ["'created_at'", "'updated_at'"];
+        if ($isSoftDeleteIncluded) {
+            $hiddenFields[] = "'deleted_at'";
+        }
         $traitInfo = $this->getTraitInfo();
         $relationMethods = $this->getRelations();
         $relatedModelImports = $this->getRelatedModels();
@@ -89,19 +85,19 @@ class MakeModel extends Command
             'class' => $modelClass,
             'traitNamespaces' => $traitInfo['uses'],
             'traits' => $traitInfo['apply'],
-            'relatedModelNamespaces' => !empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : "",
+            'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : '',
             'relation' => $relationMethods,
             'fillableFields' => $this->getFillableFields($this->option('fields')),
-            'deletedAt' => $this->option('softDelete') ? "'deleted_at' => 'datetime'," : '',
-            'deletedBy' => $this->option('softDelete') ? "'deleted_by'," : ''
+            'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'datetime'," : '',
+            'deletedBy' => $isSoftDeleteIncluded ? "'deleted_by'," : '',
+            'hiddenFields' => implode(', ', $hiddenFields),
         ];
     }
 
     /**
      * Prepare fillable fields for the model.
      *
-     * @param string|null $fieldsOption
-     * @return string
+     * @param  string|null  $fieldsOption
      */
     protected function getFillableFields($fieldsOption): string
     {
@@ -118,12 +114,12 @@ class MakeModel extends Command
             $fillableFields = implode(",\n        ", $fieldNames);
         }
         return $fillableFields;
+
+        return $fillableFields;
     }
 
     /**
      * Get trait information for the model.
-     *
-     * @return array
      */
     protected function getTraitInfo(): array
     {
@@ -135,13 +131,13 @@ class MakeModel extends Command
 
         // Add HasFactory trait if factory file is included
         if ($isFactoryIncluded) {
-            $traitUseStatements[] = "use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;";
+            $traitUseStatements[] = 'use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;';
             $traitNames[] = 'HasFactory';
         }
 
         // Add SoftDeletes trait if soft delete is included
         if ($softDeleteIncluded) {
-            $traitUseStatements[] = "use Illuminate\\Database\\Eloquent\\SoftDeletes;";
+            $traitUseStatements[] = 'use Illuminate\\Database\\Eloquent\\SoftDeletes;';
             $traitNames[] = 'SoftDeletes';
         }
 
@@ -150,7 +146,7 @@ class MakeModel extends Command
         if ($customTraits) {
             foreach (explode(',', $customTraits) as $trait) {
                 $trait = trim($trait);
-                $traitUseStatements[] = "use App\\" . config('code_generator.trait_path', 'Traits') . "\\$trait;";
+                $traitUseStatements[] = 'use App\\' . config('code_generator.trait_path', 'Traits') . "\\$trait;";
                 $traitNames[] = $trait;
             }
         }
@@ -163,28 +159,59 @@ class MakeModel extends Command
 
     /**
      * Generate relation methods for the model.
-     *
-     * @return string
      */
     protected function getRelations(): string
     {
         $relations = $this->option('relations');
-        if (!$relations) return '';
+        if (!$relations) {
+            return '';
+        }
+
+        $relationMap = [
+            'One to One' => 'hasOne',
+            'One to Many' => 'hasMany',
+            'Many to One' => 'belongsTo',
+            'Many to Many' => 'belongsToMany',
+            'Has One Through' => 'hasOneThrough',
+            'Has Many Through' => 'hasManyThrough',
+            'One To One (Polymorphic)' => 'morphOne',
+            'One To Many (Polymorphic)' => 'morphMany',
+            'Many To Many (Polymorphic)' => 'morphToMany',
+        ];
 
         $methods = [];
 
-        foreach (explode(',', $relations) as $relation) {
-            if (!str_contains($relation, ':')) continue;
+        foreach ($relations as $relation) {
+            $methodName = Str::camel(Str::plural($relation['related_model']));
+            $relationType = $relationMap[$relation['relation_type']];
 
-            [$model, $type, $foreignKey, $localKey] = explode(':', $relation);
-            $methodName = Str::camel($model);
-            $relatedClass = Str::studly($model);
+            $method = self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
 
-            // Generate the relation method with foreign key and local key
-            $methods[] =
-                self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL .
-                self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $type . '(' . $relatedClass . '::class' . ($foreignKey ? ", '$foreignKey'" : '') . ($localKey ? ", '$localKey'" : '') . ');' . PHP_EOL .
-                self::INDENT . '}' . PHP_EOL;
+            if (in_array($relationType, ['hasOneThrough', 'hasManyThrough'])) {
+                $args = [
+                    $relation['related_model'] . '::class',
+                    $relation['intermediate_model'] . '::class',
+                    "'{$relation['intermediate_foreign_key']}'",
+                    "'{$relation['foreign_key']}'",
+                    "'{$relation['local_key']}'",
+                    "'{$relation['intermediate_local_key']}'",
+                ];
+            } else {
+                $args = [$relation['related_model'] . '::class'];
+
+                if (! empty($relation['foreign_key'])) {
+                    $args[] = "'{$relation['foreign_key']}'";
+                }
+
+                if (! empty($relation['local_key'])) {
+                    $args[] = "'{$relation['local_key']}'";
+                }
+            }
+
+            $method .= implode(', ', $args) . ');' . PHP_EOL;
+            $method .= self::INDENT . '}' . PHP_EOL;
+
+            $methods[] = $method;
         }
 
         return rtrim(implode(PHP_EOL, $methods));
@@ -192,34 +219,33 @@ class MakeModel extends Command
 
     /**
      * Get related models for imports.
-     *
-     * @return array
      */
     protected function getRelatedModels(): array
     {
         $relations = $this->option('relations');
-        if (!$relations) return [];
+        if (!$relations) {
+            return [];
+        }
 
         $models = [];
 
         // Extract model names from relations
-        foreach (explode(',', $relations) as $relation) {
-            if (!str_contains($relation, ':')) continue;
-            [$model,] = explode(':', $relation);
-            $models[] = Str::studly($model);
+        foreach ($relations as $relation) {
+            if (!is_array($relation) || empty($relation['related_model'])) {
+                continue;
+            }
+            $models[] = Str::studly($relation['related_model']);
         }
+
         return array_unique($models);
     }
 
     /**
      * Create the directory if it does not exist.
-     *
-     * @param string $path
-     * @return void
      */
     protected function createDirectoryIfMissing(string $path): void
     {
-        if (!$this->files->isDirectory($path)) {
+        if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0755, true);
         }
     }

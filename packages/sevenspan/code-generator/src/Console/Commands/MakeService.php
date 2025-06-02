@@ -12,7 +12,7 @@ class MakeService extends Command
 {
     use FileManager;
     const INDENT = '    ';
-    protected $signature = 'codegenerator:service {modelName : The name of the service class to generate.}
+    protected $signature = 'codegenerator:service {model : The name of the service class to generate.}
                                                   {--overwrite : is overwriting this file is selected}';
     protected $description = 'Create a new service class with predefined methods for resource';
     public function __construct(protected Filesystem $files)
@@ -22,7 +22,7 @@ class MakeService extends Command
 
     public function handle()
     {
-        $serviceClass = Str::studly($this->argument('modelName'));
+        $serviceClass = Str::studly($this->argument('model'));
 
         // Define the path for the service file
         $serviceFilePath = app_path(config('code_generator.service_path', 'Services') . "/{$serviceClass}Service.php");

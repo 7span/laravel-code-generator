@@ -12,7 +12,7 @@ use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 class MakeResourceCollection extends Command
 {
     use FileManager;
-    protected $signature = 'codegenerator:resource-collection {modelName : The name of the model for the resource collection}
+    protected $signature = 'codegenerator:resource-collection {model : The name of the model for the resource collection}
                                                               {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a resource collection class for a specified model.';
 
@@ -23,7 +23,7 @@ class MakeResourceCollection extends Command
 
     public function handle()
     {
-        $modelName = Str::studly($this->argument('modelName'));
+        $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource collection file
         $resourceFilePath = app_path(config('code_generator.resource_path', 'http\Resources') . "/{$modelName}/Collection.php");

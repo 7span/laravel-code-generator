@@ -15,7 +15,7 @@ class MakeNotification extends Command
     const INDENT = '    ';
 
     protected $signature = 'codegenerator:notification {className : Name of the notification class} 
-                                                       {--modelName= : Related model name} 
+                                                       {--model= : Related model name} 
                                                        {--data= : A comma-separated list of key-value pairs for notification data (e.g., key1:value1,key2:value2)} 
                                                        {--body= : The body content of the notification} 
                                                        {--subject= : The subject of the notification}
@@ -105,7 +105,7 @@ class MakeNotification extends Command
         // Parse the --data option into an array
         $dataOption = $this->option('data');
         $parsedData = $this->parseDataOption($dataOption);
-        $relatedModel = $this->option('modelName');
+        $relatedModel = $this->option('model');
 
         return [
             'namespace'              => 'App\\' . config('code_generator.notification_path', 'Notification'),

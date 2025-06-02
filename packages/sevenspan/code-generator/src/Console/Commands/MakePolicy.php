@@ -12,7 +12,7 @@ class MakePolicy extends Command
 {
     use FileManager;
 
-    protected $signature = 'codegenerator:policy {modelName : The related model for the policy.}
+    protected $signature = 'codegenerator:policy {model : The related model for the policy.}
                                                  {--overwrite : is overwriting this file is selected}';
 
     protected $description = 'Generate a policy class for a specified model.';
@@ -24,7 +24,7 @@ class MakePolicy extends Command
 
     public function handle()
     {
-        $policyClass = Str::studly($this->argument('modelName'));
+        $policyClass = Str::studly($this->argument('model'));
 
         // Define the path for the policy file
         $policyFilePath = app_path(config('code_generator.policy_path', 'Policies') . "/{$policyClass}Policy.php");
@@ -56,7 +56,7 @@ class MakePolicy extends Command
      */
     protected function getStubVariables($policyClass): array
     {
-        $relatedModel = $this->argument('modelName');
+        $relatedModel = $this->argument('model');
 
         return [
             'namespace'             => 'App\\' . config('code_generator.policy_path', 'Policies'),

@@ -35,7 +35,7 @@ class MakeController extends Command
         $modelName = $this->argument('model');
         $isAdminCrudIncluded = (bool) $this->option('adminCrud');
 
-        //generate the normal controller
+        // generate the normal controller
         $this->generateController($modelName, isAdminCrudIncluded: false);
 
         // if admin crud is selected, generate the admin controller
@@ -64,10 +64,6 @@ class MakeController extends Command
         $this->appendApiRoute($controllerClassName, $isAdminCrudIncluded);
     }
 
-
-    /**
-     * @return string
-     */
     protected function getStubPath(): string
     {
         return __DIR__ . '/../../stubs/controller.stub';
@@ -75,9 +71,6 @@ class MakeController extends Command
 
     /**
      * Get the replaced content for the controller file.
-     *
-     * @param  string  $controllerClassName
-     * @return string
      */
     public function getReplacedContent(string $controllerClassName, bool $isAdminCrudIncluded = false): string
     {
@@ -88,41 +81,30 @@ class MakeController extends Command
         );
     }
 
-
     /**
      * Get the variables to replace in the stub file.
-     *
-     * @param  string  $controllerClassName
-     * @return array
      */
     public function getStubVariables(string $controllerClassName, bool $isAdminCrudIncluded = false): array
     {
-        $modelName = $this->argument('modelName') ? ucfirst($this->argument('modelName')) : '';
+        $modelName = $this->argument('model') ? ucfirst($this->argument('model')) : '';
 
         return [
             'namespace' => $isAdminCrudIncluded ? config('code_generator.admin_controller_path', 'Http\Controllers\Admin') : config('code_generator.controller_path', 'Http\Controllers'),
             'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
             'className' => $controllerClassName,
-            'relatedModelNamespace' => "use App\\" . config('code_generator.model_path', 'Models') . "\\" . $modelName,
+            'relatedModelNamespace' => 'use App\\' . config('code_generator.model_path', 'Models') . '\\' . $modelName,
             'modelName' => $modelName,  // used in generating methods
         ];
     }
 
     /**
      * Inject additional use statements into the controller file.
-     *
-     * @param  string  $mainContent
-     * @param  bool  $includeServiceFile
-     * @param  bool  $includeRequestFile
-     * @param  bool  $includeResourceFile
-     * @param  string  $className
-     * @return string
      */
     protected function injectUseStatements(
         string $mainContent,
-        bool $includeServiceFile = false,
-        bool $includeRequestFile = false,
-        bool $includeResourceFile = false,
+        bool $includeServiceFile,
+        bool $includeRequestFile,
+        bool $includeResourceFile,
         string $className
     ): string {
         $additionalUseStatements = [];
@@ -130,26 +112,25 @@ class MakeController extends Command
         // Add service file use statement
         $mainContent = str_replace(
             '{{ service }}',
-            $includeServiceFile ? 'use App\\' . config('code_generator.service_path', 'Services') . '\\' . $className . 'Service;' : "",
+            $includeServiceFile ? 'use App\\' . config('code_generator.service_path', 'Services') . '\\' . $className . 'Service;' : '',
             $mainContent
         );
 
         // Add request file use statement
         $mainContent = str_replace(
             '{{ request }}',
-            $includeRequestFile ? "use App\\" . config('code_generator.request_path', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;" : "",
+            $includeRequestFile ? 'use App\\' . config('code_generator.request_path', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;" : '',
             $mainContent
         );
 
         // Add resource file use statements
         $includeResourceFile ? array_push(
             $additionalUseStatements,
-            "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Resource;",
-            "use App\\" . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Collection;"
+            'use App\\' . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Resource;",
+            'use App\\' . config('code_generator.resource_path', 'Http\Resources') . "\\{$className}\\Collection;"
         ) : null;
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
-
 
         return str_replace(
             'use App\Http\Controllers\Controller;',
@@ -160,10 +141,6 @@ class MakeController extends Command
 
     /**
      * Get the contents of the stub file with replaced variables.
-     *
-     * @param  string  $mainStub
-     * @param  array  $stubVariables
-     * @return string
      */
     public function getStubContents(string $mainStub, array $stubVariables = [], bool $isAdminCrudIncluded = false): string
     {
@@ -178,6 +155,7 @@ class MakeController extends Command
         $singularObj = '$' . $singularInstance . 'Obj';
 
         $methods = $isAdminCrudIncluded ?  ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
+        $methods = $isAdminCrudIncluded ? ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
         // Replace stub variables in base content
         foreach ($stubVariables as $search => $replace) {
             $mainContent = str_replace('{{ ' . $search . ' }}', $replace, $mainContent);
@@ -209,7 +187,7 @@ class MakeController extends Command
         $methodContents = '';
         foreach ($methods as $method) {
             $methodStubPath = __DIR__ . "/../../stubs/controller.{$method}.stub";
-            if (!file_exists($methodStubPath)) {
+            if (! file_exists($methodStubPath)) {
                 continue;
             }
 
@@ -272,7 +250,7 @@ class MakeController extends Command
 
                 case 'destroy':
                     $destroyBody = "\$result = \$this->{$singularInstance}Service->destroy(\${$singularInstance}->id);" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->success(\$result);";
+                        self::INDENT . self::INDENT . 'return $this->success($result);';
 
                     $methodContent = str_replace('{{ destroyMethod }}', $includeServiceFile ? $destroyBody : '', $methodContent);
                     break;
@@ -284,26 +262,19 @@ class MakeController extends Command
         return $mainContent . $methodContents . PHP_EOL . '}' . PHP_EOL;
     }
 
-    /**
-     * @param string $path
-     */
     protected function createDirectoryIfMissing(string $path): void
     {
-        if (!$this->files->isDirectory($path)) {
+        if (! $this->files->isDirectory($path)) {
             $this->files->makeDirectory($path, 0755, true);
         }
     }
 
     /**
      * Append API route for the model to the routes file.
-     *
-     * @param string $controllerClassName
-     * @param bool $isAdminCrudIncluded
-     * @return void
      */
     protected function appendApiRoute(string $controllerClassName, bool $isAdminCrudIncluded = false): void
     {
-        $resource = Str::plural(Str::kebab($this->argument('modelName')));
+        $resource = Str::plural(Str::kebab($this->argument('model')));
         $methodsArray = explode(',', $this->option('methods') ?? '');
         $methodCount = $isAdminCrudIncluded ? 5 : count($methodsArray);
 

@@ -84,5 +84,5 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'log_retention_days' => env('CODE_GENERATOR_LOG_RETENTION_DAYS'),
+    'log_retention_days' => env('CODE_GENERATOR_LOG_RETENTION_DAYS',2),
 ];

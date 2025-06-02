@@ -83,6 +83,6 @@ return [
     |  Delete logs older than configured days
     |--------------------------------------------------------------------------
     */
-    
-    'log_retention_days' => 2, 
+
+    'log_retention_days' => env('CODE_GENERATOR_LOG_RETENTION_DAYS'),
 ];

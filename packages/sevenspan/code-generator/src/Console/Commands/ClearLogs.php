@@ -8,12 +8,12 @@ use Sevenspan\CodeGenerator\Models\CodeGeneratorFileLog;
 
 class ClearLogs extends Command
 {
-    protected $signature = 'codegenerator:clearlogs';
+    protected $signature = 'code-generator:clear-logs';
     protected $description = 'Deletes log entries older than configured retention days';
 
     public function handle(): void
     {
-        $days = config('code-generator.log_retention_days', 2);
+        $days = config('code-generator.log_retention_days');
 
         //   Delete log entries older than the configured retention period
         $deleted = CodeGeneratorFileLog::where('created_at', '<', now()->subDays($days))->delete();

@@ -11,7 +11,7 @@ Add env variable in .env file like this:
 
 Add this in bootstrap/app.php:
 scheduler()
-    ->command('codegenerator:clear')
+    ->command('code-generator:clear-logs')
     ->daily(); // or weekly/monthly
 
 🔹 Automatically (Laravel 10+)
@@ -19,9 +19,9 @@ For Laravel 10 and later, you can schedule the log clearing command in the sched
 
 protected function schedule(Schedule $schedule): void
 {
-    $schedule->command('codegenerator:clearlogs')->daily(); // Runs daily
+    $schedule->command('code-generator:clear-logs')->daily(); // Runs daily
     // Or, weekly:
-    // $schedule->command('codegenerator:clearlogs')->weekly();
+    // $schedule->command('code-generator:clear-logs')->weekly();
     // Or, for monthly:
-    // $schedule->command('codegenerator:clearlogs')->monthly();
+    // $schedule->command('code-generator:clear-logs')->monthly();
 }

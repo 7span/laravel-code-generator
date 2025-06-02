@@ -77,12 +77,4 @@ return [
     */
     
     'class_namespace' => 'Sevenspan\\CodeGenerator',
-
-    /*
-    |--------------------------------------------------------------------------
-    |  Delete logs older than configured days
-    |--------------------------------------------------------------------------
-    */
-    
-    'log_retention_days' => 2, 
 ];

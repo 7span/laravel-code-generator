@@ -7,7 +7,14 @@ use Illuminate\Support\Facades\Route;
 Route::get(
     config("code_generator.route_path"),
     function () {
-        // TODO: Replace this with the appropriate view to be returned by the frontend
-        return "in laravel code generator";
+        return view('code-generator::livewire.index');
     }
-)->middleware("codeGeneratorMiddleware");
+)->middleware("codeGeneratorMiddleware")->name('code-generator.index');
+
+// Define the route for logs
+Route::get(
+    'codegenerator/logs',
+    function () {
+        return view('code-generator::livewire.index');
+    }
+)->middleware("codeGeneratorMiddleware")->name('code-generator.logs');

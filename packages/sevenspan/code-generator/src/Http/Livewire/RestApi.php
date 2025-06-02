@@ -584,13 +584,9 @@ class RestApi extends Component
     //Generate migration file
     private function generateMigration($modelName, $fields, $softDelete, $overwrite)
     {
-        $migrationFieldString = collect($fields)->map(function ($field) {
-            return $field['column_name'] . ':' . $field['data_type'];
-        })->implode(',');
-
         Artisan::call('codegenerator:migration', [
             'model' => $modelName,
-            '--fields' => $migrationFieldString,
+            '--fields' => $fields,
             '--softdelete' => $softDelete,
             '--overwrite' => $overwrite
         ]);

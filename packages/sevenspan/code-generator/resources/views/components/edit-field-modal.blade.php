@@ -32,7 +32,7 @@
                 <select wire:model.live="column_validation" id="column_validation"
                     class="form-control w-full border rounded-md p-2" name="column_validation">
                     <option value="">Select one</option>
-                    <option value="optional">Optional</option>
+                    <option value="nullable">Nullable</option>
                     <option value="required">Required</option>
                     <option value="unique">Unique</option>
                     <option value="email">Email</option>

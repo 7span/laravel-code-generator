@@ -439,7 +439,15 @@ class RestApi extends Component
         // Check if model exists and overwrite is not checked
         $modelPath = app_path('Models/' . $this->modelName . '.php');
         if (File::exists($modelPath) && !$this->overwriteFiles) {
-            $this->errorMessage = "Model {$this->modelName} already exists.";
+            $this->errorMessage = "Model {$this->modelName} already exists if you want to overwrite it check the 'Overwrite Files' option";
+            session()->flash('error', $this->errorMessage);
+            $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
+            return false;
+        }
+
+        // Check if notification file is selected but no notification data is provided
+        if ($this->notificationFile && empty($this->notificationData)) {
+            $this->errorMessage = "Please add notification data before generating files.";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
             return false;
@@ -584,13 +592,9 @@ class RestApi extends Component
     //Generate migration file
     private function generateMigration($modelName, $fields, $softDelete, $overwrite)
     {
-        $migrationFieldString = collect($fields)->map(function ($field) {
-            return $field['column_name'] . ':' . $field['data_type'];
-        })->implode(',');
-
         Artisan::call('codegenerator:migration', [
             'model' => $modelName,
-            '--fields' => $migrationFieldString,
+            '--fields' => $fields,
             '--softdelete' => $softDelete,
             '--overwrite' => $overwrite
         ]);

@@ -5,6 +5,9 @@ namespace Sevenspan\CodeGenerator;
 use Livewire\Livewire;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Sevenspan\CodeGenerator\Http\Livewire\Index;
+use Sevenspan\CodeGenerator\Http\Livewire\Logs;
+use Sevenspan\CodeGenerator\Http\Livewire\RestApi;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
 {
@@ -37,11 +40,7 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         ]);
     }
 
-    /**
-     * Bootstrap services.
-     *
-     * Publish config, migrations, stubs; load routes and migrations; register middleware group.
-     */
+
     public function boot(): void
     {
         // Define middleware group for the code generator routes
@@ -49,6 +48,11 @@ class CodeGeneratorServiceProvider extends ServiceProvider
             'codeGeneratorMiddleware',
             config('code_generator.middleware', [])
         );
+
+        // Publish views from package
+        $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('code-generator'),
+        ], 'code-generator-views');
 
         // Publish config file
         $this->publishes([
@@ -70,5 +74,13 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
         // Load migrations from package
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
+
+        // Load views from package
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'code-generator');
+
+        // Register Livewire components
+        Livewire::component('code-generator::index', Index::class);
+        Livewire::component('code-generator::rest-api', RestApi::class);
+        Livewire::component('code-generator::logs', Logs::class);
     }
 }

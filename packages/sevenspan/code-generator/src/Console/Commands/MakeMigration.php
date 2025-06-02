@@ -40,7 +40,7 @@ class MakeMigration extends Command
         $contents = $this->getReplacedContent($tableName);
 
         // Create or overwrite file and get log the status and message
-        [$logStatus, $logMessage] = $this->createOrOverwriteFile(
+        $this->saveFile(
             $migrationFilePath,
             $contents,
             CodeGeneratorFileType::MIGRATION

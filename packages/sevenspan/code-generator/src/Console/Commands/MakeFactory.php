@@ -11,7 +11,7 @@ use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 class MakeFactory extends Command
 {
     use FileManager;
-    protected $signature = 'codegenerator:factory {modelName : The name of the model for which the factory file will be generated.} 
+    protected $signature = 'codegenerator:factory {model : The name of the model for which the factory file will be generated.} 
                                                   {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}
                                                   {--overwrite : is overwriting this file is selected}';
 
@@ -24,7 +24,7 @@ class MakeFactory extends Command
 
     public function handle()
     {
-        $modelName = Str::studly($this->argument('modelName'));
+        $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the factory file
         $factoryFilePath = base_path("database/" . config('code_generator.factory_path', 'Factories') . "/{$modelName}Factory.php");

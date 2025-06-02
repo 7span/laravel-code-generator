@@ -1,4 +1,0 @@
-    public function update({{ updaterRequestName }})
-    {
-        {{ updateMethod }}
-    }

@@ -13,7 +13,7 @@ class MakeObserver extends Command
 {
     use FileManager;
 
-    protected $signature = 'codegenerator:observer {modelName : The related model for the observer.}
+    protected $signature = 'codegenerator:observer {model : The related model for the observer.}
                                                    {--overwrite}';
 
     protected $description = 'Generate an observer class for a specified model.';
@@ -25,7 +25,7 @@ class MakeObserver extends Command
 
     public function handle()
     {
-        $observerClass = Str::studly($this->argument('modelName'));
+        $observerClass = Str::studly($this->argument('model'));
 
         // Define the path for the observer file
         $observerFilePath = app_path(config('code_generator.observer_path', 'Notification') . "/{$observerClass}.php");
@@ -58,7 +58,7 @@ class MakeObserver extends Command
      */
     protected function getStubVariables($observerClass): array
     {
-        $relatedModel = $this->argument('modelName');
+        $relatedModel = $this->argument('model');
         return [
             'namespace'              => 'App\\' . config('code_generator.observer_path', 'Observers'),
             'class'                  => $observerClass,

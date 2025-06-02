@@ -29,6 +29,7 @@ class MakeController extends Command
         parent::__construct();
     }
 
+
     public function handle(): void
     {
         $modelName = $this->argument('model');
@@ -153,6 +154,7 @@ class MakeController extends Command
         $singularInstance = lcfirst($className);
         $singularObj = '$' . $singularInstance . 'Obj';
 
+        $methods = $isAdminCrudIncluded ?  ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
         $methods = $isAdminCrudIncluded ? ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
         // Replace stub variables in base content
         foreach ($stubVariables as $search => $replace) {

@@ -13,7 +13,6 @@ return [
     | yourdomain.com/code-generator/...
     |
     */
-
     "route_path" => "code-generator",
 
     /*
@@ -70,11 +69,5 @@ return [
         AuthorizeCodeGenerator::class, // Custom middleware to authorize generator access
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Code Generator Class Namespace
-    |--------------------------------------------------------------------------
-    */
-    
     'class_namespace' => 'Sevenspan\\CodeGenerator',
 ];

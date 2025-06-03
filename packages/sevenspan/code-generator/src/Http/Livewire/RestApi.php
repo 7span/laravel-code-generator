@@ -95,11 +95,11 @@ class RestApi extends Component
         'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
         'relation_type' => 'required',
         'intermediate_model' => 'required|different:modelName|different:related_model|regex:/^[A-Z][A-Za-z]+$/|max:255',
-        'foreign_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
-        'local_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
+        'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
+        'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
 
-        'intermediate_foreign_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
-        'intermediate_local_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
+        'intermediate_foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
+        'intermediate_local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
 
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/|max:255',

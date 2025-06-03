@@ -1,23 +1,8 @@
-<div class="w-full p-6" x-data="{ 
-    showToast: false,
-    toastMessage: '',
-    toastType: 'success',
-    init() {
-        Livewire.on('show-toast', (data) => {
-            this.toastMessage = data.message;
-            this.toastType = data.type;
-            this.showToast = false; // Reset first
-            setTimeout(() => {
-                this.showToast = true;
-                setTimeout(() => this.showToast = false, 1000);
-            }, 50);
-        });
-    }
-}" >
+<div class="w-full p-6">
 
     <!-- Loading Overlay  -->
     <div  wire:loading wire:target="save"
-        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter="transition ease-out duration-100"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-50"
@@ -34,7 +19,8 @@
     <!-- Session Messages -->
     @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
     @if (session()->has($type))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+    <div  wire:key="{{ now()->timestamp }}-{{ $type }}" 
+        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2"
         x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
@@ -100,9 +86,10 @@
         <x-code-generator::add-files-methods :$errorMessage />
     </div>
 
-    <!-- Generate files button -->
-    <div>
+    <!-- Generate files and Reset button -->
+    <div class="flex justify-start space-x-4 mt-4">
         <x-code-generator::button title="Generate Files" wire:click="save"  />
+        <x-code-generator::button title="Reset" wire:click="resetForm()"  />
     </div>
 
     <!-- Modals -->

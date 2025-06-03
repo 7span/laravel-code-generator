@@ -91,22 +91,22 @@ class RestApi extends Component
 
     // Validation rules
     protected $rules = [
-        'modelName' => 'required|regex:/^[A-Z][A_Za-z]+$/',
-        'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/',
+        'modelName' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
+        'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
         'relation_type' => 'required',
-        'intermediate_model' => 'required|different:modelName|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
-        'foreign_key' => 'required|string|regex:/^[a-z_]+$/',
-        'local_key' => 'required|string|regex:/^[a-z_]+$/',
+        'intermediate_model' => 'required|different:modelName|different:related_model|regex:/^[A-Z][A-Za-z]+$/|max:255',
+        'foreign_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
+        'local_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
 
-        'intermediate_foreign_key' => 'required|string|regex:/^[a-z_]+$/',
-        'intermediate_local_key' => 'required|string|regex:/^[a-z_]+$/',
+        'intermediate_foreign_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
+        'intermediate_local_key' => 'required|string|regex:/^[a-z_]+$/|max:255',
 
         'data_type' => 'required',
-        'column_name' => 'required|regex:/^[a-z_]+$/',
+        'column_name' => 'required|regex:/^[a-z_]+$/|max:255',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^[A-Za-z0-9]+:[A-Za-z0-9]+(?:,[A-Za-z0-9]+:[A-Za-z0-9]+)*$/',
-        'subject' => 'required|regex:/^[A-Za-z ]+$/',
+        'subject' => 'required|regex:/^[A-Za-z ]+$/|max:255',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
         'foreignModelName' => 'required|regex:/^[a-z0-9_]+$/',
         'onDeleteAction' => 'nullable|in:restrict,cascade,set null,no action',
@@ -117,6 +117,8 @@ class RestApi extends Component
     public $messages = [
         'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
+        'modelName.max' => 'The Model Name must not exceed 255 characters.',
+        'related_model.max' => 'The Model Name must not exceed 255 characters.',
     ];
 
     // Initialize component
@@ -204,6 +206,14 @@ class RestApi extends Component
         if ($relation) {
             $this->fill($relation);
         }
+    }
+
+    // Reset form fields and error messages
+    public function resetForm()
+    {
+       $this->reset(); 
+       $this->resetErrorBag();
+       $this->sessionMessage = '';
     }
 
     // Resets modal form fields
@@ -479,7 +489,6 @@ class RestApi extends Component
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
             session()->flash('error', $e->getMessage());
-            $this->dispatch('show-toast', ['message' => $e->getMessage(), 'type' => 'error']);
         }
     }
 

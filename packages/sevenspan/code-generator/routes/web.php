@@ -13,7 +13,7 @@ Route::get(
 
 // Define the route for logs
 Route::get(
-    'codegenerator/logs',
+    'code-generator/logs',
     function () {
         return view('code-generator::livewire.index');
     }

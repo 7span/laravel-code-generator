@@ -239,7 +239,7 @@ class RestApi extends Component
             'local_key' => $this->rules['local_key'],
         ];
 
-        $isThroughRelation = in_array($this->relation_type, ['has_one_through', 'has_many_through']);
+        $isThroughRelation = in_array($this->relation_type, ['hasOneThrough', 'hasManyThrough']);
 
         // Add intermediate model rules only for through relations
         if ($isThroughRelation) {
@@ -809,7 +809,7 @@ class RestApi extends Component
     public function updatedRelationType($value)
     {
         // If the relation type is not a "through" relation, clear intermediate fields
-        if (!in_array($value, ['has_one_through', 'has_many_through'])) {
+        if (!in_array($value, ['hasOneThrough', 'hasManyThrough'])) {
             $this->intermediate_model = '';
             $this->intermediate_foreign_key = '';
             $this->intermediate_local_key = '';

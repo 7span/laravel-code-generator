@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Traits\FileManager;
+use Sevenspan\CodeGenerator\Helper\RelationHelper;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
 class MakeModel extends Command
@@ -167,23 +168,11 @@ class MakeModel extends Command
             return '';
         }
 
-        $relationMap = [
-            'one_to_one' => 'hasOne',
-            'one_to_many' => 'hasMany',
-            'many_to_many' => 'belongsTo',
-            'Many to Many' => 'belongsToMany',
-            'has_one_through' => 'hasOneThrough',
-            'has_many_through' => 'hasManyThrough',
-            'one_to_one_polymorphic' => 'morphOne',
-            'one_to_many_polymorphic' => 'morphMany',
-            'many_to_many_polymorphic' => 'morphToMany',
-        ];
-
         $methods = [];
 
         foreach ($relations as $relation) {
             $methodName = Str::camel(Str::plural($relation['related_model']));
-            $relationType = $relationMap[$relation['relation_type']];
+            $relationType = $relation['relation_type'];
 
             $method = self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
 

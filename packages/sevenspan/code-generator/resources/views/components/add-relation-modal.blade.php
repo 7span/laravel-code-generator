@@ -48,8 +48,8 @@
                         @if (!empty($this->modelNames))
                         <select wire:model.live="intermediate_model"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500"
-                            :disabled="!['has_one_through', 'has_many_through'].includes(relationType)"
-                            :class="{ 'bg-gray-100 text-gray-400': !['has_one_through', 'has_many_through'].includes(relationType) }">
+                            :disabled="!['hasOneThrough', 'hasManyThrough'].includes(relationType)"
+                            :class="{ 'bg-gray-100 text-gray-400': !['hasOneThrough', 'hasManyThrough'].includes(relationType) }">
                             <option value=""> -- Intermediate Model --</option>
                             @foreach ($this->modelNames as $table)
                             <option value="{{ $table }}">{{ $table }}</option>
@@ -58,8 +58,8 @@
                         @else
                         <input type="text" wire:model.live="intermediate_model" placeholder="Intermediate Model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
-                            :disabled="!['has_one_through', 'has_many_through'].includes(relationType)"
-                            :class="{ 'bg-gray-100 text-gray-400': !['has_one_through', 'has_many_through'].includes(relationType) }" />
+                            :disabled="!['hasOneThrough', 'hasManyThrough'].includes(relationType)"
+                            :class="{ 'bg-gray-100 text-gray-400': !['hasOneThrough', 'hasManyThrough'].includes(relationType) }" />
                         @endif
                         @error('intermediate_model')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- Extra keys -->
-                <div x-show="['has_one_through', 'has_many_through'].includes(relationType)" class="flex gap-2">
+                <div x-show="['hasOneThrough', 'hasManyThrough'].includes(relationType)" class="flex gap-2">
                     <!-- Foreign Key Input -->
                     <div class="w-1/2">
                         @if (!empty($this->intermediateFields))

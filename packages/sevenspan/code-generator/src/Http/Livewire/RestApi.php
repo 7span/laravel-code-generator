@@ -239,7 +239,7 @@ class RestApi extends Component
             'local_key' => $this->rules['local_key'],
         ];
 
-        $isThroughRelation = in_array($this->relation_type, ['Has One Through', 'Has Many Through']);
+        $isThroughRelation = in_array($this->relation_type, ['has_one_through', 'has_many_through']);
 
         // Add intermediate model rules only for through relations
         if ($isThroughRelation) {
@@ -288,7 +288,6 @@ class RestApi extends Component
                 return;
             }
         }
-
         // Update or add relation
         if ($this->relationId) {
             foreach ($this->relationData as &$relation) {
@@ -301,6 +300,8 @@ class RestApi extends Component
         } else {
             $this->relationData[] = ['id' => Str::random(8)] + $relationData;
         }
+
+
         $this->isAddRelModalOpen = false;
         $this->isRelEditModalOpen = false;
         $this->reset(['related_model', 'relation_type', 'intermediate_model', 'foreign_key', 'local_key', 'intermediate_foreign_key', 'intermediate_local_key']);
@@ -497,7 +498,6 @@ class RestApi extends Component
         ]);
 
         $modelName = $this->modelName;
-
         // Prepare selected methods
         $selectedMethods = array_filter([
             $this->index ? 'index' : null,
@@ -809,7 +809,7 @@ class RestApi extends Component
     public function updatedRelationType($value)
     {
         // If the relation type is not a "through" relation, clear intermediate fields
-        if (!in_array($value, ['Has One Through', 'Has Many Through'])) {
+        if (!in_array($value, ['has_one_through', 'has_many_through'])) {
             $this->intermediate_model = '';
             $this->intermediate_foreign_key = '';
             $this->intermediate_local_key = '';

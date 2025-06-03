@@ -168,15 +168,15 @@ class MakeModel extends Command
         }
 
         $relationMap = [
-            'One to One' => 'hasOne',
-            'One to Many' => 'hasMany',
-            'Many to One' => 'belongsTo',
+            'one_to_one' => 'hasOne',
+            'one_to_many' => 'hasMany',
+            'many_to_many' => 'belongsTo',
             'Many to Many' => 'belongsToMany',
-            'Has One Through' => 'hasOneThrough',
-            'Has Many Through' => 'hasManyThrough',
-            'One To One (Polymorphic)' => 'morphOne',
-            'One To Many (Polymorphic)' => 'morphMany',
-            'Many To Many (Polymorphic)' => 'morphToMany',
+            'has_one_through' => 'hasOneThrough',
+            'has_many_through' => 'hasManyThrough',
+            'one_to_one_polymorphic' => 'morphOne',
+            'one_to_many_polymorphic' => 'morphMany',
+            'many_to_many_polymorphic' => 'morphToMany',
         ];
 
         $methods = [];

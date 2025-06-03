@@ -48,8 +48,8 @@
                         @if (!empty($this->modelNames))
                         <select wire:model.live="intermediate_model"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500"
-                            :disabled="!['Has One Through', 'Has Many Through'].includes(relationType)"
-                            :class="{ 'bg-gray-100 text-gray-400': !['Has One Through', 'Has Many Through'].includes(relationType) }">
+                            :disabled="!['has_one_through', 'has_many_through'].includes(relationType)"
+                            :class="{ 'bg-gray-100 text-gray-400': !['has_one_through', 'has_many_through'].includes(relationType) }">
                             <option value=""> -- Intermediate Model --</option>
                             @foreach ($this->modelNames as $table)
                             <option value="{{ $table }}">{{ $table }}</option>
@@ -58,8 +58,8 @@
                         @else
                         <input type="text" wire:model.live="intermediate_model" placeholder="Intermediate Model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
-                            :disabled="!['Has One Through', 'Has Many Through'].includes(relationType)"
-                            :class="{ 'bg-gray-100 text-gray-400': !['Has One Through', 'Has Many Through'].includes(relationType) }" />
+                            :disabled="!['has_one_through', 'has_many_through'].includes(relationType)"
+                            :class="{ 'bg-gray-100 text-gray-400': !['has_one_through', 'has_many_through'].includes(relationType) }" />
                         @endif
                         @error('intermediate_model')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
@@ -79,7 +79,7 @@
                             @endforeach
                         </select>
                         @else
-                        <input type="text" wire:model.live="foreign_key" placeholder="Foreign Key on Related model"
+                        <input type="text" wire:model.live="foreign_key" placeholder="Foreign Key On Related Model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base" />
                         @endif
                         @error('foreign_key')
@@ -89,7 +89,7 @@
 
                     <!-- Local Key Input -->
                     <div class="w-1/2">
-                        <input type="text" wire:model.live="local_key" placeholder="Local Key on Base model"
+                        <input type="text" wire:model.live="local_key" placeholder="Local Key On Base Model"
                             class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base" />
                         @error('local_key')
                         <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- Extra keys -->
-                <div x-show="['Has One Through', 'Has Many Through'].includes($wire.relation_type)" class="flex gap-2">
+                <div x-show="['has_one_through', 'has_many_through'].includes(relationType)" class="flex gap-2">
                     <!-- Foreign Key Input -->
                     <div class="w-1/2">
                         @if (!empty($this->intermediateFields))

@@ -4,7 +4,7 @@
 'loadingTarget' => null,
 ])
 
-<button {{ $attributes->merge(['class' => 'bg-red-500 text-white py-3 pl-3 pr-4 rounded-lg flex items-center
+<button {{ $attributes->merge(['class' => 'bg-red-500 text-white py-2 pl-3 pr-4 rounded-lg flex items-center
     justify-center relative']) }}>
 
     @if ($loadingTarget)

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Sevenspan\CodeGenerator\Console\Commands;
 
@@ -13,7 +13,7 @@ class ClearLogs extends Command
 
     public function handle(): void
     {
-        $days = config('code-generator.log_retention_days');
+        $days = config('code_generator.log_retention_days');
 
         //   Delete log entries older than the configured retention period
         $deleted = CodeGeneratorFileLog::where('created_at', '<', now()->subDays($days))->delete();

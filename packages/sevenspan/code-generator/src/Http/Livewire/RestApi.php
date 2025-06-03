@@ -30,11 +30,12 @@ class RestApi extends Component
     public $errorMessage = "";
     public $successMessage = '';
 
-    public $isForeignKey = false;
-    public $foreignModelName = '';
-    public $referencedColumn = '';
-    public $onDeleteAction = '';
-    public $onUpdateAction = '';
+    // Foreign key properties
+    public $is_foreign_key = false;
+    public $foreign_model_name = '';
+    public $referenced_column = '';
+    public $on_delete_action = '';
+    public $on_update_action = '';
 
     // Modal visibility properties
     public $isAddRelModalOpen = false;
@@ -46,7 +47,7 @@ class RestApi extends Component
     public $isNotificationModalOpen = false;
 
     // Form inputs
-    public $modelName;
+    public $model_name;
 
     public $relations, $relationId, $fields, $fieldId;
 
@@ -67,34 +68,33 @@ class RestApi extends Component
     public $destroy = false;
 
     // File generation options
-    public $modelFile = false;
-    public $migrationFile = false;
-    public $softDeleteFile = false;
-    public $crudFile = false;
-    public $serviceFile = false;
-    public $notificationFile = false;
-    public $resourceFile = false;
-    public $requestFile = false;
-    public $traitFiles = false;
-    public $overwriteFiles = false;
-    public $observerFile = false;
-    public $factoryFile = false;
-    public $policyFile = false;
+    public $model_file = false;
+    public $migration_file = false;
+    public $soft_delete_file = false;
+    public $crud_file = false;
+    public $service_file = false;
+    public $notification_file = false;
+    public $resource_file = false;
+    public $request_file = false;
+    public $trait_files = false;
+    public $overwrite_files = false;
+    public $observer_file = false;
+    public $factory_file = false;
+    public $policy_file = false;
 
     // Trait checkboxes
-    public $BootModel = false;
-    public $PaginationTrait = false;
-    public $ResourceFilterable = false;
-    public $HasUuid = false;
-    public $HasUserAction = false;
-    public $isGenerating = false;
+    public $boot_model = false;
+    public $pagination_trait = false;
+    public $resource_filterable_trait = false;
+    public $has_uuid = false;
+    public $has_user_action = false;
 
     // Validation rules
     protected $rules = [
-        'modelName' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
+        'model_name' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
         'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
         'relation_type' => 'required',
-        'intermediate_model' => 'required|different:modelName|different:related_model|regex:/^[A-Z][A-Za-z]+$/|max:255',
+        'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/|max:255',
         'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
         'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
 
@@ -108,16 +108,16 @@ class RestApi extends Component
         'data' => 'required|regex:/^[A-Za-z0-9]+:[A-Za-z0-9]+(?:,[A-Za-z0-9]+:[A-Za-z0-9]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z ]+$/|max:255',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
-        'foreignModelName' => 'required|regex:/^[a-z0-9_]+$/',
-        'onDeleteAction' => 'nullable|in:restrict,cascade,set null,no action',
-        'onUpdateAction' => 'nullable|in:restrict,cascade,set null,no action',
+        'foreign_model_name' => 'required|regex:/^[a-z0-9_]+$/',
+        'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
+        'on_update_action' => 'nullable|in:restrict,cascade,set null,no action',
     ];
 
     // Custom validation messages
     public $messages = [
-        'modelName.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
+        'model_name.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
-        'modelName.max' => 'The Model Name must not exceed 255 characters.',
+        'model_name.max' => 'The Model Name must not exceed 255 characters.',
         'related_model.max' => 'The Model Name must not exceed 255 characters.',
     ];
 
@@ -132,8 +132,8 @@ class RestApi extends Component
     {
         if (!$value) {
             // Checkbox was unchecked - clear related fields
-            $this->foreignModelName = '';
-            $this->referencedColumn = '';
+            $this->foreign__model_name = '';
+            $this->referenced_column = '';
         }
     }
 
@@ -154,7 +154,7 @@ class RestApi extends Component
     // Update notification file checkbox state and open modal if checked
     public function updatedNotificationFile(): void
     {
-        if ($this->notificationFile) {
+        if ($this->notification_file) {
             $this->isNotificationModalOpen = true;
         }
     }
@@ -164,7 +164,7 @@ class RestApi extends Component
         $this->errorMessage = "";
 
         // Check if any file that requires fields is selected
-        $requiresFields = $this->modelFile || $this->migrationFile || $this->requestFile || $this->factoryFile;
+        $requiresFields = $this->model_file || $this->migration_file || $this->request_file || $this->factory_file;
 
         // If fields are required but none are added
         if ($requiresFields && empty($this->fieldsData)) {
@@ -226,13 +226,12 @@ class RestApi extends Component
             'foreign_key',
             'local_key',
             'data_type',
-            'isForeignKey',
             'column_name',
             'column_validation',
             'fieldId',
-            'isForeignKey',
-            'foreignModelName',
-            'referencedColumn',
+            'is_foreign_key',
+            'foreign_model_name',
+            'referenced_column',
             'intermediate_foreign_key',
             'intermediate_local_key'
         ]);
@@ -262,7 +261,7 @@ class RestApi extends Component
 
         if (
             $this->foreign_key === $this->local_key &&
-            $this->related_model === $this->modelName
+            $this->related_model === $this->model_name
         ) {
             $this->addError('local_key', 'Foreign key and local key cannot be the same as base model for self-relation.');
             return;
@@ -327,9 +326,9 @@ class RestApi extends Component
             $this->column_name = $field['column_name'] ?? '';
             $this->data_type = $field['data_type'] ?? '';
             $this->column_validation = $field['column_validation'] ?? '';
-            $this->isForeignKey = (bool) ($field['isForeignKey'] ?? false);
-            $this->foreignModelName = $field['foreignModelName'] ?? '';
-            $this->referencedColumn = $field['referencedColumn'] ?? '';
+            $this->is_foreign_key = (bool) ($field['is_foreign_key'] ?? false);
+            $this->foreign_model_name = $field['foreign_model_name'] ?? '';
+            $this->referenced_column = $field['referenced_column'] ?? '';
         }
 
         $this->isEditFieldModalOpen = true;
@@ -377,11 +376,11 @@ class RestApi extends Component
             'column_validation' => $this->rules['column_validation'],
         ];
 
-        if ($this->isForeignKey) {
-            $rulesToValidate['foreignModelName'] = $this->rules['foreignModelName'];
-            $rulesToValidate['referencedColumn'] = $this->rules['local_key'];
-            $rulesToValidate['onDeleteAction'] = $this->rules['onDeleteAction'];
-            $rulesToValidate['onUpdateAction'] = $this->rules['onUpdateAction'];
+        if ($this->is_foreign_key) {
+            $rulesToValidate['foreign_model_name'] = $this->rules['foreign_model_name'];
+            $rulesToValidate['referenced_column'] = $this->rules['local_key'];
+            $rulesToValidate['on_delete_action'] = $this->rules['on_delete_action'];
+            $rulesToValidate['on_update_action'] = $this->rules['on_update_action'];
         }
 
         $this->validate($rulesToValidate);
@@ -391,11 +390,11 @@ class RestApi extends Component
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,
             'column_validation' => $this->column_validation,
-            'isForeignKey' => $this->isForeignKey ?? false,
-            'foreignModelName' => $this->foreignModelName,
-            'referencedColumn' => $this->referencedColumn,
-            'onDeleteAction' => $this->onDeleteAction,
-            'onUpdateAction' => $this->onUpdateAction,
+            'is_foreign_key' => $this->is_foreign_key ?? false,
+            'foreign_model_name' => $this->foreign_model_name,
+            'referenced_column' => $this->referenced_column,
+            'on_delete_action' => $this->on_delete_action,
+            'on_update_action' => $this->on_update_action,
         ];
 
         // Update existing field or add new one
@@ -413,7 +412,7 @@ class RestApi extends Component
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
-        $this->reset(['column_name', 'data_type', 'column_validation', 'isForeignKey', 'foreignModelName', 'referencedColumn']);
+        $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column']);
     }
 
     // Save notification data
@@ -444,19 +443,19 @@ class RestApi extends Component
     private function validateInputs(): bool
     {
         // Validate model name
-        $this->validate(['modelName' => $this->rules['modelName']]);
+        $this->validate(['model_name' => $this->rules['model_name']]);
 
         // Check if model exists and overwrite is not checked
-        $modelPath = app_path('Models/' . $this->modelName . '.php');
-        if (File::exists($modelPath) && !$this->overwriteFiles) {
-            $this->errorMessage = "Model {$this->modelName} already exists if you want to overwrite it check the 'Overwrite Files' option";
+        $modelPath = app_path('Models/' . $this->model_name . '.php');
+        if (File::exists($modelPath) && !$this->overwrite_files) {
+            $this->errorMessage = "Model {$this->model_name} already exists if you want to overwrite it check the 'Overwrite Files' option";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
             return false;
         }
 
         // Check if notification file is selected but no notification data is provided
-        if ($this->notificationFile && empty($this->notificationData)) {
+        if ($this->notification_file && empty($this->notificationData)) {
             $this->errorMessage = "Please add notification data before generating files.";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
@@ -498,14 +497,14 @@ class RestApi extends Component
         $selectedTraits = array_filter([
             'ApiResponser',
             'BaseModel',
-            $this->BootModel ? 'BootModel' : null,
-            $this->PaginationTrait ? 'PaginationTrait' : null,
-            $this->ResourceFilterable ? 'ResourceFilterable' : null,
-            $this->HasUuid ? 'HasUuid' : null,
-            $this->HasUserAction ? 'HasUserAction' : null,
+            $this->boot_model ? 'boot_model' : null,
+            $this->boot_model ? 'boot_model' : null,
+            $this->resource_filterable_trait ? 'resource_filterable_trait' : null,
+            $this->has_uuid ? 'has_uuid' : null,
+            $this->has_user_action ? 'has_user_action' : null,
         ]);
 
-        $modelName = $this->modelName;
+        $model_name = $this->model_name;
 
         // Prepare selected methods
         $selectedMethods = array_filter([
@@ -518,18 +517,18 @@ class RestApi extends Component
 
         // Prepare files config for generation
         $files = [
-            'model' => $this->modelFile,
-            'migration' => $this->migrationFile,
-            'softDelete' => $this->softDeleteFile,
-            'adminCRUDFile' => $this->crudFile,
-            'service' => $this->serviceFile,
-            'notification' => $this->notificationFile,
-            'resource' => $this->resourceFile,
-            'request' => $this->requestFile,
-            'traits' => $this->traitFiles,
-            'observer' => $this->observerFile,
-            'policy' => $this->policyFile,
-            'factory' => $this->factoryFile,
+            'model' => $this->model_file,
+            'migration' => $this->migration_file,
+            'softDelete' => $this->soft_delete_file,
+            'crud_file' => $this->crud_file,
+            'service' => $this->service_file,
+            'notification' => $this->notification_file,
+            'resource' => $this->resource_file,
+            'request' => $this->request_file,
+            'traits' => $this->trait_files,
+            'observer' => $this->observer_file,
+            'policy' => $this->policy_file,
+            'factory' => $this->factory_file,
         ];
 
         // Format field and relation strings
@@ -537,41 +536,41 @@ class RestApi extends Component
 
         // Generate files based on flags
         if ($files['model']) {
-            $this->generateModel($modelName, $fieldString, $this->relationData, $selectedMethods, $files['softDelete'], $files['factory'], $selectedTraits, $this->overwriteFiles);
+            $this->generateModel($model_name, $fieldString, $this->relationData, $selectedMethods, $files['softDelete'], $files['factory'], $selectedTraits, $this->overwrite_files);
         }
 
         if ($files['migration']) {
-            $this->generateMigration($modelName, $this->fieldsData, $files['softDelete'], $this->overwriteFiles);
+            $this->generateMigration($model_name, $this->fieldsData, $files['softDelete'], $this->overwrite_files);
         }
 
-        $this->generateController($modelName, $selectedMethods, $files['service'], $files['resource'], $files['request'], $this->overwriteFiles, $files['adminCRUDFile']);
+        $this->generateController($model_name, $selectedMethods, $files['service'], $files['resource'], $files['request'], $this->overwrite_files, $files['crud_file']);
 
         if ($files['policy']) {
-            $this->generatePolicy($modelName, $this->overwriteFiles);
+            $this->generatePolicy($model_name, $this->overwrite_files);
         }
 
         if ($files['observer']) {
-            $this->generateObserver($modelName, $this->overwriteFiles);
+            $this->generateObserver($model_name, $this->overwrite_files);
         }
 
         if ($files['service']) {
-            $this->generateService($modelName, $this->overwriteFiles);
+            $this->generateService($model_name, $this->overwrite_files);
         }
 
         if ($files['notification']) {
-            $this->generateNotification($modelName, $this->overwriteFiles);
+            $this->generateNotification($model_name, $this->overwrite_files);
         }
 
         if ($files['resource']) {
-            $this->generateResource($modelName, $this->overwriteFiles);
+            $this->generateResource($model_name, $this->overwrite_files);
         }
 
         if ($files['request']) {
-            $this->generateRequest($modelName, $this->fieldsData, $this->overwriteFiles);
+            $this->generateRequest($model_name, $this->fieldsData, $this->overwrite_files);
         }
 
         if ($files['factory']) {
-            $this->generateFactory($modelName, $this->fieldsData, $this->overwriteFiles);
+            $this->generateFactory($model_name, $this->fieldsData, $this->overwrite_files);
         }
 
         if ($selectedTraits) {
@@ -584,10 +583,10 @@ class RestApi extends Component
      */
 
     // Generate model file
-    private function generateModel($modelName, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
+    private function generateModel($model_name, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
     {
         Artisan::call('codegenerator:model', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--fields' => $fieldString,
             '--relations' => $relations,
             '--methods' => implode(',', $selectedMethods),
@@ -599,10 +598,10 @@ class RestApi extends Component
     }
 
     //Generate migration file
-    private function generateMigration($modelName, $fields, $softDelete, $overwrite)
+    private function generateMigration($model_name, $fields, $softDelete, $overwrite)
     {
         Artisan::call('codegenerator:migration', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--fields' => $fields,
             '--softdelete' => $softDelete,
             '--overwrite' => $overwrite
@@ -610,10 +609,10 @@ class RestApi extends Component
     }
 
     // Generate controller file
-    private function generateController($modelName, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
+    private function generateController($model_name, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
     {
         Artisan::call('codegenerator:controller', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--methods' => implode(',', $selectedMethods),
             '--service' => $service,
             '--resource' => $resource,
@@ -624,40 +623,40 @@ class RestApi extends Component
     }
 
     // Generate policy file
-    private function generatePolicy($modelName, $overwrite)
+    private function generatePolicy($model_name, $overwrite)
     {
         Artisan::call('codegenerator:policy', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate observer file
-    private function generateObserver($modelName, $overwrite)
+    private function generateObserver($model_name, $overwrite)
     {
         Artisan::call('codegenerator:observer', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate service file
-    private function generateService($modelName, $overwrite)
+    private function generateService($model_name, $overwrite)
     {
         Artisan::call('codegenerator:service', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--overwrite' => $overwrite
         ]);
     }
 
     //Generate notification file
-    private function generateNotification($modelName, $overwrite)
+    private function generateNotification($model_name, $overwrite)
     {
         $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
 
         Artisan::call('codegenerator:notification', [
-            'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
-            '--model' => $modelName,
+            'className' => $notificationData['class_name'] ?? $model_name . 'Notification',
+            '--model' => $model_name,
             '--data' => $notificationData['data'] ?? '',
             '--body' => $notificationData['body'] ?? '',
             '--subject' => $notificationData['subject'] ?? '',
@@ -666,37 +665,37 @@ class RestApi extends Component
     }
 
     // Generate resource file
-    private function generateResource($modelName, $overwrite)
+    private function generateResource($model_name, $overwrite)
     {
         Artisan::call('codegenerator:resource', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate request file
-    private function generateRequest($modelName, $fields, $overwrite)
+    private function generateRequest($model_name, $fields, $overwrite)
     {
         $ruleString = implode(',', array_map(function ($field) {
             return $field['column_name'] . ':' . $field['column_validation'];
         }, $fields));
 
         Artisan::call('codegenerator:request', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--rules' => $ruleString,
             '--overwrite' => $overwrite
         ]);
     }
 
     //Generate factory file
-    private function generateFactory($modelName, $fields, $overwrite)
+    private function generateFactory($model_name, $fields, $overwrite)
     {
         $fieldString = implode(',', array_map(function ($field) {
             return $field['column_name'] . ':' . $field['data_type'];
         }, $fields));
 
         Artisan::call('codegenerator:factory', [
-            'model' => $modelName,
+            'model' => $model_name,
             '--fields' => $fieldString,
             '--overwrite' => $overwrite
         ]);

@@ -53,11 +53,11 @@
         <div>
             <h2 class="grey-900 text-xl font-semibold pb-2">Model Name</h2>
             <input type="text" class="border border-gray-300 rounded-lg px-4 py-2 w-full" placeholder="Enter Name"
-                wire:model.live="modelName" />
+                wire:model.live="model_name" />
             <span class="text-s text-gray-600 italic">
                 Note: Enter your model name like, Project OR Project Category.
             </span>
-                @error('modelName')
+                @error('model_name')
                     <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
                 @enderror      
         </div>
@@ -69,7 +69,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::field-table :$fieldsData  :$softDeleteFile/>
+        <x-code-generator::field-table :$fieldsData  :$soft_delete_file/>
     </div>
 
     <!-- eloqunet relations -->

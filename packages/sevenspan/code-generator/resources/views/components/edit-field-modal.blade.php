@@ -42,14 +42,14 @@
 
             <div>
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" wire:model.live="isForeignKey" class="form-checkbox text-indigo-600">
+                    <input type="checkbox" wire:model.live="is_foreign_key" class="form-checkbox text-indigo-600">
                     <span class="text-sm text-gray-800">Make it a foreign key?</span>
                 </div>
-                @error('isForeignKey') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                @error('is_foreign_key') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <!-- Show if Foreign Key is selected -->
-            @if($this->isForeignKey)
+            @if($this->is_foreign_key)
             <div class="bg-white border border-gray-200 rounded-2xl shadow-md p-6 mt-6">
 
                 <!-- Related Table Name -->
@@ -57,7 +57,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Related Table Name</label>
 
                     @if (!empty($this->tableNames))
-                    <select wire:model.live="foreignModelName"
+                    <select wire:model.live="foreign_model_name"
                         class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
                         <option value="">-- Select Table --</option>
                         @foreach ($this->tableNames as $table)
@@ -65,12 +65,12 @@
                         @endforeach
                     </select>
                     @else
-                    <input type="text" placeholder="users" wire:model.live="foreignModelName"
+                    <input type="text" placeholder="users" wire:model.live="foreign_model_name"
                         class="w-full border border-gray-300 rounded-md p-2 placeholder:text-gray-400 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
                     <p class="text-xs italic text-gray-500 mt-1">Note: use plural form, e.g., <code>users</code></p>
                     @endif
 
-                    @error('foreignModelName') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                    @error('foreign_model_name') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -78,7 +78,7 @@
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Referenced Column</label>
                     @if (!empty($this->fieldNames))
-                    <select wire:model.live="referencedColumn"
+                    <select wire:model.live="referenced_column"
                         class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
                         <option value="">-- Select Field --</option>
                         @foreach ($this->fieldNames as $field)
@@ -86,11 +86,11 @@
                         @endforeach
                     </select>
                     @else
-                    <input type="text" placeholder="user_id" wire:model.live="referencedColumn"
+                    <input type="text" placeholder="user_id" wire:model.live="referenced_column"
                         class="w-full border border-gray-300 rounded-md p-2 placeholder:text-gray-400 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
                     @endif
 
-                    @error('referencedColumn') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                    @error('referenced_column') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -99,7 +99,7 @@
                     <!-- ON UPDATE -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">On Update Action</label>
-                        <select wire:model.live="onUpdateAction"
+                        <select wire:model.live="on_update_action"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
                             <option value="">Select</option>
                             <option value="cascade">Cascade</option>
@@ -107,14 +107,14 @@
                             <option value="restrict">Restrict</option>
                             <option value="no action">No Action</option>
                         </select>
-                        @error('onUpdateAction') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                        @error('on_update_action') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <!-- ON DELETE -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">On Delete Action</label>
-                        <select wire:model.live="onDeleteAction"
+                        <select wire:model.live="on_delete_action"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
                             <option value="">Select</option>
                             <option value="cascade">Cascade</option>
@@ -122,7 +122,7 @@
                             <option value="restrict">Restrict</option>
                             <option value="no action">No Action</option>
                         </select>
-                        @error('onDeleteAction') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                        @error('on_delete_action') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
                 </div>

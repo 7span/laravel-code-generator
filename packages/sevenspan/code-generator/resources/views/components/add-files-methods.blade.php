@@ -4,25 +4,25 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="modelFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="model_file">
                     <span class="ml-2 text-sm">Model</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="migrationFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="migration_file">
                     <span class="ml-2 text-sm">Migration</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crudFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crud_file">
                     <span class="ml-2 text-sm">Admin CRUD Controller</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="policyFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="policy_file">
                     <span class="ml-2 text-sm">Policy</span>
                 </label>
             </div>
@@ -30,20 +30,20 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="observerFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="observer_file">
                     <span class="ml-2 text-sm">Observer</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="serviceFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="service_file">
                     <span class="ml-2 text-sm">Service</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500"
-                        wire:model.live="notificationFile">
+                        wire:model.live="notification_file">
                     <span class="ml-2 text-sm">Notification</span>
                 </label>
             </div>
@@ -51,19 +51,19 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="resourceFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="resource_file">
                     <span class="ml-2 text-sm">Resource</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="requestFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="request_file">
                     <span class="ml-2 text-sm">Request</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="factoryFile">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="factory_file">
                     <span class="ml-2 text-sm">Factory</span>
                 </label>
             </div>
@@ -100,20 +100,20 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="BootModel">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="boot_model">
                     <span class="ml-2 text-sm">BootModel.php</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="PaginationTrait">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="pagination_trait">
                     <span class="ml-2 text-sm">PaginationTrait.php</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500"
-                        wire:model.live="ResourceFilterable">
+                        wire:model.live="resource_filterable_trait">
                     <span class="ml-2 text-sm">ResourceFilterable.php</span>
                 </label>
             </div>
@@ -121,13 +121,13 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUuid">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="has_uuid">
                     <span class="ml-2 text-sm">HasUuid.php</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="HasUserAction">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="has_user_action">
                     <span class="ml-2 text-sm">HasUserAction.php</span>
                 </label>
             </div>
@@ -137,11 +137,11 @@
     <h2 class="text-sm font-medium mb-2">General Settings:</h2>
     <div class="mb-6 flex space-x-4 border-b border-gray-200">
         <label class="flex items-center mb-2">
-            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwriteFiles">
-            <span class="ml-1 text-sm">Overwrite Files</span>
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwrite_files">
+            <span class="ml-1 text-sm">Overwrite _files</span>
         </label>
         <label class="flex items-center mb-2">
-            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="softDeleteFile">
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="soft_delete_file">
             <span class="ml-1 text-sm">Soft Delete</span>
         </label>
     </div>

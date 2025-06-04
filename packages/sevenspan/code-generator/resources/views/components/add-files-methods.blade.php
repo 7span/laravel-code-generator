@@ -4,25 +4,25 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="model_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_model_file_added">
                     <span class="ml-2 text-sm">Model</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="migration_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_migration_file_added">
                     <span class="ml-2 text-sm">Migration</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="crud_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_crud_file_added">
                     <span class="ml-2 text-sm">Admin CRUD Controller</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="policy_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_policy_file_added">
                     <span class="ml-2 text-sm">Policy</span>
                 </label>
             </div>
@@ -30,20 +30,20 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="observer_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_observer_file_added">
                     <span class="ml-2 text-sm">Observer</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="service_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_service_file_added">
                     <span class="ml-2 text-sm">Service</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500"
-                        wire:model.live="notification_file">
+                        wire:model.live="is_notification_file_added">
                     <span class="ml-2 text-sm">Notification</span>
                 </label>
             </div>
@@ -51,19 +51,19 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="resource_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_resource_file_added">
                     <span class="ml-2 text-sm">Resource</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="request_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_request_file_added">
                     <span class="ml-2 text-sm">Request</span>
                 </label>
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="factory_file">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_factory_file_added">
                     <span class="ml-2 text-sm">Factory</span>
                 </label>
             </div>
@@ -137,11 +137,11 @@
     <h2 class="text-sm font-medium mb-2">General Settings:</h2>
     <div class="mb-6 flex space-x-4 border-b border-gray-200">
         <label class="flex items-center mb-2">
-            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="overwrite_files">
-            <span class="ml-1 text-sm">Overwrite _files</span>
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_overwrite_files_added">
+            <span class="ml-1 text-sm">Overwrite Files</span>
         </label>
         <label class="flex items-center mb-2">
-            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="soft_delete_file">
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_soft_delete_added">
             <span class="ml-1 text-sm">Soft Delete</span>
         </label>
     </div>

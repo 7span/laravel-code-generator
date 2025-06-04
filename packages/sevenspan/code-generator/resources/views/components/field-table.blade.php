@@ -40,7 +40,7 @@
                 </tr>
 
                 <!-- Show If Soft Delete is enabled -->
-                @if($softDeleteFile)
+                @if($isSoftDeleteAdded)
                 <tr>
                     <td class="px-4 py-2 text-gray-600">deleted_by</td>
                     <td class="px-4 py-2 text-gray-600">string</td>

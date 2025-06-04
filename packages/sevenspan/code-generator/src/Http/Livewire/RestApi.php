@@ -68,19 +68,19 @@ class RestApi extends Component
     public $destroy = false;
 
     // File generation options
-    public $model_file = false;
-    public $migration_file = false;
-    public $soft_delete_file = false;
-    public $crud_file = false;
-    public $service_file = false;
-    public $notification_file = false;
-    public $resource_file = false;
-    public $request_file = false;
-    public $trait_files = false;
-    public $overwrite_files = false;
-    public $observer_file = false;
-    public $factory_file = false;
-    public $policy_file = false;
+    public $is_model_file_added = false;
+    public $is_migration_file_added = false;
+    public $is_soft_delete_added = false;
+    public $is_crud_file_added = false;
+    public $is_service_file_added = false;
+    public $is_notification_file_added = false;
+    public $is_resource_file_added = false;
+    public $is_request_file_added = false;
+    public $is_trait_files_added = false;
+    public $is_overwrite_files_added = false;
+    public $is_observer_file_added = false;
+    public $is_factory_file_added = false;
+    public $is_policy_file_added = false;
 
     // Trait checkboxes
     public $boot_model = false;
@@ -154,7 +154,7 @@ class RestApi extends Component
     // Update notification file checkbox state and open modal if checked
     public function updatedNotificationFile(): void
     {
-        if ($this->notification_file) {
+        if ($this->is_notification_file_added) {
             $this->isNotificationModalOpen = true;
         }
     }
@@ -164,7 +164,7 @@ class RestApi extends Component
         $this->errorMessage = "";
 
         // Check if any file that requires fields is selected
-        $requiresFields = $this->model_file || $this->migration_file || $this->request_file || $this->factory_file;
+        $requiresFields = $this->is_model_file_added || $this->is_migration_file_added || $this->is_request_file_added || $this->is_factory_file_added;
 
         // If fields are required but none are added
         if ($requiresFields && empty($this->fieldsData)) {
@@ -447,7 +447,7 @@ class RestApi extends Component
 
         // Check if model exists and overwrite is not checked
         $modelPath = app_path('Models/' . $this->model_name . '.php');
-        if (File::exists($modelPath) && !$this->overwrite_files) {
+        if (File::exists($modelPath) && !$this->is_overwrite_files_added) {
             $this->errorMessage = "Model {$this->model_name} already exists if you want to overwrite it check the 'Overwrite Files' option";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
@@ -455,7 +455,7 @@ class RestApi extends Component
         }
 
         // Check if notification file is selected but no notification data is provided
-        if ($this->notification_file && empty($this->notificationData)) {
+        if ($this->is_notification_file_added && empty($this->notificationData)) {
             $this->errorMessage = "Please add notification data before generating files.";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
@@ -497,11 +497,11 @@ class RestApi extends Component
         $selectedTraits = array_filter([
             'ApiResponser',
             'BaseModel',
-            $this->boot_model ? 'boot_model' : null,
-            $this->boot_model ? 'boot_model' : null,
-            $this->resource_filterable_trait ? 'resource_filterable_trait' : null,
-            $this->has_uuid ? 'has_uuid' : null,
-            $this->has_user_action ? 'has_user_action' : null,
+            $this->boot_model ? 'BootModel' : null,
+            $this->pagination_trait ? 'PaginationTrait' : null,
+            $this->resource_filterable_trait ? 'ResourceFilterable' : null,
+            $this->has_uuid ? 'HasUuid' : null,
+            $this->has_user_action ? 'HasUserAction' : null,
         ]);
 
         $model_name = $this->model_name;
@@ -517,18 +517,18 @@ class RestApi extends Component
 
         // Prepare files config for generation
         $files = [
-            'model' => $this->model_file,
-            'migration' => $this->migration_file,
-            'softDelete' => $this->soft_delete_file,
-            'crud_file' => $this->crud_file,
-            'service' => $this->service_file,
-            'notification' => $this->notification_file,
-            'resource' => $this->resource_file,
-            'request' => $this->request_file,
-            'traits' => $this->trait_files,
-            'observer' => $this->observer_file,
-            'policy' => $this->policy_file,
-            'factory' => $this->factory_file,
+            'model' => $this->is_model_file_added,
+            'migration' => $this->is_migration_file_added,
+            'soft_delete' => $this->is_soft_delete_added,
+            'crud_file' => $this->is_crud_file_added,
+            'service' => $this->is_service_file_added,
+            'notification' => $this->is_notification_file_added,
+            'resource' => $this->is_resource_file_added,
+            'request' => $this->is_request_file_added,
+            'traits' => $this->is_trait_files_added,
+            'observer' => $this->is_observer_file_added,
+            'policy' => $this->is_policy_file_added,
+            'factory' => $this->is_factory_file_added,
         ];
 
         // Format field and relation strings
@@ -536,41 +536,41 @@ class RestApi extends Component
 
         // Generate files based on flags
         if ($files['model']) {
-            $this->generateModel($model_name, $fieldString, $this->relationData, $selectedMethods, $files['softDelete'], $files['factory'], $selectedTraits, $this->overwrite_files);
+            $this->generateModel($model_name, $fieldString, $this->relationData, $selectedMethods, $files['soft_delete'], $files['factory'], $selectedTraits, $this->is_overwrite_files_added);
         }
 
         if ($files['migration']) {
-            $this->generateMigration($model_name, $this->fieldsData, $files['softDelete'], $this->overwrite_files);
+            $this->generateMigration($model_name, $this->fieldsData, $files['soft_delete'], $this->is_overwrite_files_added);
         }
 
-        $this->generateController($model_name, $selectedMethods, $files['service'], $files['resource'], $files['request'], $this->overwrite_files, $files['crud_file']);
+        $this->generateController($model_name, $selectedMethods, $files['service'], $files['resource'], $files['request'], $this->is_overwrite_files_added, $files['crud_file']);
 
         if ($files['policy']) {
-            $this->generatePolicy($model_name, $this->overwrite_files);
+            $this->generatePolicy($model_name, $this->is_overwrite_files_added);
         }
 
         if ($files['observer']) {
-            $this->generateObserver($model_name, $this->overwrite_files);
+            $this->generateObserver($model_name, $this->is_overwrite_files_added);
         }
 
         if ($files['service']) {
-            $this->generateService($model_name, $this->overwrite_files);
+            $this->generateService($model_name, $this->is_overwrite_files_added);
         }
 
         if ($files['notification']) {
-            $this->generateNotification($model_name, $this->overwrite_files);
+            $this->generateNotification($model_name, $this->is_overwrite_files_added);
         }
 
         if ($files['resource']) {
-            $this->generateResource($model_name, $this->overwrite_files);
+            $this->generateResource($model_name, $this->is_overwrite_files_added);
         }
 
         if ($files['request']) {
-            $this->generateRequest($model_name, $this->fieldsData, $this->overwrite_files);
+            $this->generateRequest($model_name, $this->fieldsData, $this->is_overwrite_files_added);
         }
 
         if ($files['factory']) {
-            $this->generateFactory($model_name, $this->fieldsData, $this->overwrite_files);
+            $this->generateFactory($model_name, $this->fieldsData, $this->is_overwrite_files_added);
         }
 
         if ($selectedTraits) {

@@ -69,7 +69,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::field-table :$fieldsData  :$soft_delete_file/>
+        <x-code-generator::field-table :$fieldsData  :$is_soft_delete_added />
     </div>
 
     <!-- eloqunet relations -->

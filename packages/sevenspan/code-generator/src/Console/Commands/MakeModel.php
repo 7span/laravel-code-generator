@@ -6,7 +6,6 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Sevenspan\CodeGenerator\Traits\FileManager;
-use Sevenspan\CodeGenerator\Helper\RelationHelper;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
 class MakeModel extends Command

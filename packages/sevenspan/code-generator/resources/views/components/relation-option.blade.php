@@ -2,8 +2,8 @@
 
 <option value="">Select Relation</option>
 @php
-use Sevenspan\CodeGenerator\Helper\RelationHelper;
-$relations = RelationHelper::getRelation();
+use Sevenspan\CodeGenerator\Library\Helper;
+$relations = Helper::getRelation();
 @endphp
 
 @foreach ($relations as $key => $label)

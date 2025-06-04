@@ -1,30 +1,113 @@
 # Laravel Code Generator
 
-The Laravel Code Generator is a powerful tool that simplifies the process of generating boilerplate code for your Laravel applications. It automates the creation of controllers, models, views, migrations, and more, saving you time and effort in the development process.
+A developer-friendly Laravel package to **generate models, migrations, controllers, requests, resources, factories, policies, observers, services, notifications, and traits** using a modern Livewire-powered UI.
 
-Whether you're building a new Laravel project or adding new features to an existing one, this code generator will help you quickly scaffold the necessary code structures, so you can focus on building the core functionality of your application
+This package is designed to **accelerate API development** in Laravel by providing a visual interface for defining models, fields, relationships, and scaffolding complete REST endpoints.
 
-## Features
+---
 
--   **CRUD API Generation:** Easily create CRUD (Create, Read, Update, Delete) operations for your models with a single command.
--   **CRUD Admin API Generation:** Easily create CRUD (Create, Read, Update, Delete) operations for your models with a single command.
--   **Controller Generation:** Quickly generate controllers with standard CRUD methods for your models.
--   **Model Generation:** Automatically create model classes for your database tables.
--   **Migration Generation:** Automatically create database migration files to define your database schema.
--   **Request file Generation:** Create request classes for input validation..
--   **Response file Generation:** Create response classes.
--   **API Resource Generation:** Generate API resource classes for transforming model data into JSON.
--   **API Collection Generation:** Generate API collection classes for transforming model data into JSON.
--   **Service file Generation:** Generate API service for process fields.
--   **Add new field apart from default field support:** Option to add new fields apart from the already added default fields.
+## 🚀 Features
 
-## Contributing
+-   **REST API Generator**: Instantly scaffold Models, Controllers, Migrations, Services, Resources, Requests, and more.
+-   **Livewire UI**: Interactive, dynamic interface for rapid development.
+-   **Trait Support**: Easily add reusable traits to your models via the UI.
+-   **Validation & Error Handling**: Smart file handling with overwrite protection.
+-   **Highly Configurable**: Customize paths, namespaces, route prefixes, and stub templates.
+-   **Smart File Placement**: Files are created in Laravel-standard folders.
+-   **Log Viewer**: View package logs directly from the UI for troubleshooting and transparency.
 
-If you encounter any issues or would like to contribute to this repository, we welcome contributions from the community to improve and enhance this repository. If you'd like to contribute, please follow our contribution guidelines:
+---
 
--   Fork this repository.
--   Clone the forked repository to your local machine.
--   Create a new branch for your feature or bug fix: git checkout -b feature/your-feature-name
--   Make your changes and commit them: git commit -m 'Add new feature'
--   Push your changes to your fork: git push origin feature/your-feature-name
--   Create a pull request to the original repository.
+## 🧩 Requirements
+
+-   Laravel 12+
+-   PHP 8.2+
+-   [Livewire 3](https://livewire.laravel.com/)
+-   [spatie/laravel-query-builder](https://github.com/spatie/laravel-query-builder)
+
+---
+
+## 📦 Installation
+
+1. **Install via Composer:**
+
+    ```bash
+    composer require sevenspan/laravel-code-generator
+    ```
+
+2. **Publish the configuration and migrations:**
+
+    ```bash
+    php artisan vendor:publish --tag=code-generator-config
+    php artisan vendor:publish --tag=code-generator-migrations
+    ```
+
+3. **(Optional) Customize configuration:**
+
+    Edit `config/code-generator.php` to set route paths, folder locations, and stub templates as needed.
+
+---
+
+## 🖥️ Usage
+
+1. **Access the UI**
+
+    Visit:
+
+    ```
+    http://yourdomain.com/laravel-code-generator
+    ```
+
+2. **Define your model, fields, and relationships**
+
+    - Use the UI to add fields (columns), set data types, validation, and foreign keys.
+    - Add Eloquent relationships visually (hasOne, hasMany, belongsToMany, etc.).
+    - Select which files to generate (model, migration, controller, etc.).
+    - Optionally, select other features like traits, observers, and notifications.
+
+3. **Generate Files**
+
+    - Click "Generate" to scaffold all selected files in your Laravel app.
+
+---
+
+## 📜 Logs
+
+-   The package provides a log viewer in the UI to help you review generation activity and errors.
+-   **To clear the logs**, run the following Artisan command:
+
+    ```bash
+    php artisan codegenerator:clear-logs
+    ```
+
+---
+
+## ⚙️ Configuration
+
+The main configuration file is published at `config/code-generator.php`.  
+You can customize:
+
+-   Route path and prefix
+-   Folder paths for generated files
+-   Stub templates for each file type
+
+---
+
+## 🧑‍💻 Contributing
+
+Pull requests and issues are welcome!
+
+-   Fork the repo
+-   Create a new branch: `git checkout -b feature/my-feature`
+-   Commit your changes and push
+-   Open a Pull Request
+
+---
+
+## 📄 License
+
+The MIT License (MIT).
+
+---
+
+**Happy coding! 🚀**

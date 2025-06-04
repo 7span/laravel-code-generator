@@ -3,7 +3,6 @@
 namespace Sevenspan\CodeGenerator;
 
 use Livewire\Livewire;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Sevenspan\CodeGenerator\Http\Livewire\Index;
 use Sevenspan\CodeGenerator\Http\Livewire\Logs;
@@ -44,11 +43,9 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Define middleware group for the code generator routes
-        Route::middlewareGroup(
-            'codeGeneratorMiddleware',
-            config('code_generator.middleware', [])
-        );
+        if (!app()->environment(['local'])) {
+            return;
+        }
 
         // Publish views from package
         $this->publishes([

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Sevenspan\CodeGenerator\Console\Commands;
 

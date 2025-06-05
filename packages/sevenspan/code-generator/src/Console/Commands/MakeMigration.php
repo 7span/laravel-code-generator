@@ -28,7 +28,7 @@ class MakeMigration extends Command
 
     public function handle()
     {
-        $tableName = Str::snake($this->argument('model'));
+        $tableName = Str::plural(Str::snake($this->argument('model')));
         $timestamp = now()->format('Y_m_d_His');
 
         // Define the migration file name and path

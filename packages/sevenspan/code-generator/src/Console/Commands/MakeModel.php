@@ -167,23 +167,11 @@ class MakeModel extends Command
             return '';
         }
 
-        $relationMap = [
-            'One to One' => 'hasOne',
-            'One to Many' => 'hasMany',
-            'Many to One' => 'belongsTo',
-            'Many to Many' => 'belongsToMany',
-            'Has One Through' => 'hasOneThrough',
-            'Has Many Through' => 'hasManyThrough',
-            'One To One (Polymorphic)' => 'morphOne',
-            'One To Many (Polymorphic)' => 'morphMany',
-            'Many To Many (Polymorphic)' => 'morphToMany',
-        ];
-
         $methods = [];
 
         foreach ($relations as $relation) {
             $methodName = Str::camel(Str::plural($relation['related_model']));
-            $relationType = $relationMap[$relation['relation_type']];
+            $relationType = $relation['relation_type'];
 
             $method = self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
 

@@ -9,7 +9,7 @@ Route::get(
     function () {
         return view('code-generator::livewire.index');
     }
-)->middleware("codeGeneratorMiddleware")->name('code-generator.index');
+)->name('code-generator.index');
 
 // Define the route for logs
 Route::get(
@@ -17,4 +17,4 @@ Route::get(
     function () {
         return view('code-generator::livewire.index');
     }
-)->middleware("codeGeneratorMiddleware")->name('code-generator.logs');
+)->name('code-generator.logs');

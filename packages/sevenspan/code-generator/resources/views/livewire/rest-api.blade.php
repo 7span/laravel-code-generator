@@ -13,22 +13,20 @@
             }, 50);
         });
     }
-}" >
+}">
 
     <!-- Loading Overlay  -->
-    <div  wire:loading wire:target="save"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-50"
-        x-transition:leave-start="opacity-100"
+    <div wire:loading wire:target="save" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-50" x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
             <p class="text-gray-700 font-medium text-lg">Generating files...</p>
         </div>
-    </div>   
+    </div>
 
 
     <!-- Session Messages -->
@@ -71,9 +69,9 @@
             <span class="text-s text-gray-600 italic">
                 Note: Enter your model name like, Project OR Project Category.
             </span>
-                @error('modelName')
-                    <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
-                @enderror      
+            @error('modelName')
+            <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
+            @enderror
         </div>
     </div>
 
@@ -83,7 +81,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::field-table :$fieldsData  :$softDeleteFile/>
+        <x-code-generator::field-table :$fieldsData :$softDeleteFile />
     </div>
 
     <!-- eloqunet relations -->
@@ -92,23 +90,23 @@
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::eloqunet-relation-table :$relationData :$intermediate_model :$intermediate_foreign_key :$intermediate_local_key />
+        <x-code-generator::eloqunet-relation-table :$relationData :$relationTypes />
     </div>
 
-    <!-- checkboxes -->   
+    <!-- checkboxes -->
     <div class="mb-2">
         <x-code-generator::add-files-methods :$errorMessage />
     </div>
 
     <!-- Generate files button -->
     <div>
-        <x-code-generator::button title="Generate Files" wire:click="save"  />
+        <x-code-generator::button title="Generate Files" wire:click="save" />
     </div>
 
     <!-- Modals -->
-    <x-code-generator::add-relation-modal />
+    <x-code-generator::add-relation-modal :relationTypes="$relationTypes" />
     <x-code-generator::add-new-field-modal />
-    <x-code-generator::edit-relation-modal :$intermediate_model :$intermediate_foreign_key :$intermediate_local_key />
+    <x-code-generator::edit-relation-modal :relationTypes="$relationTypes" />
     <x-code-generator::delete-relation-modal />
     <x-code-generator::delete-field-modal />
     <x-code-generator::edit-field-modal />

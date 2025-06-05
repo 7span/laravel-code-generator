@@ -1,3 +1,4 @@
+@props(['relationTypes'])
 <div wire:show="isRelEditModalOpen" x-data="{ relationType: @entangle('relation_type').live }"
     x-transition.duration.200ms x-on:click.self="$wire.isRelEditModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
@@ -14,7 +15,10 @@
         <div class="flex flex-col gap-4">
             <div class="flex flex-col">
                 <select class="w-full p-2 border border-gray-300 rounded-md" wire:model.live="relation_type">
-                    <x-code-generator::relation-option />
+                    <option value="">Select Relation</option>
+                    @foreach ($relationTypes as $key => $label)
+                    <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
                 </select>
                 @error('relation_type')
                 <span class="text-red-600 text-sm">{{ $message }}</span>

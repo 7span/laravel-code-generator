@@ -12,6 +12,7 @@ use Sevenspan\CodeGenerator\Library\Helper;
 class RestApi extends Component
 {
     // Data properties
+    public array $relationTypes = [];
     public array $relationData = [];
     public array $fieldsData = [];
     public array $notificationData = [];
@@ -147,6 +148,7 @@ class RestApi extends Component
     public function updatedIsAddRelModalOpen($value)
     {
         if ($value) {
+            $this->relationTypes = Helper::getRelationType();
             $this->modelNames = collect(Helper::loadMigrationTableNames())
                 ->map(function ($name) {
                     return Str::studly(Str::singular($name));
@@ -740,11 +742,11 @@ class RestApi extends Component
         }
     }
 
-    // Add this method to load field names when related model changes
+    // loadw field names when related model changes
     public function updatedRelatedModel($value)
     {
         if ($value) {
-            $this->columnNames = Helper::getColumnNames($value);
+            $this->columnNames = Helper::getColumnNames('App\\' . config('code-generator.model_path', 'Models') . '\\' . $value);
         }
     }
 
@@ -752,11 +754,10 @@ class RestApi extends Component
     public function updatedIntermediateModel($value)
     {
         if ($value) {
-            $this->intermediateFields = Helper::getColumnNames($value);
+            $this->intermediateFields = Helper::getColumnNames('App\\' . config('code-generator.model_path', 'Models') . '\\' . $value);
         }
     }
 
-    // Add this method to handle relation type changes
     public function updatedRelationType($value)
     {
         // If the relation type is not a "through" relation, clear intermediate fields

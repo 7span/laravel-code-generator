@@ -3,9 +3,10 @@
 namespace Sevenspan\CodeGenerator;
 
 use Livewire\Livewire;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Sevenspan\CodeGenerator\Http\Livewire\Index;
 use Sevenspan\CodeGenerator\Http\Livewire\Logs;
+use Sevenspan\CodeGenerator\Http\Livewire\Index;
 use Sevenspan\CodeGenerator\Http\Livewire\RestApi;
 
 class CodeGeneratorServiceProvider extends ServiceProvider
@@ -68,7 +69,8 @@ class CodeGeneratorServiceProvider extends ServiceProvider
         ], 'stubs');
 
         // Load routes from package
-        $this->loadRoutesFrom(__DIR__ . "/../routes/web.php");
+        Route::middleware('web')
+            ->group(__DIR__ . '/../routes/web.php');
 
         // Load migrations from package
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');

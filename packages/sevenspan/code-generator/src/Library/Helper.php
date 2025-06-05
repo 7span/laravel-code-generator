@@ -13,7 +13,7 @@ class Helper
      *
      * @return array<string, string> Array of relation 
      */
-    public static function getRelation(): array
+    public static function getRelationType(): array
     {
         return [
             'hasOne' => 'One to One',
@@ -34,7 +34,7 @@ class Helper
      */
     public static function loadMigrationTableNames()
     {
-        $migrationPath = database_path('migrations');
+        $migrationPath = database_path(config('code-generator.migration_path', 'Migrations'));
         $files = File::exists($migrationPath) ? File::files($migrationPath) : [];
 
         $tableNames = collect($files)->map(function ($file) {
@@ -54,13 +54,21 @@ class Helper
      */
     public static function getColumnNames($modelName)
     {
-        $tableName = Str::plural(Str::snake($modelName));
-        if (Schema::hasTable($tableName)) {
-            $columnNames = Schema::getColumnListing($tableName);
+
+        // Try to resolve as a model class('App\Models\User'); fallback to table name if class does not exist
+        if (class_exists($modelName)) {
+            $model = new $modelName;
+            $tableName = method_exists($model, 'getTable')
+                ? $model->getTable()
+                : Str::plural(Str::snake(class_basename($modelName)));
         } else {
-            $columnNames = [];
+            // Assume it's a table name
+            $tableName = Str::snake($modelName);
         }
 
-        return $columnNames;
+        // Return column names if table exists, otherwise return empty array
+        return Schema::hasTable($tableName)
+            ? Schema::getColumnListing($tableName)
+            : [];
     }
 }

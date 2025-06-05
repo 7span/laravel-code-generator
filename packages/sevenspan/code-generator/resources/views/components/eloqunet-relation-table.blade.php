@@ -1,7 +1,9 @@
+@props(['relationTypes', 'relationData' ])
+
 <div class="overflow-x-auto px-0 py-0">
     <table class="w-full border-collapse border border-gray-200">
 
-    <!-- Table Header -->
+        <!-- Table Header -->
         <thead class="bg-gray-200 rounded-t-lg">
             <th class="p-3 text-left text-sm">Related Model</th>
             <th class="p-3 text-left text-sm">Data Type</th>
@@ -18,10 +20,10 @@
             @foreach ($relationData as $relation)
             <tr class="border">
                 <td class="px-4 py-2 text-gray-600">{{$relation['related_model']}}</td>
-                <td class="px-4 py-2 text-gray-600">{{$relation['relation_type']}}</td>
+                <td class="px-4 py-2 text-gray-600">{{$relationTypes[$relation['relation_type']]}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['foreign_key']}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['local_key']}}</td>
-                <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_model'] ?? '-'}}</td>
+                <td class="px-4 py-2 text-gray-600">{{ $relation['intermediate_model'] ?? '-' }}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_foreign_key'] ?? '-'}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_local_key'] ?? '-'}}</td>
                 <td class="px-4 py-2 flex items-center">

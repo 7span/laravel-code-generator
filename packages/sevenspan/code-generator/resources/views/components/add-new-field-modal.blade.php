@@ -1,8 +1,6 @@
 <div wire:show="isAddFieldModalOpen" x-data x-transition.duration.200ms
     x-on:click.self="$wire.isAddFieldModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
-    @csrf
-
     <x-code-generator::modal modalTitle="Add Field">
 
         <x-slot:closebtn>
@@ -58,7 +56,9 @@
             @if($this->is_foreign_key)
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-md p-6 mt-6">
-
+                <p class="text-xs italic text-gray-500 mb-2">Note: This foreign key data is required for generating the
+                    base
+                    model's migration file. </p>
                 <!-- Related Table Name -->
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Related Table Name</label>

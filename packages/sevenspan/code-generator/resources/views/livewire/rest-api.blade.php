@@ -9,11 +9,12 @@
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
             <p class="text-gray-700 font-medium text-lg">Generating files...</p>
         </div>
-    </div>   
+    </div>
 
 
     <!-- Session Messages -->
@@ -78,10 +79,10 @@
             <h2 class="text-xl font-semibold">Eloquent Relations</h2>
             <x-code-generator::button title="Add" @click="$wire.isAddRelModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::eloqunet-relation-table :$relationData :$intermediate_model :$intermediate_foreign_key :$intermediate_local_key />
+        <x-code-generator::eloqunet-relation-table :$relationData :$relationTypes />
     </div>
 
-    <!-- checkboxes -->   
+    <!-- checkboxes -->
     <div class="mb-2">
         <x-code-generator::add-files-methods :$errorMessage />
     </div>
@@ -93,9 +94,9 @@
     </div>
 
     <!-- Modals -->
-    <x-code-generator::add-relation-modal />
+    <x-code-generator::add-relation-modal :relationTypes="$relationTypes" />
     <x-code-generator::add-new-field-modal />
-    <x-code-generator::edit-relation-modal :$intermediate_model :$intermediate_foreign_key :$intermediate_local_key />
+    <x-code-generator::edit-relation-modal :relationTypes="$relationTypes" />
     <x-code-generator::delete-relation-modal />
     <x-code-generator::delete-field-modal />
     <x-code-generator::edit-field-modal />

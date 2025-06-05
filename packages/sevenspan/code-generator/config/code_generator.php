@@ -1,7 +1,5 @@
 <?php
 
-use Sevenspan\CodeGenerator\Http\Middleware\AuthorizeCodeGenerator;
-
 return [
     /*
     |--------------------------------------------------------------------------
@@ -55,25 +53,9 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Middleware for Code Generator Routes
-    |--------------------------------------------------------------------------
-    |
-    | Define the middleware that will be applied to all code generator routes.
-    | You can add more middleware or remove existing ones as per your app's
-    | requirements.
-    |
-    */
-
-    "middleware" => [
-        "web",
-        AuthorizeCodeGenerator::class, // Custom middleware to authorize generator access
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     |  Delete logs older than configured days
     |--------------------------------------------------------------------------
     */
 
-    'log_retention_days' => env('CODE_GENERATOR_LOG_RETENTION_DAYS',2),
+    'log_retention_days' => env('CODE_GENERATOR_LOG_RETENTION_DAYS', 2),
 ];

@@ -58,15 +58,14 @@ class Helper
         // Try to resolve as a model class('App\Models\User'); fallback to table name if class does not exist
         if (class_exists($modelName)) {
             $model = new $modelName;
-            $tableName = method_exists($model, 'getTable')
+            $tableName = method_exists($model, 'getTable') && !empty($model->getTable())
                 ? $model->getTable()
                 : Str::plural(Str::snake(class_basename($modelName)));
         } else {
-            // Assume it's a table name
-            $tableName = Str::snake($modelName);
+              // Assume it's a table name
+            $tableName = Str::snake(class_basename($modelName));
         }
 
-        // Return column names if table exists, otherwise return empty array
         return Schema::hasTable($tableName)
             ? Schema::getColumnListing($tableName)
             : [];

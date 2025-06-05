@@ -77,7 +77,7 @@ This package is designed to **accelerate API development** in Laravel by providi
 -   **To clear the logs**, run the following Artisan command:
 
     ```bash
-    php artisan code-generator:clear-logs
+    php artisan codegenerator:clear-logs
     ```
 
 ---

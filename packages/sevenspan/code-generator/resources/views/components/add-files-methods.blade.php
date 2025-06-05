@@ -16,7 +16,7 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_crud_file_added">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_admin_crud_added">
                     <span class="ml-2 text-sm">Admin CRUD Controller</span>
                 </label>
             </div>
@@ -135,7 +135,7 @@
     <h2 class="text-sm font-medium mb-2">General Settings:</h2>
     <div class="mb-6 flex space-x-4 border-b border-gray-200">
         <label class="flex items-center mb-2">
-            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_overwrite_files_added">
+            <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_overwrite_files">
             <span class="ml-1 text-sm">Overwrite Files</span>
         </label>
         <label class="flex items-center mb-2">

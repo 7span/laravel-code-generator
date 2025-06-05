@@ -69,13 +69,13 @@ class RestApi extends Component
     public $is_model_file_added = false;
     public $is_migration_file_added = false;
     public $is_soft_delete_added = false;
-    public $is_crud_file_added = false;
+    public $is_admin_crud_added = false;
     public $is_service_file_added = false;
     public $is_notification_file_added = false;
     public $is_resource_file_added = false;
     public $is_request_file_added = false;
     public $is_trait_files_added = false;
-    public $is_overwrite_files_added = false;
+    public $is_overwrite_files = false;
     public $is_observer_file_added = false;
     public $is_factory_file_added = false;
     public $is_policy_file_added = false;
@@ -89,22 +89,22 @@ class RestApi extends Component
 
     // Validation rules
     protected $rules = [
-        'model_name' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
-        'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/|max:255',
+        'model_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
+        'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'relation_type' => 'required',
-        'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/|max:255',
-        'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
-        'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
+        'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
+        'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
 
-        'intermediate_foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
-        'intermediate_local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/|max:255',
+        'intermediate_foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'intermediate_local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
 
         'data_type' => 'required',
-        'column_name' => 'required|regex:/^[a-z_]+$/|max:255',
+        'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^[A-Za-z0-9]+:[A-Za-z0-9]+(?:,[A-Za-z0-9]+:[A-Za-z0-9]+)*$/',
-        'subject' => 'required|regex:/^[A-Za-z ]+$/|max:255',
+        'subject' => 'required|regex:/^[A-Za-z ]+$/',
         'body' => 'required|regex:/^[A-Za-z ]+$/',
         'foreign_model_name' => 'required|regex:/^[a-z0-9_]+$/',
         'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
@@ -460,7 +460,7 @@ class RestApi extends Component
 
         // Check if model exists and overwrite is not checked
         $modelPath = app_path('Models/' . $this->model_name . '.php');
-        if (File::exists($modelPath) && !$this->is_overwrite_files_added) {
+        if (File::exists($modelPath) && !$this->is_overwrite_files) {
             $this->errorMessage = "Model {$this->model_name} already exists if you want to overwrite it check the 'Overwrite Files' option";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
@@ -530,62 +530,46 @@ class RestApi extends Component
             $this->is_destroy_method_added ? 'destroy' : null,
         ]);
 
-        // Prepare files config for generation
-        $files = [
-            'model' => $this->is_model_file_added,
-            'migration' => $this->is_migration_file_added,
-            'soft_delete' => $this->is_soft_delete_added,
-            'crud_file' => $this->is_crud_file_added,
-            'service' => $this->is_service_file_added,
-            'notification' => $this->is_notification_file_added,
-            'resource' => $this->is_resource_file_added,
-            'request' => $this->is_request_file_added,
-            'traits' => $this->is_trait_files_added,
-            'observer' => $this->is_observer_file_added,
-            'policy' => $this->is_policy_file_added,
-            'factory' => $this->is_factory_file_added,
-        ];
-
         // Format field and relation strings
         $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
 
         // Generate files based on flags
-        if ($files['model']) {
-            $this->generateModel($model_name, $fieldString, $this->relationData, $selectedMethods, $files['soft_delete'], $files['factory'], $selectedTraits, $this->is_overwrite_files_added);
+        if ($this->is_model_file_added) {
+            $this->generateModel($model_name, $fieldString, $this->relationData, $selectedMethods,  $this->is_soft_delete_added, $this->is_factory_file_added, $selectedTraits, $this->is_overwrite_files);
         }
 
-        if ($files['migration']) {
-            $this->generateMigration($model_name, $this->fieldsData, $files['soft_delete'], $this->is_overwrite_files_added);
+        if ($this->is_migration_file_added) {   
+            $this->generateMigration($model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
 
-        $this->generateController($model_name, $selectedMethods, $files['service'], $files['resource'], $files['request'], $this->is_overwrite_files_added, $files['crud_file']);
+        $this->generateController($model_name, $selectedMethods, $this->is_service_file_added, $this->is_resource_file_added, $this->is_request_file_added, $this->is_overwrite_files, $this->is_admin_crud_added);
 
-        if ($files['policy']) {
-            $this->generatePolicy($model_name, $this->is_overwrite_files_added);
+        if ($this->is_policy_file_added) {
+            $this->generatePolicy($model_name, $this->is_overwrite_files);
         }
 
-        if ($files['observer']) {
-            $this->generateObserver($model_name, $this->is_overwrite_files_added);
+        if ($this->is_observer_file_added) {
+            $this->generateObserver($model_name, $this->is_overwrite_files);
         }
 
-        if ($files['service']) {
-            $this->generateService($model_name, $this->is_overwrite_files_added);
+        if ($this->is_service_file_added) {
+            $this->generateService($model_name, $this->is_overwrite_files);
         }
 
-        if ($files['notification']) {
-            $this->generateNotification($model_name, $this->is_overwrite_files_added);
+        if ($this->is_notification_file_added) {
+            $this->generateNotification($model_name, $this->is_overwrite_files);
         }
 
-        if ($files['resource']) {
-            $this->generateResource($model_name, $this->is_overwrite_files_added);
+        if ($this->is_resource_file_added) {
+            $this->generateResource($model_name, $this->is_overwrite_files);
         }
 
-        if ($files['request']) {
-            $this->generateRequest($model_name, $this->fieldsData, $this->is_overwrite_files_added);
+        if ($this->is_request_file_added) {
+            $this->generateRequest($model_name, $this->fieldsData, $this->is_overwrite_files);
         }
 
-        if ($files['factory']) {
-            $this->generateFactory($model_name, $this->fieldsData, $this->is_overwrite_files_added);
+        if ($this->is_factory_file_added) {
+            $this->generateFactory($model_name, $this->fieldsData, $this->is_overwrite_files);
         }
 
         if ($selectedTraits) {

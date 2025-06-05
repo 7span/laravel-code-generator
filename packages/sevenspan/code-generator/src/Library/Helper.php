@@ -63,7 +63,7 @@ class Helper
                 : Str::plural(Str::snake(class_basename($modelName)));
         } else {
               // Assume it's a table name
-            $tableName = Str::snake(class_basename($modelName));
+            $tableName = Str::plural(Str::snake(class_basename($modelName)));
         }
 
         return Schema::hasTable($tableName)

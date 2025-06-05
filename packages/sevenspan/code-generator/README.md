@@ -55,7 +55,7 @@ This package is designed to **accelerate API development** in Laravel by providi
     Visit:
 
     ```
-    http://yourdomain.com/laravel-code-generator
+    http://yourdomain.com/code-generator
     ```
 
 2. **Define your model, fields, and relationships**

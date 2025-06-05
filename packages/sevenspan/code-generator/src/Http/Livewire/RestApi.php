@@ -127,7 +127,7 @@ class RestApi extends Component
     public function updatedIsForeignKey($value)
     {
         if ($value) {
-            $this->tableNames = Helper::loadMigrationTableNames();
+            $this->tableNames = Helper::getTableNamesFromMigrations();
         } else {
             $this->foreignModelName = '';
             $this->referencedColumn = '';
@@ -148,8 +148,8 @@ class RestApi extends Component
     public function updatedIsAddRelModalOpen($value)
     {
         if ($value) {
-            $this->relationTypes = Helper::getRelationType();
-            $this->modelNames = collect(Helper::loadMigrationTableNames())
+            $this->relationTypes = Helper::getRelationTypes();
+            $this->modelNames = collect(Helper::getTableNamesFromMigrations())
                 ->map(function ($name) {
                     return Str::studly(Str::singular($name));
                 })->toArray();

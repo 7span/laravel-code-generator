@@ -13,7 +13,7 @@ class Helper
      *
      * @return array<string, string> Array of relation 
      */
-    public static function getRelationType(): array
+    public static function getRelationTypes(): array
     {
         return [
             'hasOne' => 'One to One',
@@ -32,7 +32,7 @@ class Helper
      *
      * @return array<int, string> List of table names found in migration files
      */
-    public static function loadMigrationTableNames()
+    public static function getTableNamesFromMigrations()
     {
         $migrationPath = database_path(config('code-generator.migration_path', 'Migrations'));
         $files = File::exists($migrationPath) ? File::files($migrationPath) : [];

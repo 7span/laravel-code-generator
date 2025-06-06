@@ -1,6 +1,0 @@
-    public function resource($id)
-    {
-        $$SINGULAR_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->getQB()->findOrFail($id);
-
-        return $$SINGULAR_VARIABLE$;
-    }

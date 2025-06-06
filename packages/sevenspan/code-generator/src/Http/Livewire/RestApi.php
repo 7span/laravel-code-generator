@@ -520,7 +520,7 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
-        $model_name = $this->model_name;
+        
         // Prepare selected methods
         $selectedMethods = array_filter([
             $this->is_index_method_added ? 'index' : null,
@@ -535,41 +535,41 @@ class RestApi extends Component
 
         // Generate files based on flags
         if ($this->is_model_file_added) {
-            $this->generateModel($model_name, $fieldString, $this->relationData, $selectedMethods,  $this->is_soft_delete_added, $this->is_factory_file_added, $selectedTraits, $this->is_overwrite_files);
+            $this->generateModel($this->model_name, $fieldString, $this->relationData, $selectedMethods,  $this->is_soft_delete_added, $this->is_factory_file_added, $selectedTraits, $this->is_overwrite_files);
         }
 
         if ($this->is_migration_file_added) {   
-            $this->generateMigration($model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
+            $this->generateMigration($this->model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
 
-        $this->generateController($model_name, $selectedMethods, $this->is_service_file_added, $this->is_resource_file_added, $this->is_request_file_added, $this->is_overwrite_files, $this->is_admin_crud_added);
+        $this->generateController($this->model_name, $selectedMethods, $this->is_service_file_added, $this->is_resource_file_added, $this->is_request_file_added, $this->is_overwrite_files, $this->is_admin_crud_added);
 
         if ($this->is_policy_file_added) {
-            $this->generatePolicy($model_name, $this->is_overwrite_files);
+            $this->generatePolicy($this->model_name, $this->is_overwrite_files);
         }
 
         if ($this->is_observer_file_added) {
-            $this->generateObserver($model_name, $this->is_overwrite_files);
+            $this->generateObserver($this->model_name, $this->is_overwrite_files);
         }
 
         if ($this->is_service_file_added) {
-            $this->generateService($model_name, $this->is_overwrite_files);
+            $this->generateService($this->model_name, $this->is_overwrite_files);
         }
 
         if ($this->is_notification_file_added) {
-            $this->generateNotification($model_name, $this->is_overwrite_files);
+            $this->generateNotification($this->model_name, $this->is_overwrite_files);
         }
 
         if ($this->is_resource_file_added) {
-            $this->generateResource($model_name, $this->is_overwrite_files);
+            $this->generateResource($this->model_name, $this->is_overwrite_files);
         }
 
         if ($this->is_request_file_added) {
-            $this->generateRequest($model_name, $this->fieldsData, $this->is_overwrite_files);
+            $this->generateRequest($this->model_name, $this->fieldsData, $this->is_overwrite_files);
         }
 
         if ($this->is_factory_file_added) {
-            $this->generateFactory($model_name, $this->fieldsData, $this->is_overwrite_files);
+            $this->generateFactory($this->model_name, $this->fieldsData, $this->is_overwrite_files);
         }
 
         if ($selectedTraits) {
@@ -582,10 +582,10 @@ class RestApi extends Component
      */
 
     // Generate model file
-    private function generateModel($model_name, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
+    private function generateModel($modelName, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
     {
         Artisan::call('codegenerator:model', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--fields' => $fieldString,
             '--relations' => $relations,
             '--methods' => implode(',', $selectedMethods),
@@ -597,10 +597,10 @@ class RestApi extends Component
     }
 
     //Generate migration file
-    private function generateMigration($model_name, $fields, $softDelete, $overwrite)
+    private function generateMigration($modelName, $fields, $softDelete, $overwrite)
     {
         Artisan::call('codegenerator:migration', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--fields' => $fields,
             '--softdelete' => $softDelete,
             '--overwrite' => $overwrite
@@ -608,10 +608,10 @@ class RestApi extends Component
     }
 
     // Generate controller file
-    private function generateController($model_name, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
+    private function generateController($modelName, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
     {
         Artisan::call('codegenerator:controller', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--methods' => implode(',', $selectedMethods),
             '--service' => $service,
             '--resource' => $resource,
@@ -622,40 +622,40 @@ class RestApi extends Component
     }
 
     // Generate policy file
-    private function generatePolicy($model_name, $overwrite)
+    private function generatePolicy($modelName, $overwrite)
     {
         Artisan::call('codegenerator:policy', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate observer file
-    private function generateObserver($model_name, $overwrite)
+    private function generateObserver($modelName, $overwrite)
     {
         Artisan::call('codegenerator:observer', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate service file
-    private function generateService($model_name, $overwrite)
+    private function generateService($modelName, $overwrite)
     {
         Artisan::call('codegenerator:service', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
 
     //Generate notification file
-    private function generateNotification($model_name, $overwrite)
+    private function generateNotification($modelName, $overwrite)
     {
         $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
 
         Artisan::call('codegenerator:notification', [
-            'className' => $notificationData['class_name'] ?? $model_name . 'Notification',
-            '--model' => $model_name,
+            'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
+            '--model' => $modelName,
             '--data' => $notificationData['data'] ?? '',
             '--body' => $notificationData['body'] ?? '',
             '--subject' => $notificationData['subject'] ?? '',
@@ -664,37 +664,37 @@ class RestApi extends Component
     }
 
     // Generate resource file
-    private function generateResource($model_name, $overwrite)
+    private function generateResource($modelName, $overwrite)
     {
         Artisan::call('codegenerator:resource', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate request file
-    private function generateRequest($model_name, $fields, $overwrite)
+    private function generateRequest($modelName, $fields, $overwrite)
     {
         $ruleString = implode(',', array_map(function ($field) {
             return $field['column_name'] . ':' . $field['column_validation'];
         }, $fields));
 
         Artisan::call('codegenerator:request', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--rules' => $ruleString,
             '--overwrite' => $overwrite
         ]);
     }
 
     //Generate factory file
-    private function generateFactory($model_name, $fields, $overwrite)
+    private function generateFactory($modelName, $fields, $overwrite)
     {
         $fieldString = implode(',', array_map(function ($field) {
             return $field['column_name'] . ':' . $field['data_type'];
         }, $fields));
 
         Artisan::call('codegenerator:factory', [
-            'model' => $model_name,
+            'model' => $modelName,
             '--fields' => $fieldString,
             '--overwrite' => $overwrite
         ]);

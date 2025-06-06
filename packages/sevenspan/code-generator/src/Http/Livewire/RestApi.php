@@ -584,7 +584,7 @@ class RestApi extends Component
     // Generate model file
     private function generateModel($modelName, $fieldString, $relations, $selectedMethods, $softDelete, $factory, $selectedTraits, $overwrite)
     {
-        Artisan::call('codegenerator:model', [
+        Artisan::call('code-generator:model', [
             'model' => $modelName,
             '--fields' => $fieldString,
             '--relations' => $relations,
@@ -599,7 +599,7 @@ class RestApi extends Component
     //Generate migration file
     private function generateMigration($modelName, $fields, $softDelete, $overwrite)
     {
-        Artisan::call('codegenerator:migration', [
+        Artisan::call('code-generator:migration', [
             'model' => $modelName,
             '--fields' => $fields,
             '--softdelete' => $softDelete,
@@ -610,7 +610,7 @@ class RestApi extends Component
     // Generate controller file
     private function generateController($modelName, $selectedMethods, $service, $resource, $request, $overwrite, $adminCrud)
     {
-        Artisan::call('codegenerator:controller', [
+        Artisan::call('code-generator:controller', [
             'model' => $modelName,
             '--methods' => implode(',', $selectedMethods),
             '--service' => $service,
@@ -624,7 +624,7 @@ class RestApi extends Component
     // Generate policy file
     private function generatePolicy($modelName, $overwrite)
     {
-        Artisan::call('codegenerator:policy', [
+        Artisan::call('code-generator:policy', [
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
@@ -633,7 +633,7 @@ class RestApi extends Component
     // Generate observer file
     private function generateObserver($modelName, $overwrite)
     {
-        Artisan::call('codegenerator:observer', [
+        Artisan::call('code-generator:observer', [
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
@@ -642,7 +642,7 @@ class RestApi extends Component
     // Generate service file
     private function generateService($modelName, $overwrite)
     {
-        Artisan::call('codegenerator:service', [
+        Artisan::call('code-generator:service', [
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
@@ -653,7 +653,7 @@ class RestApi extends Component
     {
         $notificationData = !empty($this->notificationData) ? $this->notificationData[0] : [];
 
-        Artisan::call('codegenerator:notification', [
+        Artisan::call('code-generator:notification', [
             'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
             '--model' => $modelName,
             '--data' => $notificationData['data'] ?? '',
@@ -666,7 +666,7 @@ class RestApi extends Component
     // Generate resource file
     private function generateResource($modelName, $overwrite)
     {
-        Artisan::call('codegenerator:resource', [
+        Artisan::call('code-generator:resource', [
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
@@ -679,7 +679,7 @@ class RestApi extends Component
             return $field['column_name'] . ':' . $field['column_validation'];
         }, $fields));
 
-        Artisan::call('codegenerator:request', [
+        Artisan::call('code-generator:request', [
             'model' => $modelName,
             '--rules' => $ruleString,
             '--overwrite' => $overwrite
@@ -693,7 +693,7 @@ class RestApi extends Component
             return $field['column_name'] . ':' . $field['data_type'];
         }, $fields));
 
-        Artisan::call('codegenerator:factory', [
+        Artisan::call('code-generator:factory', [
             'model' => $modelName,
             '--fields' => $fieldString,
             '--overwrite' => $overwrite
@@ -704,7 +704,7 @@ class RestApi extends Component
     private  function copyTraits(array $selectedTraits): void
     {
         $source = __DIR__ . '/../TraitsLibrary/Traits';
-        $destination = app_path(config('code_generator.trait_path', 'Traits'));
+        $destination = app_path(config('code-generator.trait_path', 'Traits'));
 
         if (!File::exists($source)) {
             return;

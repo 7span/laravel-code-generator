@@ -20,8 +20,8 @@ class CodeGeneratorServiceProvider extends ServiceProvider
     {
         // Merge package config with app config
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/code_generator.php',
-            'code_generator'
+            __DIR__ . '/../config/code-generator.php',
+            'code-generator'
         );
 
         // Register package artisan commands
@@ -55,18 +55,18 @@ class CodeGeneratorServiceProvider extends ServiceProvider
 
         // Publish config file
         $this->publishes([
-            __DIR__ . '/../config/code_generator.php' => config_path('code_generator.php'),
-        ], 'config');
+            __DIR__ . '/../config/code-generator.php' => config_path('code-generator.php'),
+        ], 'code-generator-config');
 
         // Publish migration files
         $this->publishes([
             __DIR__ . '/Migrations' => database_path('migrations'),
-        ], 'codegenerator-migrations');
+        ], 'code-generator-migrations');
 
         // Publish stub files
         $this->publishes([
             __DIR__ . '/stubs' => database_path('stubs'),
-        ], 'stubs');
+        ], 'code-generator-stubs');
 
         // Load routes from package
         Route::middleware('web')

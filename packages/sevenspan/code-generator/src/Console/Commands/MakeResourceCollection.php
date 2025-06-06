@@ -12,7 +12,7 @@ use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 class MakeResourceCollection extends Command
 {
     use FileManager;
-    protected $signature = 'codegenerator:resource-collection {model : The name of the model for the resource collection}
+    protected $signature = 'code-generator:resource-collection {model : The name of the model for the resource collection}
                                                               {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a resource collection class for a specified model.';
 
@@ -26,7 +26,7 @@ class MakeResourceCollection extends Command
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource collection file
-        $resourceFilePath = app_path(config('code_generator.resource_path', 'http\Resources') . "/{$modelName}/Collection.php");
+        $resourceFilePath = app_path(config('code-generator.resource_path', 'http\Resources') . "/{$modelName}/Collection.php");
 
         $this->createDirectoryIfMissing(dirname($resourceFilePath));
         $content = $this->getReplacedContent($modelName);
@@ -56,9 +56,9 @@ class MakeResourceCollection extends Command
     protected function getStubVariables($modelName): array
     {
         return [
-            'namespace' => "App\\" . config('code_generator.resource_path', 'Resources') . "\\{$modelName}",
+            'namespace' => "App\\" . config('code-generator.resource_path', 'Resources') . "\\{$modelName}",
             'modelName' => $modelName,
-            'resourceNamespace' => config('code_generator.resource_path', 'Http\Resources'),
+            'resourceNamespace' => config('code-generator.resource_path', 'Http\Resources'),
         ];
     }
 

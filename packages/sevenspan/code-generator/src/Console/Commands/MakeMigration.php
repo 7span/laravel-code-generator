@@ -14,7 +14,7 @@ class MakeMigration extends Command
 
     private const INDENT = '    ';
 
-    protected $signature = 'codegenerator:migration {model : The name of the migration} 
+    protected $signature = 'code-generator:migration {model : The name of the migration} 
                                                     {--fields=* : Array of field definitions with options like column_name, data_type, isForeignKey, foreignModelName, referencedColumn, onDeleteAction, onUpdateAction} 
                                                     {--softdelete : Include soft delete} 
                                                     {--overwrite : Overwrite the file if it exists}';
@@ -33,7 +33,7 @@ class MakeMigration extends Command
 
         // Define the migration file name and path
         $migrationFileName = "{$timestamp}_create_{$tableName}_table.php";
-        $migrationFilePath = base_path("database/" . config('code_generator.migration_path', 'Migration') . "/{$migrationFileName}");
+        $migrationFilePath = base_path("database/" . config('code-generator.migration_path', 'Migration') . "/{$migrationFileName}");
 
         $this->createDirectoryIfMissing(dirname($migrationFilePath));
 

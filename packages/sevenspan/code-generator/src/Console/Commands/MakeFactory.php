@@ -11,7 +11,7 @@ use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 class MakeFactory extends Command
 {
     use FileManager;
-    protected $signature = 'codegenerator:factory {model : The name of the model for which the factory file will be generated.} 
+    protected $signature = 'code-generator:factory {model : The name of the model for which the factory file will be generated.} 
                                                   {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}
                                                   {--overwrite : is overwriting this file is selected}';
 
@@ -27,7 +27,7 @@ class MakeFactory extends Command
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the factory file
-        $factoryFilePath = base_path("database/" . config('code_generator.factory_path', 'Factories') . "/{$modelName}Factory.php");
+        $factoryFilePath = base_path("database/" . config('code-generator.factory_path', 'Factories') . "/{$modelName}Factory.php");
 
         $this->createDirectoryIfMissing(dirname($factoryFilePath));
 
@@ -129,8 +129,8 @@ class MakeFactory extends Command
     protected function getStubVariables(string $modelName, array $fields): array
     {
         return [
-            'factoryNamespace'       => 'Database\\' . config('code_generator.factory_path', 'Factories'),
-            'relatedModelNamespace'  => 'App\\' . config('code_generator.model_path', 'Models') . "\\" . $modelName,
+            'factoryNamespace'       => 'Database\\' . config('code-generator.factory_path', 'Factories'),
+            'relatedModelNamespace'  => 'App\\' . config('code-generator.model_path', 'Models') . "\\" . $modelName,
             'factory'                => $modelName . "Factory",
             'fields'                 => $this->generateFactoryFields($fields),
         ];

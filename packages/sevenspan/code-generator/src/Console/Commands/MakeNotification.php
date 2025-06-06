@@ -14,7 +14,7 @@ class MakeNotification extends Command
 
     const INDENT = '    ';
 
-    protected $signature = 'codegenerator:notification {className : Name of the notification class} 
+    protected $signature = 'code-generator:notification {className : Name of the notification class} 
                                                        {--model= : Related model name} 
                                                        {--data= : A comma-separated list of key-value pairs for notification data (e.g., key1:value1,key2:value2)} 
                                                        {--body= : The body content of the notification} 
@@ -33,7 +33,7 @@ class MakeNotification extends Command
         $notificationClass = Str::studly($this->argument('className'));
 
         // Define the path for the notification file
-        $notificationFilePath = app_path(config('code_generator.notification_path', 'Notification') . "/{$notificationClass}.php");
+        $notificationFilePath = app_path(config('code-generator.paths.notification', 'Notification') . "/{$notificationClass}.php");
 
         $this->createDirectoryIfMissing(dirname($notificationFilePath));
 
@@ -108,10 +108,10 @@ class MakeNotification extends Command
         $relatedModel = $this->option('model');
 
         return [
-            'namespace'              => 'App\\' . config('code_generator.notification_path', 'Notification'),
+            'namespace'              => 'App\\' . config('code-generator.paths.notification', 'Notification'),
             'class'                  => $notificationClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace'  => config('code_generator.model_path', 'Models') . '\\' . $relatedModel,
+            'relatedModelNamespace'  => config('code-generator.paths.model', 'Models') . '\\' . $relatedModel,
             'modelObject'            => '$' . (Str::camel($relatedModel)),
             'subject'                => $this->option('subject'),
             'body'                   => (string) $this->option('body'),

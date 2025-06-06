@@ -40,7 +40,7 @@
                 </tr>
 
                 <!-- Show If Soft Delete is enabled -->
-                @if($softDeleteFile)
+                @if($isSoftDeleteAdded)
                 <tr>
                     <td class="px-4 py-2 text-gray-600">deleted_by</td>
                     <td class="px-4 py-2 text-gray-600">string</td>
@@ -58,10 +58,10 @@
                     <td class="px-4 py-2">{{$field['column_name']}}</td>
                     <td class="px-4 py-2">{{$field['data_type']}}</td>
                     <td class="px-4 py-2">{{$field['column_validation']}}</td>
-                    <td class="px-4 py-2">{{ !empty($field['isForeignKey']) ? 'yes' : 'no' }}</td>
-                    <td class="px-4 py-2">{{ !empty($field['foreignModelName']) ? $field['foreignModelName'] : '-' }}
+                    <td class="px-4 py-2">{{ !empty($field['is_foreign_key']) ? 'yes' : 'no' }}</td>
+                    <td class="px-4 py-2">{{ !empty($field['foreign_model_name']) ? $field['foreign_model_name'] : '-' }}
                     </td>
-                    <td class="px-4 py-2">{{ !empty($field['referencedColumn']) ?$field['referencedColumn']: '-' }}
+                    <td class="px-4 py-2">{{ !empty($field['referenced_column']) ?$field['referenced_column']: '-' }}
                     </td>
 
                     <td class="px-4 py-2">

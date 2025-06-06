@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 // Define the route for the code generator
-// The route path is configurable via the 'route_path' option in the code_generator config file
+// The route path is configurable via the 'route_path' option in the code-generator config file
 Route::get(
-    config("code_generator.route_path"),
+    config("code-generator.route_path"),
     function () {
         return view('code-generator::livewire.index');
     }
@@ -13,7 +13,7 @@ Route::get(
 
 // Define the route for logs
 Route::get(
-    'codegenerator/logs',
+    'code-generator/logs',
     function () {
         return view('code-generator::livewire.index');
     }

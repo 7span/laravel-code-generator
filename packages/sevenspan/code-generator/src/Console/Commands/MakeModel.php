@@ -14,7 +14,7 @@ class MakeModel extends Command
 
     private const INDENT = '    ';
 
-    protected $signature = 'codegenerator:model {model : The name of the model} 
+    protected $signature = 'code-generator:model {model : The name of the model} 
                                                 {--fields= : Comma-separated fields (e.g., name,age)} 
                                                 {--relations=* : Model relationships with their foreign key and local key (e.g., Post:hasMany:user_id:id,User:belongsTo:post_id:id)} 
                                                 {--methods= : Comma-separated list of controller methods to generate api routes (e.g., index,show,store,update,destroy)}
@@ -33,7 +33,7 @@ class MakeModel extends Command
     public function handle(): void
     {
         $modelClass = Str::studly($this->argument('model'));
-        $modelFilePath = app_path(config('code_generator.model_path', 'Models') . "/{$modelClass}.php");
+        $modelFilePath = app_path(config('code-generator.paths.model', 'Models') . "/{$modelClass}.php");
 
         $this->createDirectoryIfMissing(dirname($modelFilePath));
         $content = $this->getReplacedContent($modelClass);
@@ -81,7 +81,7 @@ class MakeModel extends Command
         $relatedModelImports = $this->getRelatedModels();
 
         return [
-            'namespace' => 'App\\' . config('code_generator.model_path', 'Models'),
+            'namespace' => 'App\\' . config('code-generator.paths.model', 'Models'),
             'class' => $modelClass,
             'traitNamespaces' => $traitInfo['uses'],
             'traits' => $traitInfo['apply'],
@@ -146,7 +146,7 @@ class MakeModel extends Command
         if ($customTraits) {
             foreach (explode(',', $customTraits) as $trait) {
                 $trait = trim($trait);
-                $traitUseStatements[] = 'use App\\' . config('code_generator.trait_path', 'Traits') . "\\$trait;";
+                $traitUseStatements[] = 'use App\\' . config('code-generator.paths.trait', 'Traits') . "\\$trait;";
                 $traitNames[] = $trait;
             }
         }

@@ -14,7 +14,7 @@ class MakeRequest extends Command
 
     private const INDENT = '    ';
 
-    protected $signature = 'codegenerator:request  {model : The related model for the observer.}
+    protected $signature = 'code-generator:request  {model : The related model for the observer.}
                                                    {--rules= :comma seperated list of rules (e.g, Name:required,email:nullable )} 
                                                    {--overwrite : is overwriting this file is selected}';
 
@@ -30,7 +30,7 @@ class MakeRequest extends Command
         $relatedModelName = Str::studly($this->argument('model'));
 
         // Define the path for the request file
-        $requestFilePath = app_path(config('code_generator.request_path', 'Requests') . "/{$relatedModelName}" . "/Request.php");
+        $requestFilePath = app_path(config('code-generator.paths.request', 'Requests') . "/{$relatedModelName}" . "/Request.php");
         $this->createDirectoryIfMissing(dirname($requestFilePath));
 
         $content = $this->getReplacedContent($relatedModelName);
@@ -81,9 +81,9 @@ class MakeRequest extends Command
      */
     protected function getStubVariables($relatedModelName): array
     {
-        $relatedModel = $this->argument('model');
+        $relatedModelName = $this->argument('model');
         return [
-            'namespace'        => 'App\\' . config('code_generator.request_path', 'Http\Requests') . '\\' . $relatedModel,
+            'namespace'        => 'App\\' . config('code-generator.paths.request', 'Http\Requests') . '\\' . $relatedModelName,
             'class'            => 'Request',
             'validationFields' => $this->getValidationFields(),
         ];

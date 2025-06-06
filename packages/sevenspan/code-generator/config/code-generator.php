@@ -18,25 +18,27 @@ return [
     | Paths for Generated Files
     |--------------------------------------------------------------------------
     |
-    | These paths specify where generated files will be saved within the `app` directory,
+    | These paths specify where generated files will be saved within the app directory,
     | and they also determine the corresponding namespaces for those files.
-    | For example, if model_path is set to 'Models', generated models will be placed in
-    | app/Models and will have the namespace App\Models.
+    | For example, if the model path is 'Models\Abc', models will be generated in app/Models/Abc
+    | with the namespace App\Models\Abc.
     |
     */
 
-    "model_path" => "Models",
-    "migration_path" => "Migrations",
-    "factory_path" => "Factories",
-    "notification_path" => "Notifications",
-    "observer_path" => "Observers",
-    "policy_path" => "Policies",
-    "service_path" => "Services",
-    "controller_path" => "Http\Controllers",
-    'admin_controller_path' => 'Http\Controllers\Admin',
-    "request_path" => "Http\Requests",
-    "resource_path" => "Http\Resources",
-    "trait_path" => "Traits",
+    'paths' => [
+        'model' => 'Models',
+        'migration' => 'Migrations',
+        'factory' => 'Factories',
+        'notification' => 'Notifications',
+        'observer' => 'Observers',
+        'policy' => 'Policies',
+        'service' => 'Services',
+        'controller' => 'Http\Controllers',
+        'admin_controller' => 'Http\Controllers\Admin',
+        'request' => 'Http\Requests',
+        'resource' => 'Http\Resources',
+        'trait' => 'Traits',
+    ],
 
     /*
     |--------------------------------------------------------------------------

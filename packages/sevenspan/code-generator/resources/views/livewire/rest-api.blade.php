@@ -1,24 +1,12 @@
-<div class="w-full p-6" x-data="{ 
-    showToast: false,
-    toastMessage: '',
-    toastType: 'success',
-    init() {
-        Livewire.on('show-toast', (data) => {
-            this.toastMessage = data.message;
-            this.toastType = data.type;
-            this.showToast = false; // Reset first
-            setTimeout(() => {
-                this.showToast = true;
-                setTimeout(() => this.showToast = false, 1000);
-            }, 50);
-        });
-    }
-}">
+<div class="w-full p-6">
 
     <!-- Loading Overlay  -->
-    <div wire:loading wire:target="save" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-50" x-transition:leave-start="opacity-100"
+    <div  wire:loading wire:target="save"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-50"
+        x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
         <div
@@ -32,7 +20,8 @@
     <!-- Session Messages -->
     @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
     @if (session()->has($type))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+    <div  wire:key="{{ now()->timestamp }}-{{ $type }}" 
+        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2"
         x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
@@ -65,13 +54,13 @@
         <div>
             <h2 class="grey-900 text-xl font-semibold pb-2">Model Name</h2>
             <input type="text" class="border border-gray-300 rounded-lg px-4 py-2 w-full" placeholder="Enter Name"
-                wire:model.live="modelName" />
+                wire:model.live="model_name" />
             <span class="text-s text-gray-600 italic">
                 Note: Enter your model name like, Project OR Project Category.
             </span>
-            @error('modelName')
-            <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
-            @enderror
+                @error('model_name')
+                    <span class="block mt-1 text-sm text-red-600">{{ $message }}</span>
+                @enderror      
         </div>
     </div>
 
@@ -81,7 +70,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::field-table :$fieldsData :$softDeleteFile />
+        <x-code-generator::field-table :$fieldsData  :$is_soft_delete_added />
     </div>
 
     <!-- eloqunet relations -->
@@ -98,9 +87,10 @@
         <x-code-generator::add-files-methods :$errorMessage />
     </div>
 
-    <!-- Generate files button -->
-    <div>
-        <x-code-generator::button title="Generate Files" wire:click="save" />
+    <!-- Generate files and Reset button -->
+    <div class="flex justify-start space-x-4 mt-4">
+        <x-code-generator::button title="Generate Files" wire:click="save"  />
+        <x-code-generator::button title="Reset" wire:click="resetForm()"  />
     </div>
 
     <!-- Modals -->

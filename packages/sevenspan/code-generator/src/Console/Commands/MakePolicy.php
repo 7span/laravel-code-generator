@@ -27,7 +27,7 @@ class MakePolicy extends Command
         $policyClass = Str::studly($this->argument('model'));
 
         // Define the path for the policy file
-        $policyFilePath = app_path(config('code-generator.policy_path', 'Policies') . "/{$policyClass}Policy.php");
+        $policyFilePath = app_path(config('code-generator.paths.policy', 'Policies') . "/{$policyClass}Policy.php");
         $this->createDirectoryIfMissing(dirname($policyFilePath));
 
         $content = $this->getReplacedContent($policyClass);
@@ -59,10 +59,10 @@ class MakePolicy extends Command
         $relatedModel = $this->argument('model');
 
         return [
-            'namespace'             => 'App\\' . config('code-generator.policy_path', 'Policies'),
+            'namespace'             => 'App\\' . config('code-generator.paths.policy', 'Policies'),
             'class'                 => $policyClass,
             'model'                 => Str::studly($relatedModel),
-            'relatedModelNamespace' => config('code-generator.model_path', 'Models') . "\\" . Str::studly($relatedModel),
+            'relatedModelNamespace' => config('code-generator.paths.model', 'Models') . "\\" . Str::studly($relatedModel),
             'modelInstance'         => Str::camel($relatedModel),
         ];
     }

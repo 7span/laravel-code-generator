@@ -33,7 +33,7 @@ class MakeNotification extends Command
         $notificationClass = Str::studly($this->argument('className'));
 
         // Define the path for the notification file
-        $notificationFilePath = app_path(config('code-generator.notification_path', 'Notification') . "/{$notificationClass}.php");
+        $notificationFilePath = app_path(config('code-generator.paths.notification', 'Notification') . "/{$notificationClass}.php");
 
         $this->createDirectoryIfMissing(dirname($notificationFilePath));
 
@@ -108,10 +108,10 @@ class MakeNotification extends Command
         $relatedModel = $this->option('model');
 
         return [
-            'namespace'              => 'App\\' . config('code-generator.notification_path', 'Notification'),
+            'namespace'              => 'App\\' . config('code-generator.paths.notification', 'Notification'),
             'class'                  => $notificationClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace'  => config('code-generator.model_path', 'Models') . '\\' . $relatedModel,
+            'relatedModelNamespace'  => config('code-generator.paths.model', 'Models') . '\\' . $relatedModel,
             'modelObject'            => '$' . (Str::camel($relatedModel)),
             'subject'                => $this->option('subject'),
             'body'                   => (string) $this->option('body'),

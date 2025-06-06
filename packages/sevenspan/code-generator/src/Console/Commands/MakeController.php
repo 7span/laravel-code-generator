@@ -49,8 +49,8 @@ class MakeController extends Command
         $controllerClassName = Str::studly($modelName) . 'Controller';
 
         // Determine controller path (normal or admin)
-        $pathKey = $isAdminCrudIncluded ? 'admin_controller_path' : 'controller_path';
-        $controllerPath = config("code-generator.{$pathKey}", $isAdminCrudIncluded ? 'Http/Controllers/Admin' : 'Http/Controllers');
+        $pathKey = $isAdminCrudIncluded ? 'admin_controller' : 'controller';
+        $controllerPath = config("code-generator.paths.{$pathKey}", $isAdminCrudIncluded ? 'Http/Controllers/Admin' : 'Http/Controllers');
 
         $fullPath = app_path("{$controllerPath}/{$controllerClassName}.php");
         $this->createDirectoryIfMissing(dirname($fullPath));
@@ -89,10 +89,10 @@ class MakeController extends Command
         $modelName = $this->argument('model') ? ucfirst($this->argument('model')) : '';
 
         return [
-            'namespace' => $isAdminCrudIncluded ? config('code-generator.admin_controller_path', 'Http\Controllers\Admin') : config('code-generator.controller_path', 'Http\Controllers'),
+            'namespace' => $isAdminCrudIncluded ? config('code-generator.paths.admin_controller', 'Http\Controllers\Admin') : config('code-generator.paths.controller', 'Http\Controllers'),
             'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
             'className' => $controllerClassName,
-            'relatedModelNamespace' => 'use App\\' . config('code-generator.model_path', 'Models') . '\\' . $modelName,
+            'relatedModelNamespace' => 'use App\\' . config('code-generator.paths.model', 'Models') . '\\' . $modelName,
             'modelName' => $modelName,  // used in generating methods
         ];
     }
@@ -112,22 +112,22 @@ class MakeController extends Command
         // Add service file use statement
         $mainContent = str_replace(
             '{{ service }}',
-            $includeServiceFile ? 'use App\\' . config('code-generator.service_path', 'Services') . '\\' . $className . 'Service;' : '',
+            $includeServiceFile ? 'use App\\' . config('code-generator.paths.service', 'Services') . '\\' . $className . 'Service;' : '',
             $mainContent
         );
 
         // Add request file use statement
         $mainContent = str_replace(
             '{{ request }}',
-            $includeRequestFile ? 'use App\\' . config('code-generator.request_path', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;" : '',
+            $includeRequestFile ? 'use App\\' . config('code-generator.paths.request', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;" : '',
             $mainContent
         );
 
         // Add resource file use statements
         $includeResourceFile ? array_push(
             $additionalUseStatements,
-            'use App\\' . config('code-generator.resource_path', 'Http\Resources') . "\\{$className}\\Resource;",
-            'use App\\' . config('code-generator.resource_path', 'Http\Resources') . "\\{$className}\\Collection;"
+            'use App\\' . config('code-generator.paths.resource', 'Http\Resources') . "\\{$className}\\Resource;",
+            'use App\\' . config('code-generator.paths.resource', 'Http\Resources') . "\\{$className}\\Collection;"
         ) : null;
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
@@ -281,7 +281,7 @@ class MakeController extends Command
         $apiPath = base_path($isAdminCrudIncluded ? 'routes/api-admin.php' : 'routes/api.php');
         $stubPath = __DIR__ . '/../../stubs/' . ($isAdminCrudIncluded ? 'api.admin.route.stub' : 'api.routes.stub');
         $controllerPath = config(
-            'code-generator.' . ($isAdminCrudIncluded ? 'admin_controller_path' : 'controller_path'),
+            'code-generator.' . ($isAdminCrudIncluded ? 'admin_controller' : 'controller'),
             $isAdminCrudIncluded ? 'Http\Controllers\Admin' : 'Http\Controllers'
         );
 

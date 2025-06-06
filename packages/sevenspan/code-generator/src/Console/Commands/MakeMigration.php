@@ -33,7 +33,7 @@ class MakeMigration extends Command
 
         // Define the migration file name and path
         $migrationFileName = "{$timestamp}_create_{$tableName}_table.php";
-        $migrationFilePath = base_path("database/" . config('code-generator.migration_path', 'Migration') . "/{$migrationFileName}");
+        $migrationFilePath = base_path("database/" . config('code-generator.paths.migration', 'Migration') . "/{$migrationFileName}");
 
         $this->createDirectoryIfMissing(dirname($migrationFilePath));
 

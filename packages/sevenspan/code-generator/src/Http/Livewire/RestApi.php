@@ -704,7 +704,7 @@ class RestApi extends Component
     private  function copyTraits(array $selectedTraits): void
     {
         $source = __DIR__ . '/../TraitsLibrary/Traits';
-        $destination = app_path(config('code-generator.trait_path', 'Traits'));
+        $destination = app_path(config('code-generator.paths.trait', 'Traits'));
 
         if (!File::exists($source)) {
             return;
@@ -742,7 +742,7 @@ class RestApi extends Component
     public function updatedRelatedModel($value)
     {
         if ($value) {
-            $this->columnNames = Helper::getColumnNames('App\\' . config('code-generator.model_path', 'Models') . '\\' . $value);
+            $this->columnNames = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
         }
     }
 
@@ -750,7 +750,7 @@ class RestApi extends Component
     public function updatedIntermediateModel($value)
     {
         if ($value) {
-            $this->intermediateFields = Helper::getColumnNames('App\\' . config('code-generator.model_path', 'Models') . '\\' . $value);
+            $this->intermediateFields = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
         }
     }
 

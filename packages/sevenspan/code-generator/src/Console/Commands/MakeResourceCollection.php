@@ -26,7 +26,7 @@ class MakeResourceCollection extends Command
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource collection file
-        $resourceFilePath = app_path(config('code-generator.resource_path', 'http\Resources') . "/{$modelName}/Collection.php");
+        $resourceFilePath = app_path(config('code-generator.paths.resource', 'http\Resources') . "/{$modelName}/Collection.php");
 
         $this->createDirectoryIfMissing(dirname($resourceFilePath));
         $content = $this->getReplacedContent($modelName);
@@ -56,9 +56,9 @@ class MakeResourceCollection extends Command
     protected function getStubVariables($modelName): array
     {
         return [
-            'namespace' => "App\\" . config('code-generator.resource_path', 'Resources') . "\\{$modelName}",
+            'namespace' => "App\\" . config('code-generator.paths.resource', 'Resources') . "\\{$modelName}",
             'modelName' => $modelName,
-            'resourceNamespace' => config('code-generator.resource_path', 'Http\Resources'),
+            'resourceNamespace' => config('code-generator.paths.resource', 'Http\Resources'),
         ];
     }
 

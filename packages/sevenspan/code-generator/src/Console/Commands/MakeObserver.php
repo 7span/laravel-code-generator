@@ -28,7 +28,7 @@ class MakeObserver extends Command
         $observerClass = Str::studly($this->argument('model'));
 
         // Define the path for the observer file
-        $observerFilePath = app_path(config('code-generator.observer_path', 'Notification') . "/{$observerClass}.php");
+        $observerFilePath = app_path(config('code-generator.paths.observer', 'Notification') . "/{$observerClass}.php");
 
         $this->createDirectoryIfMissing(dirname($observerFilePath));
 
@@ -60,10 +60,10 @@ class MakeObserver extends Command
     {
         $relatedModel = $this->argument('model');
         return [
-            'namespace'              => 'App\\' . config('code-generator.observer_path', 'Observers'),
+            'namespace'              => 'App\\' . config('code-generator.paths.observer', 'Observers'),
             'class'                  => $observerClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace'  => config('code-generator.model_path', 'Models') . '\\' . Str::studly($relatedModel),
+            'relatedModelNamespace'  => config('code-generator.paths.model', 'Models') . '\\' . Str::studly($relatedModel),
             'modelInstance'          => Str::camel($relatedModel),
         ];
     }

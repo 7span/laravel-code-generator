@@ -34,7 +34,7 @@ class Helper
      */
     public static function getTableNamesFromMigrations()
     {
-        $migrationPath = database_path(config('code-generator.migration_path', 'Migrations'));
+        $migrationPath = database_path(config('code-generator.paths.migration', 'Migrations'));
         $files = File::exists($migrationPath) ? File::files($migrationPath) : [];
 
         $tableNames = collect($files)->map(function ($file) {

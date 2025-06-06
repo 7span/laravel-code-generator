@@ -1,6 +1,0 @@
-    public function collection(array $inputs)
-    {
-        $$PLURAL_VARIABLE$ = $this->$SINGULAR_VARIABLE$Obj->getQB();
-
-        return $this->paginationAttribute($inputs, $$PLURAL_VARIABLE$);
-    }

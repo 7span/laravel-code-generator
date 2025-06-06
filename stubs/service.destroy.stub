@@ -1,6 +1,0 @@
-    public function destroy(int $id)
-    {
-        $this->resource($id)->delete();
-        $data['message'] = __('entity.entityDeleted', ['entity' => '$CLASS_NAME$']);
-        return $data;
-    }

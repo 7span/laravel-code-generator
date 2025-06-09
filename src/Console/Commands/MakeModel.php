@@ -168,10 +168,22 @@ class MakeModel extends Command
         }
 
         $methods = [];
+        $pluralRelations = [
+            'hasMany',
+            'belongsToMany',
+            'hasManyThrough',
+            'morphMany',
+            'morphToMany',
+        ];
 
         foreach ($relations as $relation) {
-            $methodName = Str::camel(Str::plural($relation['related_model']));
             $relationType = $relation['relation_type'];
+
+            // Use pluaral form of methodName for plural relations (e.g., hasMany, belongsToMany)
+            // and singular for singular relations (e.g., hasOne, belongsTo)
+            $methodName = in_array($relationType, $pluralRelations) ?
+                Str::camel(Str::plural($relation['related_model'])) :
+                Str::camel($relation['related_model']);
 
             $method = self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
 

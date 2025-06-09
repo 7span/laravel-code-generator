@@ -13,7 +13,7 @@ class {{ class }} extends Model
 
     protected $table = '';
 
-    public $fillable = [
+    protected $fillable = [
         {{ fillableFields }}
         'created_by',
         'updated_by',

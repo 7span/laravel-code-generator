@@ -54,27 +54,36 @@
                 <p class="text-xs italic text-gray-500 mb-2">Note: This foreign key data is required for generating the
                     base
                     model's migration file. </p>
+
                 <!-- Related Table Name -->
                 <div class="mb-5">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Related Table Name</label>
 
-                    @if (!empty($this->tableNames))
-                    <select wire:model.live="foreign_model_name"
-                        class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
-                        <option value="">-- Select Table --</option>
-                        @foreach ($this->tableNames as $table)
-                        <option value="{{ $table }}">{{ $table }}</option>
-                        @endforeach
-                    </select>
-                    @else
-                    <input type="text" placeholder="users" wire:model.live="foreign_model_name"
-                        class="w-full border border-gray-300 rounded-md p-2 placeholder:text-gray-400 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
-                    <p class="text-xs italic text-gray-500 mt-1">Note: use plural form, e.g., <code>users</code></p>
-                    @endif
+                    <div x-data="{ open: false }" class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Related Table Name</label>
 
-                    @error('foreign_model_name') <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
-                    @enderror
+                        <input wire:model.live="foreign_model_name" @focus="open = true" @click.away="open = false"
+                            type="text" placeholder="Select or type related table"
+                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
+
+                        @if (!empty($this->tableNames))
+                        <ul x-show="open"
+                            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto">
+                            @foreach ($this->tableNames as $table)
+                            <li @click="$wire.set('foreign_model_name', '{{ $table }}'); open = false"
+                                class="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                                {{ $table }}
+                            </li>
+                            @endforeach
+                        </ul>
+                        @endif
+
+                        @error('foreign_model_name')
+                        <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                 </div>
+
 
                 <!-- Referenced Column -->
                 <div class="mb-5">

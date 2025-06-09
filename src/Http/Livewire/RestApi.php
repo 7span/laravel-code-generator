@@ -89,7 +89,11 @@ class RestApi extends Component
 
     // Validation rules
     protected $rules = [
-        'model_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
+        'model_name' => [
+            'required',
+            'regex:/^[A-Z][A-Za-z]+$/',
+            'not_in:Default,Model,Controller,Request,Route,Middleware,View,New,Return,Class,Function',
+        ],
         'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'relation_type' => 'required',
         'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
@@ -117,6 +121,7 @@ class RestApi extends Component
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'model_name.max' => 'The Model Name must not exceed 255 characters.',
         'related_model.max' => 'The Model Name must not exceed 255 characters.',
+        'model_name.not_in' => 'The Model Name cannot be a reserved word.',
     ];
 
     // Initialize component
@@ -218,9 +223,9 @@ class RestApi extends Component
     // Reset form fields and error messages
     public function resetForm()
     {
-       $this->reset(); 
-       $this->resetErrorBag();
-       $this->sessionMessage = '';
+        $this->reset();
+        $this->resetErrorBag();
+        $this->sessionMessage = '';
     }
 
     // Resets modal form fields
@@ -442,7 +447,7 @@ class RestApi extends Component
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
-        $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column','on_delete_action', 'on_update_action']);
+        $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column', 'on_delete_action', 'on_update_action']);
     }
 
     // Save notification data
@@ -537,7 +542,7 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
-        
+
         // Prepare selected methods
         $selectedMethods = array_filter([
             $this->is_index_method_added ? 'index' : null,
@@ -555,7 +560,7 @@ class RestApi extends Component
             $this->generateModel($this->model_name, $fieldString, $this->relationData, $selectedMethods,  $this->is_soft_delete_added, $this->is_factory_file_added, $selectedTraits, $this->is_overwrite_files);
         }
 
-        if ($this->is_migration_file_added) {   
+        if ($this->is_migration_file_added) {
             $this->generateMigration($this->model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
 
@@ -720,7 +725,7 @@ class RestApi extends Component
 
     private  function copyTraits(array $selectedTraits): void
     {
-        $source = __DIR__ . '/../TraitsLibrary/Traits';
+        $source = __DIR__ . '/../../TraitsLibrary/Traits';
         $destination = app_path(config('code-generator.paths.trait', 'Traits'));
 
         if (!File::exists($source)) {
@@ -751,7 +756,9 @@ class RestApi extends Component
     public function updatedForeignModelName($value)
     {
         if ($value) {
+            $this->fieldNames = [];
             $this->fieldNames = Helper::getColumnNames($value);
+            $this->reset(['referenced_column']);
         }
     }
 
@@ -759,7 +766,9 @@ class RestApi extends Component
     public function updatedRelatedModel($value)
     {
         if ($value) {
+            $this->columnNames = [];
             $this->columnNames = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
+            $this->reset('foreign_key');
         }
     }
 
@@ -767,7 +776,9 @@ class RestApi extends Component
     public function updatedIntermediateModel($value)
     {
         if ($value) {
+            $this->intermediateFields = []; // Always reset first
             $this->intermediateFields = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
+            $this->reset('intermediate_foreign_key', 'intermediate_local_key'); // Reset intermediate keys
         }
     }
 

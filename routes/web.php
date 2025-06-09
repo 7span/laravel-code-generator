@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 // Define the route for the code generator
 // The route path is configurable via the 'route_path' option in the code-generator config file
 Route::get(
-    config("code-generator.route_path"),
+    config("code-generator.route_path", 'code-generator'),
     function () {
         return view('code-generator::livewire.index');
     }

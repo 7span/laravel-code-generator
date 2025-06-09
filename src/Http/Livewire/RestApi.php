@@ -218,9 +218,9 @@ class RestApi extends Component
     // Reset form fields and error messages
     public function resetForm()
     {
-       $this->reset(); 
-       $this->resetErrorBag();
-       $this->sessionMessage = '';
+        $this->reset();
+        $this->resetErrorBag();
+        $this->sessionMessage = '';
     }
 
     // Resets modal form fields
@@ -425,7 +425,7 @@ class RestApi extends Component
         $this->isAddFieldModalOpen = false;
         $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
-        $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column','on_delete_action', 'on_update_action']);
+        $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column', 'on_delete_action', 'on_update_action']);
     }
 
     // Save notification data
@@ -520,7 +520,7 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
-        
+
         // Prepare selected methods
         $selectedMethods = array_filter([
             $this->is_index_method_added ? 'index' : null,
@@ -538,7 +538,7 @@ class RestApi extends Component
             $this->generateModel($this->model_name, $fieldString, $this->relationData, $selectedMethods,  $this->is_soft_delete_added, $this->is_factory_file_added, $selectedTraits, $this->is_overwrite_files);
         }
 
-        if ($this->is_migration_file_added) {   
+        if ($this->is_migration_file_added) {
             $this->generateMigration($this->model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
 
@@ -703,7 +703,7 @@ class RestApi extends Component
 
     private  function copyTraits(array $selectedTraits): void
     {
-        $source = __DIR__ . '/../TraitsLibrary/Traits';
+        $source = __DIR__ . '/../../TraitsLibrary/Traits';
         $destination = app_path(config('code-generator.paths.trait', 'Traits'));
 
         if (!File::exists($source)) {

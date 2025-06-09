@@ -374,12 +374,29 @@ class RestApi extends Component
         }
         return false;
     }
+
+    // Check if column name is a default column
+    public function isDefaultColumn($columnName): bool
+    {
+        $defaultColumns = ['id', 'created_at', 'updated_at','created_by', 'updated_by'];
+        if ($this->is_soft_delete_added) {
+        $defaultColumns = array_merge($defaultColumns, ['deleted_by', 'deleted_at']);
+    }
+        return in_array($columnName, $defaultColumns);
+    }
+
     // Save Fields Data
     public function saveField(): void
     {
         // Check for duplicate column name, excluding the current edited field by ID
         if ($this->isDuplicateColumn()) {
             $this->addError('column_name', 'You have already taken this column');
+            return;
+        }
+
+        // Check if column name is a default column
+        if($this->isDefaultColumn($this->column_name)) {
+            $this->addError('column_name', 'Column name already exists.');
             return;
         }
 

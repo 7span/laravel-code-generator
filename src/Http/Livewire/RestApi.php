@@ -492,11 +492,6 @@ class RestApi extends Component
             return false;
         }
 
-        // if model exists and overwrite checked no need to add fields
-        if(File::exists($modelPath) && $this->is_overwrite_files) {
-            return true;
-        }
-
         // Check fields and methods validation
         if (!$this->validateFieldsAndMethods()) {
             session()->flash('error', $this->errorMessage);

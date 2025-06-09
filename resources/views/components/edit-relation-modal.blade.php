@@ -27,42 +27,51 @@
 
             <div class="space-y-3">
                 <div class="flex gap-2">
-                    <div class="w-1/2">
+                    {{-- Related Model --}}
+                    <div class="w-1/2 relative" x-data="{ open: false }">
+                        <input wire:model.live="related_model" @focus="open = true" @click.away="open = false"
+                            type="text" placeholder="Select or type related model"
+                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
 
-                        <!-- Related Model Name -->
                         @if (!empty($this->modelNames))
-                        <select wire:model.live="related_model"
-                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
-                            <option value="">-- Related Model --</option>
-                            @foreach ($this->modelNames as $table)
-                            <option value="{{ $table }}">{{ $table }}</option>
+                        <ul x-show="open"
+                            class="absolute min-w-full z-20 left-0 mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto"
+                            style="max-height: 160px;">
+                            @foreach ($this->modelNames as $model)
+                            <li @click="$wire.set('related_model', '{{ $model }}'); open = false"
+                                class="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                                {{ $model }}
+                            </li>
                             @endforeach
-                        </select>
-                        @else
-                        <input type="text" placeholder="Related Model" wire:model.live="related_model"
-                            class="w-full border border-gray-300 rounded-md p-2 placeholder:text-gray-400 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
+                        </ul>
                         @endif
-                        @error('related_model') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+
+                        @error('related_model')
+                        <span class="text-red-600 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <div class="w-1/2">
-                        <!-- Intermediate Model Name -->
-                        @if (!empty($this->modelNames))
-                        <select wire:model.live="intermediate_model"
-                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500"
-                            :disabled="!['hasOneThrough', 'hasManyThrough'].includes(relationType)"
-                            :class="{ 'bg-gray-100 text-gray-400': !['hasOneThrough', 'hasManyThrough'].includes(relationType) }">
-                            <option value=""> -- Intermediate Model --</option>
-                            @foreach ($this->modelNames as $table)
-                            <option value="{{ $table }}">{{ $table }}</option>
-                            @endforeach
-                        </select>
-                        @else
-                        <input type="text" wire:model.live="intermediate_model" placeholder="Intermediate Model"
-                            class="w-full p-2 border border-gray-300 rounded-md placeholder:text-base"
+                    {{-- Intermediate Model --}}
+                    <div class="w-1/2 relative" x-data="{ open: false }">
+                        <input wire:model.live="intermediate_model" @focus="open = true" @click.away="open = false"
+                            type="text" placeholder="Select or type intermediate model"
+                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500"
                             :disabled="!['hasOneThrough', 'hasManyThrough'].includes(relationType)"
                             :class="{ 'bg-gray-100 text-gray-400': !['hasOneThrough', 'hasManyThrough'].includes(relationType) }" />
+
+                        @if (!empty($this->modelNames))
+                        <ul x-show="open"
+                            class="absolute min-w-full z-20 left-0 mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto"
+                            style="max-height: 160px;">
+                            @foreach ($this->modelNames as $model)
+                            <li @click="$wire.set('intermediate_model', '{{ $model }}'); open = false"
+                                class="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                                {{ $model }}
+                            </li>
+                            @endforeach
+                        </ul>
                         @endif
+
                         @error('intermediate_model')
                         <span class="text-red-600 text-sm">{{ $message }}</span>
                         @enderror
@@ -107,7 +116,7 @@
                         <select wire:model.live="intermediate_foreign_key"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
                             <option value="">-- Intermediate Foreign Key --</option>
-                            @foreach ($this-> intermediateFields as $field)
+                            @foreach ($this->intermediateFields as $field)
                             <option value="{{ $field }}">{{ $field }}</option>
                             @endforeach
                         </select>
@@ -127,7 +136,7 @@
                         <select wire:model.live="intermediate_local_key"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:ring focus:ring-indigo-100 focus:border-indigo-500">
                             <option value=""> -- Intermediate Local Key --</option>
-                            @foreach ($this-> intermediateFields as $field)
+                            @foreach ($this->intermediateFields as $field)
                             <option value="{{ $field }}">{{ $field }}</option>
                             @endforeach
                         </select>

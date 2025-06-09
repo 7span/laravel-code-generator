@@ -15,7 +15,7 @@ class MakeMigration extends Command
     private const INDENT = '    ';
 
     protected $signature = 'code-generator:migration {model : The name of the migration} 
-                                                    {--fields=* : Array of field definitions with options like column_name, data_type, isForeignKey, foreignModelName, referencedColumn, onDeleteAction, onUpdateAction} 
+                                                    {--fields=* : Array of field definitions with options like column_name, data_type, is_foreign_key, foreign_model_name, referenced_column, on_delete_action, on_update_action} 
                                                     {--softdelete : Include soft delete} 
                                                     {--overwrite : Overwrite the file if it exists}';
 
@@ -80,6 +80,8 @@ class MakeMigration extends Command
     protected function parseFieldsAndForeignKeys(): string
     {
         $fieldsOption = $this->option('fields');
+
+
         if (empty($fieldsOption)) {
             return '';
         }
@@ -89,28 +91,27 @@ class MakeMigration extends Command
         foreach ($fieldsOption as $field) {
             $name = $field['column_name'] ?? null;
             $type = $field['data_type'] ?? 'string';
-            $isForeignKey = $field['isForeignKey'] ?? false;
-
+            $isForeignKey = $field['is_foreign_key'] ?? false;
             if (!$name) {
                 continue;
             }
 
-            if ($isForeignKey && isset($field['foreignModelName'])) {
-                $relatedModel = $field['foreignModelName'];
-                $referenceKey = $field['referencedColumn'] ?? 'id';
-                $relatedTable = Str::snake(Str::plural($relatedModel));
+            if ($isForeignKey && isset($field['foreign_model_name'])) {
 
-                $foreignLine = self::INDENT . self::INDENT . self::INDENT . "\$table->foreignId('{$name}')->constrained('{$relatedTable}')->references('{$referenceKey}')";
+                $relatedModel = $field['foreign_model_name'];
+                $referenceKey = $field['referenced_column'] ?? 'id';
+                $relatedTable = Str::snake(Str::plural($relatedModel));
+                $foreignLine = self::INDENT . self::INDENT . self::INDENT . "\$table->foreignId('{$name}')->references('{$referenceKey}')->on('{$relatedTable}')";
 
                 // Add ON DELETE action if provided
-                if (!empty($field['onDeleteAction'])) {
-                    $action = strtolower($field['onDeleteAction']);
+                if (!empty($field['on_delete_action'])) {
+                    $action = strtolower($field['on_delete_action']);
                     $foreignLine .= "->onDelete('{$action}')";
                 }
 
                 // Add ON UPDATE action if provided
-                if (!empty($field['onUpdateAction'])) {
-                    $action = strtolower($field['onUpdateAction']);
+                if (!empty($field['on_update_action'])) {
+                    $action = strtolower($field['on_update_action']);
                     $foreignLine .= "->onUpdate('{$action}')";
                 }
 

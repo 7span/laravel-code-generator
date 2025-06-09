@@ -89,7 +89,11 @@ class RestApi extends Component
 
     // Validation rules
     protected $rules = [
-        'model_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
+        'model_name' => [
+            'required',
+            'regex:/^[A-Z][A-Za-z]+$/',
+            'not_in:Default,Model,Controller,Request,Route,Middleware,View,New,Return,Class,Function',
+        ],
         'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'relation_type' => 'required',
         'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
@@ -117,6 +121,7 @@ class RestApi extends Component
         'related_model.regex' => 'The Model Name must start with an uppercase letter and contain only letters.',
         'model_name.max' => 'The Model Name must not exceed 255 characters.',
         'related_model.max' => 'The Model Name must not exceed 255 characters.',
+        'model_name.not_in' => 'The Model Name cannot be a reserved word.',
     ];
 
     // Initialize component
@@ -734,7 +739,9 @@ class RestApi extends Component
     public function updatedForeignModelName($value)
     {
         if ($value) {
+            $this->fieldNames = [];
             $this->fieldNames = Helper::getColumnNames($value);
+            $this->reset(['referenced_column']);
         }
     }
 
@@ -742,7 +749,9 @@ class RestApi extends Component
     public function updatedRelatedModel($value)
     {
         if ($value) {
+            $this->columnNames = [];
             $this->columnNames = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
+            $this->reset('foreign_key');
         }
     }
 
@@ -750,7 +759,9 @@ class RestApi extends Component
     public function updatedIntermediateModel($value)
     {
         if ($value) {
+            $this->intermediateFields = []; // Always reset first
             $this->intermediateFields = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
+            $this->reset('intermediate_foreign_key', 'intermediate_local_key'); // Reset intermediate keys
         }
     }
 

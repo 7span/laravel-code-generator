@@ -107,9 +107,9 @@ class RestApi extends Component
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
-        'data' => 'required|regex:/^[A-Za-z0-9]+:[A-Za-z0-9]+(?:,[A-Za-z0-9]+:[A-Za-z0-9]+)*$/',
-        'subject' => 'required|regex:/^[A-Za-z ]+$/',
-        'body' => 'required|regex:/^[A-Za-z ]+$/',
+        'data' => 'required|regex:/^[A-Za-z0-9_]+:[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+:[A-Za-z0-9_]+)*$/',
+        'subject' => 'required|regex:/^[A-Za-z_ ]+$/',
+        'body' => 'required|regex:/^[A-Za-z_ ]+$/',
         'foreign_model_name' => 'required|regex:/^[a-z0-9_]+$/',
         'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
         'on_update_action' => 'nullable|in:restrict,cascade,set null,no action',
@@ -164,7 +164,7 @@ class RestApi extends Component
     }
 
     // Update notification file checkbox state and open modal if checked
-    public function updatedNotificationFile($value): void
+    public function updatedIsNotificationFileAdded($value): void
     {
         if ($value) {
             $this->isNotificationModalOpen = true;

@@ -25,7 +25,7 @@ class MakeService extends Command
         $serviceClass = Str::studly($this->argument('model'));
 
         // Define the path for the service file
-        $serviceFilePath = app_path(config('code-generator.paths.service', 'Services') . "/{$serviceClass}Service.php");
+        $serviceFilePath = base_path(config('code-generator.paths.service', 'App\Services') . "/{$serviceClass}Service.php");
 
         $this->createDirectoryIfMissing(dirname($serviceFilePath));
 
@@ -102,8 +102,8 @@ class MakeService extends Command
         $modelInstance = $modelVariable . 'Model';
 
         return [
-            'serviceClassNamespace' => 'App\\' . config('code-generator.paths.service', 'Services'),
-            'relatedModelNamespace' => config('code-generator.paths.model', 'Models') . "\\{$modelName}",
+            'serviceClassNamespace' => config('code-generator.paths.service', 'App\Services'),
+            'relatedModelNamespace' => "use " . config('code-generator.paths.model', 'App\Models') . "\\{$modelName}",
             'serviceClass'          => "{$modelName}Service",
             'modelObject'           => "private {$modelName} \${$modelInstance}",
             'resourceMethod'        => $this->getResourceMethod($modelInstance),

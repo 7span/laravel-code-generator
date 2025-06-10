@@ -30,7 +30,7 @@ class MakeRequest extends Command
         $relatedModelName = Str::studly($this->argument('model'));
 
         // Define the path for the request file
-        $requestFilePath = app_path(config('code-generator.paths.request', 'Requests') . "/{$relatedModelName}" . "/Request.php");
+        $requestFilePath = base_path(config('code-generator.paths.request', 'App\Http\Requests') . "/{$relatedModelName}" . "/Request.php");
         $this->createDirectoryIfMissing(dirname($requestFilePath));
 
         $content = $this->getReplacedContent($relatedModelName);
@@ -83,7 +83,7 @@ class MakeRequest extends Command
     {
         $relatedModelName = $this->argument('model');
         return [
-            'namespace'        => 'App\\' . config('code-generator.paths.request', 'Http\Requests') . '\\' . $relatedModelName,
+            'namespace'        => config('code-generator.paths.request', 'App\Http\Requests') . '\\' . $relatedModelName,
             'class'            => 'Request',
             'validationFields' => $this->getValidationFields(),
         ];

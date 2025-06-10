@@ -2,7 +2,7 @@
 
 namespace {{ serviceClassNamespace }};
 
-use App\{{ relatedModelNamespace }};
+{{ relatedModelNamespace }};
 
 class {{ serviceClass }} {
     public function __construct( {{ modelObject }}) {  }

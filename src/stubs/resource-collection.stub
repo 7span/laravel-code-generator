@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 class Collection extends ResourceCollection
 {
 
-    public $collects = 'App\{{ resourceNamespace }}\{{ modelName }}\Resource';
+    public $collects = '{{ resourceNamespace }}\{{ modelName }}\Resource';
     /**
      * Transform the resource collection into an array.
      *

@@ -1,5 +1,5 @@
 @props(['relationTypes'])
-<div wire:show="isRelEditModalOpen" x-data="{ relationType: @entangle('relation_type').live }"
+<div wire:show="isRelEditModalOpen" x-cloak x-data="{ relationType: @entangle('relation_type').live }"
     x-transition.duration.200ms x-on:click.self="$wire.isRelEditModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
 

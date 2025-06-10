@@ -344,9 +344,9 @@ class RestApi extends Component
             $this->referenced_column = $field['referenced_column'] ?? '';
             $this->on_delete_action = $field['on_delete_action'] ?? '';
             $this->on_update_action = $field['on_update_action'] ?? '';
-        }
 
-        $this->isEditFieldModalOpen = true;
+            $this->isEditFieldModalOpen = true;
+        }
     }
 
     // Opens delete  Field Modal

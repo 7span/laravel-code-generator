@@ -42,19 +42,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Require Authentication in Production
-    |--------------------------------------------------------------------------
-    |
-    | Set to true if you want to restrict access to the code generator
-    | in production using authentication middleware.
-    | This is recommended for security reasons in production environments.
-    |
-    */
-
-    "require_auth_in_production" => false,
-
-    /*
-    |--------------------------------------------------------------------------
     |  Delete logs older than configured days
     |--------------------------------------------------------------------------
     */

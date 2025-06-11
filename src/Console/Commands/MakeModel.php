@@ -33,8 +33,7 @@ class MakeModel extends Command
     public function handle(): void
     {
         $modelClass = Str::studly($this->argument('model'));
-        $modelFilePath = app_path(config('code-generator.paths.model', 'Models') . "/{$modelClass}.php");
-
+        $modelFilePath = base_path(config('code-generator.paths.model', 'App\Models')) . "/{$modelClass}.php";
         $this->createDirectoryIfMissing(dirname($modelFilePath));
         $content = $this->getReplacedContent($modelClass);
 
@@ -81,11 +80,11 @@ class MakeModel extends Command
         $relatedModelImports = $this->getRelatedModels();
 
         return [
-            'namespace' => 'App\\' . config('code-generator.paths.model', 'Models'),
+            'namespace' => config('code-generator.paths.model', 'App\Models'),
             'class' => $modelClass,
             'traitNamespaces' => $traitInfo['uses'],
             'traits' => $traitInfo['apply'],
-            'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use App\\Models\\$model;", $relatedModelImports)) : '',
+            'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use " . config('code_generator.paths.model', 'App\Models') . "\\$model;", $relatedModelImports)) : '',
             'relation' => $relationMethods,
             'fillableFields' => $this->getFillableFields($this->option('fields')),
             'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'datetime'," : '',
@@ -113,8 +112,6 @@ class MakeModel extends Command
 
             $fillableFields = implode(",\n        ", $fieldNames);
         }
-        return $fillableFields;
-
         return $fillableFields;
     }
 
@@ -146,7 +143,7 @@ class MakeModel extends Command
         if ($customTraits) {
             foreach (explode(',', $customTraits) as $trait) {
                 $trait = trim($trait);
-                $traitUseStatements[] = 'use App\\' . config('code-generator.paths.trait', 'Traits') . "\\$trait;";
+                $traitUseStatements[] = 'use ' . config('code-generator.paths.trait', 'App\Traits') . "\\$trait;";
                 $traitNames[] = $trait;
             }
         }
@@ -235,6 +232,9 @@ class MakeModel extends Command
                 continue;
             }
             $models[] = Str::studly($relation['related_model']);
+            if (!empty($relation['intermediate_model'])) {
+                $models[] = Str::studly($relation['intermediate_model']);
+            }
         }
 
         return array_unique($models);

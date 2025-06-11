@@ -34,7 +34,7 @@ class Helper
      */
     public static function getTableNamesFromMigrations()
     {
-        $migrationPath = database_path(config('code-generator.paths.migration', 'Migrations'));
+        $migrationPath = base_path(config('code-generator.paths.migration', 'Database\Migrations'));
         $files = File::exists($migrationPath) ? File::files($migrationPath) : [];
 
         $tableNames = collect($files)->map(function ($file) {
@@ -62,7 +62,7 @@ class Helper
                 ? $model->getTable()
                 : Str::plural(Str::snake(class_basename($modelName)));
         } else {
-              // Assume it's a table name
+            // Assume it's a table name
             $tableName = Str::plural(Str::snake(class_basename($modelName)));
         }
 

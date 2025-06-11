@@ -27,7 +27,7 @@ class MakeResource extends Command
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource file
-        $resourceFilePath = app_path(config('code-generator.paths.resource', 'Resources') . "/{$modelName}/Resource.php");
+        $resourceFilePath = base_path(config('code-generator.paths.resource', 'App\Http\Resources') . "/{$modelName}/Resource.php");
 
         $this->createDirectoryIfMissing(dirname($resourceFilePath));
 
@@ -58,10 +58,10 @@ class MakeResource extends Command
     protected function getStubVariables($modelName): array
     {
         return [
-            'namespace'       => "App\\" . config('code-generator.paths.resource', 'Resources') . "\\{$modelName}",
+            'namespace'       => config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$modelName}",
             'class'           => 'Resource',
             'modelName'       => $modelName,
-            'modelNamespace'  => "use App\\" . config('code-generator.paths.model', 'Models') . "\\{$modelName};",
+            'relatedModelNamespace'  => "use " . config('code-generator.paths.model', 'App\Models') . "\\{$modelName};",
         ];
     }
 

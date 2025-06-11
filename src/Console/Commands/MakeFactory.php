@@ -27,7 +27,7 @@ class MakeFactory extends Command
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the factory file
-        $factoryFilePath = base_path("database/" . config('code-generator.paths.factory', 'Factories') . "/{$modelName}Factory.php");
+        $factoryFilePath = base_path(config('code-generator.paths.factory', 'Database\Factories') . "/{$modelName}Factory.php");
 
         $this->createDirectoryIfMissing(dirname($factoryFilePath));
 
@@ -129,8 +129,8 @@ class MakeFactory extends Command
     protected function getStubVariables(string $modelName, array $fields): array
     {
         return [
-            'factoryNamespace'       => 'Database\\' . config('code-generator.paths.factory', 'Factories'),
-            'relatedModelNamespace'  => 'App\\' . config('code-generator.paths.model', 'Models') . "\\" . $modelName,
+            'factoryNamespace'       => config('code-generator.paths.factory', 'Database\Factories'),
+            'relatedModelNamespace'  => config('code-generator.paths.model', 'App\Models') . "\\" . $modelName,
             'factory'                => $modelName . "Factory",
             'fields'                 => $this->generateFactoryFields($fields),
         ];

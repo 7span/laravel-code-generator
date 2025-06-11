@@ -99,10 +99,8 @@ class RestApi extends Component
         'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
         'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
         'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-
         'intermediate_foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
         'intermediate_local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
@@ -110,7 +108,7 @@ class RestApi extends Component
         'data' => 'required|regex:/^[A-Za-z0-9_]+:[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+:[A-Za-z0-9_]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z_ ]+$/',
         'body' => 'required|regex:/^[A-Za-z_ ]+$/',
-        'foreign_model_name' => 'required|regex:/^[a-z0-9_]+$/',
+        'foreign_model_name' => 'required|regex:/^[A-Za-z][a-z0-9_]*$/',
         'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
         'on_update_action' => 'nullable|in:restrict,cascade,set null,no action',
     ];
@@ -346,9 +344,9 @@ class RestApi extends Component
             $this->referenced_column = $field['referenced_column'] ?? '';
             $this->on_delete_action = $field['on_delete_action'] ?? '';
             $this->on_update_action = $field['on_update_action'] ?? '';
-        }
 
-        $this->isEditFieldModalOpen = true;
+            $this->isEditFieldModalOpen = true;
+        }
     }
 
     // Opens delete  Field Modal
@@ -383,10 +381,10 @@ class RestApi extends Component
     // Check if column name is a default column
     public function isDefaultColumn($columnName): bool
     {
-        $defaultColumns = ['id', 'created_at', 'updated_at','created_by', 'updated_by'];
+        $defaultColumns = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
         if ($this->is_soft_delete_added) {
-        $defaultColumns = array_merge($defaultColumns, ['deleted_by', 'deleted_at']);
-    }
+            $defaultColumns = array_merge($defaultColumns, ['deleted_by', 'deleted_at']);
+        }
         return in_array($columnName, $defaultColumns);
     }
 
@@ -400,7 +398,7 @@ class RestApi extends Component
         }
 
         // Check if column name is a default column
-        if($this->isDefaultColumn($this->column_name)) {
+        if ($this->isDefaultColumn($this->column_name)) {
             $this->addError('column_name', 'Column name already exists.');
             return;
         }
@@ -726,7 +724,7 @@ class RestApi extends Component
     private  function copyTraits(array $selectedTraits): void
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
-        $destination = app_path(config('code-generator.paths.trait', 'Traits'));
+        $destination = base_path(config('code-generator.paths.trait', 'App\Traits'));
 
         if (!File::exists($source)) {
             return;

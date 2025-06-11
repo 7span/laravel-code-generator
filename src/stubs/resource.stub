@@ -2,7 +2,7 @@
 
 namespace {{ namespace }};
 
-{{ modelNamespace }}
+{{ relatedModelNamespace }}
 use Illuminate\Http\Request;
 use App\Traits\ResourceFilterable;
 use Illuminate\Http\Resources\Json\JsonResource;

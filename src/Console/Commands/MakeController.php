@@ -52,7 +52,7 @@ class MakeController extends Command
         $pathKey = $isAdminCrudIncluded ? 'admin_controller' : 'controller';
         $controllerPath = config("code-generator.paths.{$pathKey}", $isAdminCrudIncluded ? 'Http/Controllers/Admin' : 'Http/Controllers');
 
-        $fullPath = app_path("{$controllerPath}/{$controllerClassName}.php");
+        $fullPath = base_path("{$controllerPath}/{$controllerClassName}.php");
         $this->createDirectoryIfMissing(dirname($fullPath));
 
         // Generate content
@@ -89,10 +89,10 @@ class MakeController extends Command
         $modelName = $this->argument('model') ? ucfirst($this->argument('model')) : '';
 
         return [
-            'namespace' => $isAdminCrudIncluded ? config('code-generator.paths.admin_controller', 'Http\Controllers\Admin') : config('code-generator.paths.controller', 'Http\Controllers'),
+            'namespace' => $isAdminCrudIncluded ? config('code-generator.paths.admin_controller', 'App\Http\Controllers\Admin') : config('code-generator.paths.controller', 'App\Http\Controllers'),
             'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
             'className' => $controllerClassName,
-            'relatedModelNamespace' => 'use App\\' . config('code-generator.paths.model', 'Models') . '\\' . $modelName,
+            'relatedModelNamespace' => "use " . config('code-generator.paths.model', 'App\Models') . '\\' . $modelName,
             'modelName' => $modelName,  // used in generating methods
         ];
     }
@@ -112,22 +112,22 @@ class MakeController extends Command
         // Add service file use statement
         $mainContent = str_replace(
             '{{ service }}',
-            $includeServiceFile ? 'use App\\' . config('code-generator.paths.service', 'Services') . '\\' . $className . 'Service;' : '',
+            $includeServiceFile ? 'use ' . config('code-generator.paths.service', 'App\Services') . '\\' . $className . 'Service;' : '',
             $mainContent
         );
 
         // Add request file use statement
         $mainContent = str_replace(
             '{{ request }}',
-            $includeRequestFile ? 'use App\\' . config('code-generator.paths.request', 'Http\Requests') . "\\{$className}\\Request as {$className}Request;" : '',
+            $includeRequestFile ? 'use ' . config('code-generator.paths.request', 'App\Http\Requests') . "\\{$className}\\Request as {$className}Request;" : '',
             $mainContent
         );
 
         // Add resource file use statements
         $includeResourceFile ? array_push(
             $additionalUseStatements,
-            'use App\\' . config('code-generator.paths.resource', 'Http\Resources') . "\\{$className}\\Resource;",
-            'use App\\' . config('code-generator.paths.resource', 'Http\Resources') . "\\{$className}\\Collection;"
+            'use ' . config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$className}\\Resource;",
+            'use ' . config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$className}\\Collection;"
         ) : null;
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
@@ -281,13 +281,13 @@ class MakeController extends Command
         $apiPath = base_path($isAdminCrudIncluded ? 'routes/api-admin.php' : 'routes/api.php');
         $stubPath = __DIR__ . '/../../stubs/' . ($isAdminCrudIncluded ? 'api.admin.route.stub' : 'api.routes.stub');
         $controllerPath = config(
-            'code-generator.' . ($isAdminCrudIncluded ? 'admin_controller' : 'controller'),
-            $isAdminCrudIncluded ? 'Http\Controllers\Admin' : 'Http\Controllers'
+            'code-generator.paths.' . ($isAdminCrudIncluded ? 'admin_controller' : 'controller'),
+            $isAdminCrudIncluded ? 'App\Http\Controllers\Admin' : 'App\Http\Controllers'
         );
 
         $routeType = $methodCount === 5 ? 'apiResource' : 'resource';
         $routeOptions = $methodCount === 5 ? '' : "->only(['" . implode("', '", $methodsArray) . "'])";
-        $routeEntry = "Route::{$routeType}('{$resource}', \\App\\{$controllerPath}\\{$controllerClassName}::class){$routeOptions};";
+        $routeEntry = "Route::{$routeType}('{$resource}',{$controllerPath}\\{$controllerClassName}::class){$routeOptions};";
 
         // Load content (stub if file doesn't exist, else append)
         $baseContent = file_exists($apiPath)

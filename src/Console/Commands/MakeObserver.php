@@ -25,10 +25,10 @@ class MakeObserver extends Command
 
     public function handle()
     {
-        $observerClass = Str::studly($this->argument('model'));
+        $observerClass = Str::studly($this->argument('model')) . "Observer";
 
         // Define the path for the observer file
-        $observerFilePath = app_path(config('code-generator.paths.observer', 'Notification') . "/{$observerClass}.php");
+        $observerFilePath = base_path(config('code-generator.paths.observer', 'App\Observers') . "/{$observerClass}.php");
 
         $this->createDirectoryIfMissing(dirname($observerFilePath));
 
@@ -60,10 +60,10 @@ class MakeObserver extends Command
     {
         $relatedModel = $this->argument('model');
         return [
-            'namespace'              => 'App\\' . config('code-generator.paths.observer', 'Observers'),
+            'namespace'              => config('code-generator.paths.observer', 'App\Observers'),
             'class'                  => $observerClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace'  => config('code-generator.paths.model', 'Models') . '\\' . Str::studly($relatedModel),
+            'relatedModelNamespace'  => "use " . config('code-generator.paths.model', 'App\Models') . '\\' . Str::studly($relatedModel),
             'modelInstance'          => Str::camel($relatedModel),
         ];
     }

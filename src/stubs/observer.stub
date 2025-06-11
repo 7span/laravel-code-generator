@@ -2,7 +2,7 @@
 
 namespace {{ namespace }};
 
-use App\{{ relatedModelNamespace }};
+{{ relatedModelNamespace }};
 
 class {{ class }}
 {

@@ -3,6 +3,7 @@
 namespace Sevenspan\CodeGenerator\Library;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
@@ -34,11 +35,14 @@ class Helper
      */
     public static function getTableNamesFromMigrations()
     {
-        $migrationPath = base_path(config('code-generator.paths.migration', 'Database\Migrations'));
-        $files = File::exists($migrationPath) ? File::files($migrationPath) : [];
+        // Get all migration records from the migrations table in database
+        $allMigrationNames = DB::table('migrations')->get();
 
-        $tableNames = collect($files)->map(function ($file) {
-            if (preg_match('/create_(.*?)_table/', $file->getFilename(), $matches)) {
+        // Extract table names from migration file names
+        $tableNames = collect($allMigrationNames)->map(function ($migrationRecord) {
+
+            $migrationFileName = is_object($migrationRecord) ? $migrationRecord->migration : $migrationRecord['migration'];
+            if (preg_match('/create_(.*?)_table/', $migrationFileName, $matches)) {
                 return $matches[1];
             }
             return null;

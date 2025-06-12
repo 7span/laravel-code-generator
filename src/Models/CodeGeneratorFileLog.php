@@ -2,11 +2,18 @@
 
 namespace Sevenspan\CodeGenerator\Models;
 
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class CodeGeneratorFileLog extends Model
 {
+
+    use HasUuids;
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     /**
      * The table associated with the model.
      *

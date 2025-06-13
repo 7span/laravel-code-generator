@@ -34,7 +34,7 @@ export default defineConfig({
             {
                 text: "Usage",
                 items: [
-                    { text: "REST API", link: "/usage/rest-api" },
+                    { text: "Generated Files", link: "/usage/files" },
                     { text: "Logs", link: "/usage/logs" },
                 ],
             },

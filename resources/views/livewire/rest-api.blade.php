@@ -47,9 +47,23 @@
     @endif
     @endforeach
 
-    <h3 class="grey-900 text-xl font-semibold pb-2">SQL Table Query</h3>
-    <input type="text" class="border border-gray-300 rounded-lg px-4 py-2 w-full mb-4" placeholder="Enter Your Query"
-                wire:model.live="query" />
+    <!-- Query Input Section -->
+    <h3 class="grey-900 text-xl font-semibold pb-2">Enter your SQL CREATE TABLE statement</h3>
+    <span class="text-s text-gray-600 italic mb-4">Note: Enter create table SQL query to autofill model name and fields.</span>
+    
+    <textarea class="border border-gray-300 rounded-lg px-4 py-2 w-full mb-4 resize-y overflow-auto" 
+            placeholder="Enter Your Query" wire:model.live="query" rows="5">
+    </textarea>
+
+    <button class="bg-blue-500 text-white mb-2 px-4 py-2 rounded hover:bg-blue-600 transition"
+            type="button" wire:click="prefillQuery"> Parse SQL and prefill the below fields
+    </button>
+
+   <div class="flex items-center my-6">
+        <div class="flex-grow border-t border-dashed border-gray-400"></div>
+            <span class="mx-4 text-gray-500">OR</span>
+        <div class="flex-grow border-t border-dashed border-gray-400"></div>
+    </div>
 
     <!-- model input -->
     <div class="pb-4" id="modelNameSection">

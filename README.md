@@ -75,11 +75,17 @@ This package is designed to **accelerate API development** in Laravel by providi
 
 -   The package provides a log viewer in the UI to help you review generation activity and errors.
 -   **To clear the logs**, run the following Artisan command:
-
+🔹 Manually (Artisan)
     ```bash
-    php artisan code-generator:clear-logs
+    php artisan code-generator:clear-logs --days
     ```
-
+🔹 Automatically (Laravel 12+)
+Add this in bootstrap/app.php:
+```
+scheduler()
+    ->command('code-generator:clear-old-logs')
+    ->daily(); // or weekly/monthly
+```
 ---
 
 ## ⚙️ Configuration

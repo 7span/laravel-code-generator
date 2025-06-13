@@ -47,8 +47,10 @@
     @endif
     @endforeach
 
-    <p class="text-red-500 mb-4">Note: To use this CRUD generator you first need to install <a href=""
-            class="underline">spatie</a> package, as we are using it in our BaseModel.php file.</p>
+    <h3 class="grey-900 text-xl font-semibold pb-2">SQL Table Query</h3>
+    <input type="text" class="border border-gray-300 rounded-lg px-4 py-2 w-full mb-4" placeholder="Enter Your Query"
+                wire:model.live="query" />
+
     <!-- model input -->
     <div class="pb-4" id="modelNameSection">
         <div>
@@ -90,15 +92,14 @@
     <!-- Generate files and Reset button -->
     <div class="flex justify-start space-x-4 mt-4">
         <x-code-generator::button title="Generate Files" wire:click="save"  />
-        <x-code-generator::button title="Reset" wire:click="resetForm()"  />
+        <x-code-generator::button title="Reset" @click="$wire.isResetFormModalOpen=true;"  />
     </div>
 
     <!-- Modals -->
-    <x-code-generator::add-relation-modal :relationTypes="$relationTypes" />
-    <x-code-generator::add-new-field-modal />
-    <x-code-generator::edit-relation-modal :relationTypes="$relationTypes" />
+    <x-code-generator::add-relation-modal :$relationTypes :$isEditing />
+    <x-code-generator::add-new-field-modal :$isEditing />
     <x-code-generator::delete-relation-modal />
     <x-code-generator::delete-field-modal />
-    <x-code-generator::edit-field-modal />
+    <x-code-generator::reset-form-modal />
     <x-code-generator::notification-modal />
 </div>

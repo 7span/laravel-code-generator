@@ -1,7 +1,7 @@
 <div wire:show="isAddFieldModalOpen" x-data x-cloak x-transition.duration.200ms
     x-on:click.self="$wire.isAddFieldModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
-    <x-code-generator::modal modalTitle="Add Field">
+    <x-code-generator::modal :modalTitle="$isEditing ? 'Update Field' : 'Add Field'">
 
         <x-slot:closebtn>
             <button x-on:click="$wire.isAddFieldModalOpen=false"
@@ -158,7 +158,7 @@
             <div class="mr-6">
                 <x-code-generator::button title="Cancel" x-on:click="$wire.isAddFieldModalOpen=false" />
             </div>
-            <x-code-generator::button wire:click="saveField" title="Add" />
+            <x-code-generator::button wire:click="saveField" :title="$isEditing ? 'Update' : 'Add' " />
         </x-slot:footer>
     </x-code-generator::modal>
 </div>

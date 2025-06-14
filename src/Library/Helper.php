@@ -19,6 +19,7 @@ class Helper
         return [
             'hasOne' => 'One to One',
             'hasMany' => 'One to Many',
+            'belongsTo' => 'Belongs To',
             'belongsToMany' => 'Many to Many',
             'hasOneThrough' => 'Has One Through',
             'hasManyThrough' => 'Has Many Through',
@@ -31,12 +32,12 @@ class Helper
     /**
      * Load migration table names from the migrations directory.
      *
-     * @return array<int, string> List of table names found in migration files
+     * @return array<int, string>
      */
     public static function getTableNamesFromMigrations()
     {
         // Get all migration records from the migrations table in database
-        $allMigrationNames = DB::table('migrations')->get();
+        $allMigrationNames = DB::table(config('database.migrations.table'), 'migrations')->get();
 
         // Extract table names from migration file names
         $tableNames = collect($allMigrationNames)->map(function ($migrationRecord) {

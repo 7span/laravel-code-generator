@@ -32,7 +32,7 @@ This package is designed to **accelerate API development** in Laravel by providi
 1. **Install via Composer:**
 
     ```bash
-    composer require sevenspan/code-generator
+    composer require sevenspan/code-generator --dev
     ```
 
 2. **Publish the configuration and migrations:**
@@ -40,6 +40,8 @@ This package is designed to **accelerate API development** in Laravel by providi
     ```bash
     php artisan vendor:publish --tag=code-generator-config
     php artisan vendor:publish --tag=code-generator-migrations
+    php artisan vendor:publish --tag=code-generator-views
+    php artisan vendor:publish --tag=code-generator-traits
     ```
 
 3. **(Optional) Customize configuration:**
@@ -79,11 +81,13 @@ This package is designed to **accelerate API development** in Laravel by providi
     ```bash
     php artisan code-generator:clear-logs --days
     ```
+- option days will clear logs older than provided days.
+
 🔹 Automatically (Laravel 12+)
 Add this in bootstrap/app.php:
 ```
 scheduler()
-    ->command('code-generator:clear-old-logs')
+    ->command('code-generator:clear-logs')
     ->daily(); // or weekly/monthly
 ```
 ---

@@ -78,9 +78,9 @@ class RestApi extends Component
     public $is_observer_file_added = false;
     public $is_factory_file_added = false;
     public $is_policy_file_added = false;
-    public $is_select_all_files_added = false;
-    public $is_select_all_methods_added = false;
-    public $is_select_all_traits_added = false;
+    public $is_select_all_files_checked = false;
+    public $is_select_all_methods_checked = false;
+    public $is_select_all_traits_checked = false;
 
     // Trait checkboxes
     public $is_boot_model_trait_added = false;
@@ -203,7 +203,7 @@ class RestApi extends Component
     }
 
     // select all files checkbox state
-    public function updatedIsSelectAllFilesAdded($value)
+    public function updatedIsSelectAllFilesChecked($value)
     {
         $this->is_migration_file_added = $value;
         $this->is_admin_crud_added = $value;
@@ -218,7 +218,7 @@ class RestApi extends Component
     }
 
    // select all methods checkbox state
-    public function updatedIsSelectAllMethodsAdded($value)
+    public function updatedIsSelectAllMethodsChecked($value)
     {
         $this->is_store_method_added = $value;
         $this->is_show_method_added = $value;
@@ -228,7 +228,7 @@ class RestApi extends Component
     }
 
     // select all traits checkbox state
-     public function updatedIsSelectAllTraitsAdded($value)
+     public function updatedIsSelectAllTraitsChecked($value)
     {
         $this->is_boot_model_trait_added = $value;
         $this->is_pagination_trait_added = $value;

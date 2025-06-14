@@ -48,7 +48,7 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_files_added">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_files_checked">
                     <span class="ml-2 text-sm">Select All Files</span>
                 </label>
             </div>
@@ -98,7 +98,7 @@
                 <span class="ml-1 text-sm">Destroy</span>
             </label>
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_methods_added">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_methods_checked">
                     <span class="ml-2 text-sm">Select All Methods</span>
                 </label>
         </div>
@@ -141,7 +141,7 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_traits_added">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_traits_checked">
                     <span class="ml-2 text-sm">Select All Traits</span>
                 </label>
             </div>

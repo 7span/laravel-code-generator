@@ -67,10 +67,10 @@ class MakeRequest extends Command
 
         foreach ($fields as $field) {
             [$name, $rule] = explode(':', $field);
-            $lines[] = self::INDENT . self::INDENT . "'" . $name . "' => '" . $rule . "',";
+            $lines[] = "'" . $name . "' => '" . $rule . "',";
         }
 
-        return implode("\n", $lines);
+        return implode(PHP_EOL . SELF::INDENT . SELF::INDENT . SELF::INDENT, $lines);
     }
 
     /**

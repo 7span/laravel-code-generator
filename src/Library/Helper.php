@@ -3,6 +3,7 @@
 namespace Sevenspan\CodeGenerator\Library;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
@@ -18,6 +19,7 @@ class Helper
         return [
             'hasOne' => 'One to One',
             'hasMany' => 'One to Many',
+            'belongsTo' => 'Belongs To',
             'belongsToMany' => 'Many to Many',
             'hasOneThrough' => 'Has One Through',
             'hasManyThrough' => 'Has Many Through',
@@ -30,15 +32,18 @@ class Helper
     /**
      * Load migration table names from the migrations directory.
      *
-     * @return array<int, string> List of table names found in migration files
+     * @return array<int, string>
      */
     public static function getTableNamesFromMigrations()
     {
-        $migrationPath = base_path(config('code-generator.paths.migration', 'Database\Migrations'));
-        $files = File::exists($migrationPath) ? File::files($migrationPath) : [];
+        // Get all migration records from the migrations table in database
+        $allMigrationNames = DB::table(config('database.migrations.table'), 'migrations')->get();
 
-        $tableNames = collect($files)->map(function ($file) {
-            if (preg_match('/create_(.*?)_table/', $file->getFilename(), $matches)) {
+        // Extract table names from migration file names
+        $tableNames = collect($allMigrationNames)->map(function ($migrationRecord) {
+
+            $migrationFileName = is_object($migrationRecord) ? $migrationRecord->migration : $migrationRecord['migration'];
+            if (preg_match('/create_(.*?)_table/', $migrationFileName, $matches)) {
                 return $matches[1];
             }
             return null;

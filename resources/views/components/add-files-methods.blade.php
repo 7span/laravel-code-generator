@@ -46,6 +46,12 @@
                     <span class="ml-2 text-sm">Notification</span>
                 </label>
             </div>
+            <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_files_checked">
+                    <span class="ml-2 text-sm">Select All Files</span>
+                </label>
+            </div>
         </div>
         <div>
             <div class="mb-2">
@@ -91,6 +97,10 @@
                 <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_destroy_method_added">
                 <span class="ml-1 text-sm">Destroy</span>
             </label>
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_methods_checked">
+                    <span class="ml-2 text-sm">Select All Methods</span>
+                </label>
         </div>
     </div>
 
@@ -127,6 +137,12 @@
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_has_user_action_trait_added">
                     <span class="ml-2 text-sm">HasUserAction.php</span>
+                </label>
+            </div>
+            <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_traits_checked">
+                    <span class="ml-2 text-sm">Select All Traits</span>
                 </label>
             </div>
         </div>

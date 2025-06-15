@@ -27,6 +27,7 @@ class RestApi extends Component
     public $generalError = '';
     public $errorMessage = "";
     public $successMessage = '';
+    public $query = '';
 
     // Foreign key properties
     public $is_foreign_key = false;
@@ -166,15 +167,11 @@ class RestApi extends Component
             'column_validation' => 'nullable',
         ],
         ];
-         $this->updateSoftDeleteFields();
+         $this->updatedIsSoftDeleteAdded();
     }
 
+    // Update soft delete fields
     public function updatedIsSoftDeleteAdded()
-    {
-        $this->updateSoftDeleteFields();
-    }
-
-    private function updateSoftDeleteFields()
     {
         $softDeleteFields = [
             [
@@ -248,6 +245,20 @@ class RestApi extends Component
             $this->on_delete_action = '';
             $this->on_update_action = '';
             $this->tableNames = [];
+        }
+    }
+
+    // Prefill query from the create table statement
+    public function prefillQuery()
+    {
+        $result = Helper::parseCreateTable($this->query);
+        $this->model_name = $result['model_name'];     
+        // Merge existing $fieldsData with new ones without duplicates
+        foreach ($result['fields'] as $newField) {
+            $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name']);
+            if (!$alreadyExists) {
+                $this->fieldsData[] = $newField;
+            }
         }
     }
 

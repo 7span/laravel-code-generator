@@ -59,6 +59,14 @@
             type="button" wire:click="prefillQuery"> Parse SQL and prefill the below fields
     </button>
 
+    @if ($errors->has('prefill'))
+        <p class="text-red-500 text-sm mt-1">{{ $errors->first('prefill') }}</p>
+    @endif
+
+    @if ($successMessage)
+        <p class="text-green-600 text-sm mt-1">{{ $successMessage }}</p>
+    @endif
+
    <div class="flex items-center my-6">
         <div class="flex-grow border-t border-dashed border-gray-400"></div>
             <span class="mx-4 text-gray-500">OR</span>

@@ -252,14 +252,24 @@ class RestApi extends Component
     public function prefillQuery()
     {
         $result = Helper::parseCreateTable($this->query);
-        $this->model_name = $result['model_name'];     
+        $this->model_name = $result['model_name'];
+
+        $duplicateColumns = [];
+
         // Merge existing $fieldsData with new ones without duplicates
         foreach ($result['fields'] as $newField) {
             $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name']);
-            if (!$alreadyExists) {
-                $this->fieldsData[] = $newField;
+            if ($alreadyExists) {
+                $duplicateColumns[] = $newField['column_name'];
+                continue;
             }
+            $this->fieldsData[] = $newField;
         }
+
+        if (!empty($duplicateColumns)) {
+           $this->addError('prefill', 'These columns already exist: ' . implode(', ', $duplicateColumns));
+        }
+         $this->successMessage = "Model name and fields added successfully.";
     }
 
     // Live validation for form fields

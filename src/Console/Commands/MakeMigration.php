@@ -101,7 +101,7 @@ class MakeMigration extends Command
                 $relatedModel = $field['foreign_model_name'];
                 $referenceKey = $field['referenced_column'] ?? 'id';
                 $relatedTable = Str::snake(Str::plural($relatedModel));
-                $foreignLine = self::INDENT . self::INDENT . self::INDENT . "\$table->foreignId('{$name}')->references('{$referenceKey}')->on('{$relatedTable}')";
+                $foreignLine = "\$table->foreignId('{$name}')->references('{$referenceKey}')->on('{$relatedTable}')";
 
                 // Add ON DELETE action if provided
                 if (!empty($field['on_delete_action'])) {
@@ -118,10 +118,10 @@ class MakeMigration extends Command
                 $foreignLine .= ';';
                 $fieldLines[] = $foreignLine;
             } else {
-                $fieldLines[] = self::INDENT . self::INDENT . self::INDENT . "\$table->{$type}('{$name}');";
+                $fieldLines[] = "\$table->{$type}('{$name}');";
             }
         }
-        return implode(PHP_EOL, $fieldLines);
+        return implode(PHP_EOL . SELF::INDENT . SELF::INDENT . SELF::INDENT, $fieldLines);
     }
 
     /**

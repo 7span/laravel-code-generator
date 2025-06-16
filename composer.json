@@ -16,7 +16,8 @@
   "require": {
     "php": "^8.2",
     "illuminate/support": "^12.0",
-    "livewire/livewire": "^3.0"
+    "livewire/livewire": "^3.0",
+    "spatie/laravel-query-builder": "^6.0"
   },
   "extra": {
     "laravel": {

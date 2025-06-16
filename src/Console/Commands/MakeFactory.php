@@ -11,6 +11,9 @@ use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 class MakeFactory extends Command
 {
     use FileManager;
+
+    private const INDENT = '    ';
+
     protected $signature = 'code-generator:factory {model : The name of the model for which the factory file will be generated.} 
                                                   {--fields= : A comma-separated list of fields with their types (e.g., name:string,id:integer).}
                                                   {--overwrite : is overwriting this file is selected}';
@@ -113,10 +116,10 @@ class MakeFactory extends Command
         $factoryFieldLines = [];
 
         foreach ($fields as $column => $type) {
-            $factoryFieldLines[] = '      ' . $this->getFactoryField($column, $type) . ',';
+            $factoryFieldLines[] = $this->getFactoryField($column, $type) . ',';
         }
 
-        return implode("\n", $factoryFieldLines);
+        return implode(PHP_EOL . SELF::INDENT . SELF::INDENT . SELF::INDENT, $factoryFieldLines);
     }
 
     /**

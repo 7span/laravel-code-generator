@@ -3,17 +3,12 @@
 namespace Sevenspan\CodeGenerator\Models;
 
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileLogStatus;
 
 class CodeGeneratorFileLog extends Model
 {
-
-    use HasUuids;
-    public $incrementing = false;
-    protected $keyType = 'string';
-
     /**
      * The table associated with the model.
      *
@@ -28,12 +23,22 @@ class CodeGeneratorFileLog extends Model
      */
     public $timestamps = true;
 
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
+        'uuid',
         'file_type',    // Type of the file (e.g., Controller, Model, etc.)
         'file_path',    // Path where the file is generated
         'status',       // Status of the file generation (e.g., success, error)

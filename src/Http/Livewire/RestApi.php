@@ -202,36 +202,54 @@ class RestApi extends Component
     // select all files checkbox state
     public function updatedIsSelectAllFilesChecked($value)
     {
-        $this->is_migration_file_added = $value;
-        $this->is_admin_crud_added = $value;
-        $this->is_policy_file_added = $value;
-        $this->is_observer_file_added = $value;
-        $this->is_service_file_added = $value;
-        $this->is_notification_file_added = $value;
-        $this->is_resource_file_added = $value;
-        $this->is_request_file_added = $value;
-        $this->is_factory_file_added = $value;
-        $this->is_model_file_added = $value;
+        $files = [
+            'is_migration_file_added',
+            'is_admin_crud_added',
+            'is_policy_file_added',
+            'is_observer_file_added',
+            'is_service_file_added',
+            'is_notification_file_added',
+            'is_resource_file_added',
+            'is_request_file_added',
+            'is_factory_file_added',
+            'is_model_file_added',
+        ];
+
+        foreach ($files as $file) {
+            $this->$file = $value;
+        }
     }
 
    // select all methods checkbox state
     public function updatedIsSelectAllMethodsChecked($value)
     {
-        $this->is_store_method_added = $value;
-        $this->is_show_method_added = $value;
-        $this->is_update_method_added = $value;
-        $this->is_destroy_method_added = $value;
-        $this->is_index_method_added = $value;
+         $methods = [
+            'is_store_method_added',
+            'is_show_method_added',
+            'is_update_method_added',
+            'is_destroy_method_added',
+            'is_index_method_added',
+        ];
+
+        foreach ($methods as $method) {
+            $this->$method = $value;
+        }
     }
 
     // select all traits checkbox state
      public function updatedIsSelectAllTraitsChecked($value)
     {
-        $this->is_boot_model_trait_added = $value;
-        $this->is_pagination_trait_added = $value;
-        $this->is_resource_filterable_trait_added = $value;
-        $this->is_has_uuid_trait_added = $value;
-        $this->is_has_user_action_trait_added = $value;
+        $traits = [
+            'is_boot_model_trait_added',
+            'is_pagination_trait_added',
+            'is_resource_filterable_trait_added',
+            'is_has_uuid_trait_added',
+            'is_has_user_action_trait_added',
+        ];
+
+        foreach ($traits as $trait) {
+            $this->$trait = $value;
+        }
     }
 
     // Add updated method for foreign key checkbox
@@ -355,6 +373,7 @@ class RestApi extends Component
         $this->reset();
         $this->resetErrorBag();
         $this->sessionMessage = '';
+        $this->mount();
     }
 
     // Resets modal form fields
@@ -622,6 +641,7 @@ class RestApi extends Component
 
             // Reset form
             $this->reset();
+            $this->mount();
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
             session()->flash('error', $e->getMessage());

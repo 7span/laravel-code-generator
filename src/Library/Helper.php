@@ -70,4 +70,41 @@ class Helper
             ? Schema::getColumnListing($tableName)
             : [];
     }
+
+    /**
+     * Parse a CREATE TABLE SQL statement and extract model name and fields.
+     *
+     * @param string $sql The SQL statement to parse
+     * @return array<string, mixed> Parsed model name and fields
+     */
+    public static function parseCreateTable(string $sql): array
+    {
+        $result = [
+            'model_name' => '',
+            'fields' => [],
+        ];
+
+        // Extract model name
+        if (preg_match('/CREATE\s+TABLE\s+`?(\w+)`?/i', $sql, $tableMatch)) {
+            $result['model_name'] = Str::singular(ucfirst($tableMatch[1]));
+        }
+
+        // Extract columns
+        if (preg_match('/\((.*)\)/s', $sql, $matches)) {
+            $columnsRaw = explode(',', $matches[1]);
+
+            foreach ($columnsRaw as $col) {
+                if (preg_match('/`?(\w+)`?\s+(\w+)/', trim($col), $colMatch)) {
+                    $result['fields'][] = [
+                        'id' => Str::random(),
+                        'column_name' => Str::snake($colMatch[1]),
+                        'data_type' => Str::lower($colMatch[2]),
+                        'column_validation' => 'required',
+                    ];
+                }
+            }
+        }
+
+        return $result;
+    }
 }

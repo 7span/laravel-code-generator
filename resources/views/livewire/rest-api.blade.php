@@ -47,8 +47,32 @@
     @endif
     @endforeach
 
-    <p class="text-red-500 mb-4">Note: To use this CRUD generator you first need to install <a href=""
-            class="underline">spatie</a> package, as we are using it in our BaseModel.php file.</p>
+    <!-- Query Input Section -->
+    <h3 class="grey-900 text-xl font-semibold pb-2">Enter your SQL CREATE TABLE statement</h3>
+    <span class="text-s text-gray-600 italic mb-4">Note: Enter create table SQL query to autofill model name and fields.</span>
+    
+    <textarea class="border border-gray-300 rounded-lg px-4 py-2 w-full mb-4 resize-y overflow-auto" 
+            placeholder="Enter Your Query" wire:model.live="query" rows="5">
+    </textarea>
+
+    <button class="bg-blue-500 text-white mb-2 px-4 py-2 rounded hover:bg-blue-600 transition"
+            type="button" wire:click="prefillQuery"> Parse SQL and prefill the below fields
+    </button>
+
+    @if ($errors->has('prefill'))
+        <p class="text-red-500 text-sm mt-1">{{ $errors->first('prefill') }}</p>
+    @endif
+
+    @if ($successMessage)
+        <p class="text-green-600 text-sm mt-1">{{ $successMessage }}</p>
+    @endif
+
+   <div class="flex items-center my-6">
+        <div class="flex-grow border-t border-dashed border-gray-400"></div>
+            <span class="mx-4 text-gray-500">OR</span>
+        <div class="flex-grow border-t border-dashed border-gray-400"></div>
+    </div>
+
     <!-- model input -->
     <div class="pb-4" id="modelNameSection">
         <div>
@@ -90,15 +114,14 @@
     <!-- Generate files and Reset button -->
     <div class="flex justify-start space-x-4 mt-4">
         <x-code-generator::button title="Generate Files" wire:click="save"  />
-        <x-code-generator::button title="Reset" wire:click="resetForm()"  />
+        <x-code-generator::button title="Reset" @click="$wire.isResetFormModalOpen=true;"  />
     </div>
 
     <!-- Modals -->
-    <x-code-generator::add-relation-modal :relationTypes="$relationTypes" />
-    <x-code-generator::add-new-field-modal />
-    <x-code-generator::edit-relation-modal :relationTypes="$relationTypes" />
+    <x-code-generator::add-relation-modal :$relationTypes :$isEditing />
+    <x-code-generator::add-new-field-modal :$isEditing />
     <x-code-generator::delete-relation-modal />
     <x-code-generator::delete-field-modal />
-    <x-code-generator::edit-field-modal />
+    <x-code-generator::reset-form-modal />
     <x-code-generator::notification-modal />
 </div>

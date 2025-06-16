@@ -27,6 +27,7 @@ class RestApi extends Component
     public $generalError = '';
     public $errorMessage = "";
     public $successMessage = '';
+    public $query = '';
 
     // Foreign key properties
     public $is_foreign_key = false;
@@ -38,12 +39,11 @@ class RestApi extends Component
     // Modal visibility properties
     public $isAddRelModalOpen = false;
     public $isRelDeleteModalOpen = false;
-    public $isRelEditModalOpen = false;
     public $isAddFieldModalOpen = false;
     public $isDeleteFieldModalOpen = false;
-    public $isEditFieldModalOpen = false;
     public $isNotificationModalOpen = false;
-
+    public $isResetFormModalOpen = false;
+    
     // Form inputs
     public $model_name;
 
@@ -79,6 +79,9 @@ class RestApi extends Component
     public $is_observer_file_added = false;
     public $is_factory_file_added = false;
     public $is_policy_file_added = false;
+    public $is_select_all_files_checked = false;
+    public $is_select_all_methods_checked = false;
+    public $is_select_all_traits_checked = false;
 
     // Trait checkboxes
     public $is_boot_model_trait_added = false;
@@ -86,6 +89,7 @@ class RestApi extends Component
     public $is_resource_filterable_trait_added = false;
     public $is_has_uuid_trait_added = false;
     public $is_has_user_action_trait_added = false;
+    public $isEditing = false;
 
     // Validation rules
     protected $rules = [
@@ -128,6 +132,126 @@ class RestApi extends Component
         return view('code-generator::livewire.rest-api');
     }
 
+    // Mount component
+    public function mount()
+    {
+        $this->fieldsData = [
+        [
+            'id' => 'id',
+            'column_name' => 'id',
+            'data_type' => 'auto_increment',
+            'column_validation' => 'required',
+        ],
+        [
+            'id' => 'created_at',
+            'column_name' => 'created_at',
+            'data_type' => 'datetime',
+            'column_validation' => 'required',
+        ],
+        [
+            'id' => 'updated_at',
+            'column_name' => 'updated_at',
+            'data_type' => 'datetime',
+            'column_validation' => 'required',
+        ],
+        [
+            'id' => 'created_by',
+            'column_name' => 'created_by',
+            'data_type' => 'integer',
+            'column_validation' => 'nullable',
+        ],
+        [
+            'id' => 'updated_by',
+            'column_name' => 'updated_by',
+            'data_type' => 'integer',
+            'column_validation' => 'nullable',
+        ],
+        ];
+         $this->updatedIsSoftDeleteAdded();
+    }
+
+    // Update soft delete fields
+    public function updatedIsSoftDeleteAdded()
+    {
+        $softDeleteFields = [
+            [
+                'id' => 'deleted_by', 
+                'column_name' => 'deleted_by',
+                'data_type' => 'string',
+                'column_validation' => 'nullable',
+            ],
+            [
+                'id' => 'deleted_at', 
+                'column_name' => 'deleted_at',
+                'data_type' => 'datetime',
+                'column_validation' => 'nullable',
+            ],
+        ];
+
+        $this->fieldsData = collect($this->fieldsData)
+            ->reject(function ($field) {
+                 return in_array($field['column_name'], ['deleted_by', 'deleted_at']);
+        })
+        ->when($this->is_soft_delete_added, function ($collection) use ($softDeleteFields) {
+            return $collection->concat($softDeleteFields);
+        })
+        ->values() 
+        ->toArray();
+    }
+
+    // select all files checkbox state
+    public function updatedIsSelectAllFilesChecked($value)
+    {
+        $files = [
+            'is_migration_file_added',
+            'is_admin_crud_added',
+            'is_policy_file_added',
+            'is_observer_file_added',
+            'is_service_file_added',
+            'is_notification_file_added',
+            'is_resource_file_added',
+            'is_request_file_added',
+            'is_factory_file_added',
+            'is_model_file_added',
+        ];
+
+        foreach ($files as $file) {
+            $this->$file = $value;
+        }
+    }
+
+   // select all methods checkbox state
+    public function updatedIsSelectAllMethodsChecked($value)
+    {
+         $methods = [
+            'is_store_method_added',
+            'is_show_method_added',
+            'is_update_method_added',
+            'is_destroy_method_added',
+            'is_index_method_added',
+        ];
+
+        foreach ($methods as $method) {
+            $this->$method = $value;
+        }
+    }
+
+    // select all traits checkbox state
+     public function updatedIsSelectAllTraitsChecked($value)
+    {
+        $traits = [
+            'is_boot_model_trait_added',
+            'is_pagination_trait_added',
+            'is_resource_filterable_trait_added',
+            'is_has_uuid_trait_added',
+            'is_has_user_action_trait_added',
+        ];
+
+        foreach ($traits as $trait) {
+            $this->$trait = $value;
+        }
+    }
+
     // Add updated method for foreign key checkbox
     public function updatedIsForeignKey($value)
     {
@@ -140,6 +264,30 @@ class RestApi extends Component
             $this->on_update_action = '';
             $this->tableNames = [];
         }
+    }
+
+    // Prefill query from the create table statement
+    public function prefillQuery()
+    {
+        $result = Helper::parseCreateTable($this->query);
+        $this->model_name = $result['model_name'];
+
+        $duplicateColumns = [];
+
+        // Merge existing $fieldsData with new ones without duplicates
+        foreach ($result['fields'] as $newField) {
+            $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name']);
+            if ($alreadyExists) {
+                $duplicateColumns[] = $newField['column_name'];
+                continue;
+            }
+            $this->fieldsData[] = $newField;
+        }
+
+        if (!empty($duplicateColumns)) {
+           $this->addError('prefill', 'These columns already exist: ' . implode(', ', $duplicateColumns));
+        }
+         $this->successMessage = "Model name and fields added successfully.";
     }
 
     // Live validation for form fields
@@ -211,7 +359,8 @@ class RestApi extends Component
     public function openEditRelationModal($relationId): void
     {
         $this->relationId = $relationId;
-        $this->isRelEditModalOpen = true;
+        $this->isEditing = true;
+        $this->isAddRelModalOpen = true;
         $relation = collect($this->relationData)->firstWhere('id', $relationId);
         if ($relation) {
             $this->fill($relation);
@@ -224,6 +373,7 @@ class RestApi extends Component
         $this->reset();
         $this->resetErrorBag();
         $this->sessionMessage = '';
+        $this->mount();
     }
 
     // Resets modal form fields
@@ -322,9 +472,7 @@ class RestApi extends Component
             $this->relationData[] = ['id' => Str::random(8)] + $relationData;
         }
 
-
         $this->isAddRelModalOpen = false;
-        $this->isRelEditModalOpen = false;
         $this->reset(['related_model', 'relation_type', 'intermediate_model', 'foreign_key', 'local_key', 'intermediate_foreign_key', 'intermediate_local_key']);
         $this->relationId = null;
     }
@@ -333,19 +481,11 @@ class RestApi extends Component
     public function openEditFieldModal($fieldId): void
     {
         $this->fieldId = $fieldId;
+        $this->isEditing = true;
+        $this->isAddFieldModalOpen = true;
         $field = collect($this->fieldsData)->firstWhere('id', $fieldId);
-
         if ($field) {
-            $this->column_name = $field['column_name'] ?? '';
-            $this->data_type = $field['data_type'] ?? '';
-            $this->column_validation = $field['column_validation'] ?? '';
-            $this->is_foreign_key = (bool) ($field['is_foreign_key'] ?? false);
-            $this->foreign_model_name = $field['foreign_model_name'] ?? '';
-            $this->referenced_column = $field['referenced_column'] ?? '';
-            $this->on_delete_action = $field['on_delete_action'] ?? '';
-            $this->on_update_action = $field['on_update_action'] ?? '';
-
-            $this->isEditFieldModalOpen = true;
+            $this->fill($field);
         }
     }
 
@@ -378,28 +518,12 @@ class RestApi extends Component
         return false;
     }
 
-    // Check if column name is a default column
-    public function isDefaultColumn($columnName): bool
-    {
-        $defaultColumns = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
-        if ($this->is_soft_delete_added) {
-            $defaultColumns = array_merge($defaultColumns, ['deleted_by', 'deleted_at']);
-        }
-        return in_array($columnName, $defaultColumns);
-    }
-
     // Save Fields Data
     public function saveField(): void
     {
         // Check for duplicate column name, excluding the current edited field by ID
         if ($this->isDuplicateColumn()) {
             $this->addError('column_name', 'You have already taken this column');
-            return;
-        }
-
-        // Check if column name is a default column
-        if ($this->isDefaultColumn($this->column_name)) {
-            $this->addError('column_name', 'Column name already exists.');
             return;
         }
 
@@ -443,7 +567,6 @@ class RestApi extends Component
             $this->fieldsData[] = array_merge(['id' => Str::random(8)], $fieldData);
         }
         $this->isAddFieldModalOpen = false;
-        $this->isEditFieldModalOpen = false;
         $this->fieldId = null;
         $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column', 'on_delete_action', 'on_update_action']);
     }
@@ -518,6 +641,7 @@ class RestApi extends Component
 
             // Reset form
             $this->reset();
+            $this->mount();
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
             session()->flash('error', $e->getMessage());

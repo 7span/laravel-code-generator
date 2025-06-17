@@ -5,7 +5,7 @@ export default defineConfig({
   title: "Code Generator",
   description: "Your Files Generator Companion",
   srcDir: "src",
-  base: "/open-source/code-generator",
+  base: "/open-source/laravel-code-generator",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -34,7 +34,7 @@ export default defineConfig({
             {
                 text: "Usage",
                 items: [
-                    { text: "Generated Files", link: "/usage/files" },
+                    { text: "Generate Files", link: "/usage/files" },
                     { text: "Logs", link: "/usage/logs" },
                 ],
             },

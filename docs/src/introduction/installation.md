@@ -1,6 +1,5 @@
-# Getting started
+# Prerequisites
 
-🔧 Prerequisites
 Ensure your environment meets the following requirements:
 - Laravel 12.x or higher – Latest Laravel version for compatibility.
 

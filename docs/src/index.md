@@ -13,13 +13,13 @@ hero:
       text: GitHub
       link: https://github.com/7span/laravel-code-generator
 features:
-  - title: 🚀 REST API Files
+  - title: 🚀 Generate REST API Files
     details: Quickly generate Models, Migrations, Controllers, Services, Resources, Requests, Policies, Notifications, Traits, and more based on user-defined input.
-  - title: 🎨 Livewire UI
+  - title: 🎨 Interactive UI
     details: An interactive, dynamic interface to visually define models, fields, relationships, and scaffolding options
   - title: 🛠 Customizable Paths
     details: Customize folder paths, namespaces, route prefixes, and stub templates to match your application's architecture.
-  - title: 📜 Built-in Log Viewer
+  - title: 📜 View Generated Files Logs
     details:  View package logs directly from the UI for troubleshooting and transparency.
 ---
 

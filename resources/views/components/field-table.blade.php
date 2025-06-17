@@ -13,6 +13,31 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td class="px-4 py-2 font-semibold">id</td>
+                    <td class="px-4 py-2 font-semibold">auto_increment</td>
+                    <td class="px-4 py-2 font-semibold">required</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 font-semibold">created_at</td>
+                    <td class="px-4 py-2 font-semibold">datetime</td>
+                    <td class="px-4 py-2 font-semibold">required</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 font-semibold">updated_at</td>
+                    <td class="px-4 py-2 font-semibold">datetime</td>
+                    <td class="px-4 py-2 font-semibold">optional</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 font-semibold">created_by</td>
+                    <td class="px-4 py-2 font-semibold">integer</td>
+                    <td class="px-4 py-2 font-semibold">optional</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 font-semibold">updated_by</td>
+                    <td class="px-4 py-2 font-semibold">integer</td>
+                    <td class="px-4 py-2 font-semibold">optional</td>
+                </tr>
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">
                     <td class="px-4 py-2">{{$field['column_name']}}</td>

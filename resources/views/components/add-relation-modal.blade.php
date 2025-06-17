@@ -1,11 +1,11 @@
-@props(['relationTypes'])
+@props(['relationTypes','isEditing' => false])
 
 <div wire:show="isAddRelModalOpen" x-data="{ relationType: @entangle('relation_type').live }" x-cloak
     x-transition.duration.200ms
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50"
     x-on:click.self="$wire.isAddRelModalOpen=false">
 
-    <x-code-generator::modal modalTitle="Add Eloquent Relation">
+    <x-code-generator::modal :modalTitle="$isEditing ? 'Update Eloquent Relation' : 'Add Eloquent Relation'">
         <!-- Modal header -->
         <x-slot:closebtn>
             <button x-on:click="$wire.isAddRelModalOpen=false"
@@ -157,7 +157,7 @@
             <div class="mr-6">
                 <x-code-generator::button title="Cancel" x-on:click="$wire.isAddRelModalOpen=false" />
             </div>
-            <x-code-generator::button wire:click="saveRelation" title="Add" />
+            <x-code-generator::button wire:click="saveRelation" :title="$isEditing ? 'Update' : 'Add'" />
         </x-slot:footer>
         </x-modal>
 </div>

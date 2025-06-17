@@ -26,17 +26,17 @@
                 <tr>
                     <td class="px-4 py-2 font-semibold">updated_at</td>
                     <td class="px-4 py-2 font-semibold">datetime</td>
-                    <td class="px-4 py-2 font-semibold">optional</td>
+                    <td class="px-4 py-2 font-semibold">nullable</td>
                 </tr>
                 <tr>
                     <td class="px-4 py-2 font-semibold">created_by</td>
                     <td class="px-4 py-2 font-semibold">integer</td>
-                    <td class="px-4 py-2 font-semibold">optional</td>
+                    <td class="px-4 py-2 font-semibold">nullable</td>
                 </tr>
                 <tr>
                     <td class="px-4 py-2 font-semibold">updated_by</td>
                     <td class="px-4 py-2 font-semibold">integer</td>
-                    <td class="px-4 py-2 font-semibold">optional</td>
+                    <td class="px-4 py-2 font-semibold">nullable</td>
                 </tr>
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">

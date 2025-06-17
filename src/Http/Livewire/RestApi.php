@@ -145,7 +145,7 @@ class RestApi extends Component
             [
                 'id' => 'deleted_by', 
                 'column_name' => 'deleted_by',
-                'data_type' => 'string',
+                'data_type' => 'integer',
                 'column_validation' => 'nullable',
             ],
             [

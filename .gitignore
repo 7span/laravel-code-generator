@@ -1,5 +1,2 @@
 /vendor
 composer.lock
-dist
-cache
-/node_modules

@@ -40,8 +40,6 @@ This package is designed to **accelerate API development** in Laravel by providi
     ```bash
     php artisan vendor:publish --tag=code-generator-config
     php artisan vendor:publish --tag=code-generator-migrations
-    php artisan vendor:publish --tag=code-generator-views
-    php artisan vendor:publish --tag=code-generator-traits
     ```
 
 3. **(Optional) Customize configuration:**

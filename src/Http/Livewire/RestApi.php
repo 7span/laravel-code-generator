@@ -275,7 +275,6 @@ class RestApi extends Component
          if ($newFieldsAdded) {
             session()->flash('success', 'Model name and fields added successfully!');
         } 
-        // $this->successMessage = "Model name and fields added successfully.";
     }
 
     // Live validation for form fields

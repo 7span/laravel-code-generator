@@ -255,6 +255,8 @@ class RestApi extends Component
             $this->model_name = $result['model_name'];
         }
 
+        $newFieldsAdded = false;
+
         // Merge existing $fieldsData with new ones without duplicates
         foreach ($result['fields'] as $newField) {
              $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name'])
@@ -264,12 +266,16 @@ class RestApi extends Component
                     continue;
                 }
             $this->fieldsData[] = $newField;
+            $newFieldsAdded = true;
         }
 
         if (!empty($duplicateColumns)) {
            $this->addError('prefill', 'Skipped  following columns as they already exist: ' . implode(', ', $duplicateColumns).'.');
         }
-         $this->successMessage = "Model name and fields added successfully.";
+         if ($newFieldsAdded) {
+            session()->flash('success', 'Model name and fields added successfully!');
+        } 
+        // $this->successMessage = "Model name and fields added successfully.";
     }
 
     // Live validation for form fields

@@ -242,8 +242,6 @@ class RestApi extends Component
 
         $duplicateColumns = [];
         $defaultFields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
-        $modelAdded = false;
-        $fieldsAdded = false;
 
         // Validate if model_name and fields are present in the query
         if (empty($result['model_name']) || empty($result['fields'])) {
@@ -255,7 +253,6 @@ class RestApi extends Component
         // Add model name if it exists
         if (!empty($result['model_name'])) {
             $this->model_name = $result['model_name'];
-            $modelAdded = true;
         }
 
         // Merge existing $fieldsData with new ones without duplicates
@@ -267,7 +264,6 @@ class RestApi extends Component
                     continue;
                 }
             $this->fieldsData[] = $newField;
-            $fieldsAdded = true;
         }
 
         if (!empty($duplicateColumns)) {

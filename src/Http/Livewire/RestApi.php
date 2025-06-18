@@ -59,11 +59,11 @@ class RestApi extends Component
     public $class_name, $data, $subject, $body;
 
     // Method checkboxes
-    public $is_index_method_added = false;
-    public $is_store_method_added = false;
-    public $is_show_method_added = false;
-    public $is_update_method_added = false;
-    public $is_destroy_method_added = false;
+    public $is_index_method_added = true;
+    public $is_store_method_added = true;
+    public $is_show_method_added = true;
+    public $is_update_method_added = true;
+    public $is_destroy_method_added = true;
 
     // File generation options
     public $is_model_file_added = false;
@@ -80,7 +80,7 @@ class RestApi extends Component
     public $is_factory_file_added = false;
     public $is_policy_file_added = false;
     public $is_select_all_files_checked = false;
-    public $is_select_all_methods_checked = false;
+    public $is_select_all_methods_checked = true;
     public $is_select_all_traits_checked = false;
 
     // Trait checkboxes
@@ -135,38 +135,6 @@ class RestApi extends Component
     // Mount component
     public function mount()
     {
-        $this->fieldsData = [
-        [
-            'id' => 'id',
-            'column_name' => 'id',
-            'data_type' => 'auto_increment',
-            'column_validation' => 'required',
-        ],
-        [
-            'id' => 'created_at',
-            'column_name' => 'created_at',
-            'data_type' => 'datetime',
-            'column_validation' => 'required',
-        ],
-        [
-            'id' => 'updated_at',
-            'column_name' => 'updated_at',
-            'data_type' => 'datetime',
-            'column_validation' => 'required',
-        ],
-        [
-            'id' => 'created_by',
-            'column_name' => 'created_by',
-            'data_type' => 'integer',
-            'column_validation' => 'nullable',
-        ],
-        [
-            'id' => 'updated_by',
-            'column_name' => 'updated_by',
-            'data_type' => 'integer',
-            'column_validation' => 'nullable',
-        ],
-        ];
          $this->updatedIsSoftDeleteAdded();
     }
 
@@ -177,7 +145,7 @@ class RestApi extends Component
             [
                 'id' => 'deleted_by', 
                 'column_name' => 'deleted_by',
-                'data_type' => 'string',
+                'data_type' => 'integer',
                 'column_validation' => 'nullable',
             ],
             [
@@ -273,19 +241,37 @@ class RestApi extends Component
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];
+        $defaultFields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
+        $modelAdded = false;
+        $fieldsAdded = false;
+
+        // Validate if model_name and fields are present in the query
+        if (empty($result['model_name']) || empty($result['fields'])) {
+            $this->addError('prefill', 'Invalid CREATE TABLE query.');
+            $this->successMessage = null;
+            return;
+        }
+
+        // Add model name if it exists
+        if (!empty($result['model_name'])) {
+            $this->model_name = $result['model_name'];
+            $modelAdded = true;
+        }
 
         // Merge existing $fieldsData with new ones without duplicates
         foreach ($result['fields'] as $newField) {
-            $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name']);
-            if ($alreadyExists) {
-                $duplicateColumns[] = $newField['column_name'];
-                continue;
-            }
+             $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name'])
+                   || in_array($newField['column_name'], $defaultFields);
+                if ($alreadyExists) {
+                    $duplicateColumns[] = $newField['column_name'];
+                    continue;
+                }
             $this->fieldsData[] = $newField;
+            $fieldsAdded = true;
         }
 
         if (!empty($duplicateColumns)) {
-           $this->addError('prefill', 'These columns already exist: ' . implode(', ', $duplicateColumns));
+           $this->addError('prefill', 'Skipped  following columns as they already exist: ' . implode(', ', $duplicateColumns).'.');
         }
          $this->successMessage = "Model name and fields added successfully.";
     }

@@ -13,31 +13,14 @@
                 </tr>
             </thead>
             <tbody>
+              @foreach ($defaultFields as $field)
                 <tr>
-                    <td class="px-4 py-2 font-semibold">id</td>
-                    <td class="px-4 py-2 font-semibold">auto_increment</td>
-                    <td class="px-4 py-2 font-semibold">required</td>
+                    <td class="px-4 py-2">{{ $field['column_name'] }}</td>
+                    <td class="px-4 py-2">{{ $field['data_type'] }}</td>
+                    <td class="px-4 py-2">{{ $field['column_validation'] }}</td>
                 </tr>
-                <tr>
-                    <td class="px-4 py-2 font-semibold">created_at</td>
-                    <td class="px-4 py-2 font-semibold">datetime</td>
-                    <td class="px-4 py-2 font-semibold">required</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 font-semibold">updated_at</td>
-                    <td class="px-4 py-2 font-semibold">datetime</td>
-                    <td class="px-4 py-2 font-semibold">nullable</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 font-semibold">created_by</td>
-                    <td class="px-4 py-2 font-semibold">integer</td>
-                    <td class="px-4 py-2 font-semibold">nullable</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 font-semibold">updated_by</td>
-                    <td class="px-4 py-2 font-semibold">integer</td>
-                    <td class="px-4 py-2 font-semibold">nullable</td>
-                </tr>
+                @endforeach
+
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">
                     <td class="px-4 py-2">{{$field['column_name']}}</td>

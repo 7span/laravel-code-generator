@@ -22,6 +22,13 @@ class RestApi extends Component
     public $columnNames = [];
     public $baseFields = [];
     public $intermediateFields = [];
+    public array $defaultFields = [
+        ['column_name' => 'id', 'data_type' => 'auto_increment', 'column_validation' => 'required'],
+        ['column_name' => 'created_at', 'data_type' => 'datetime', 'column_validation' => 'required'],
+        ['column_name' => 'updated_at', 'data_type' => 'datetime', 'column_validation' => 'nullable'],
+        ['column_name' => 'created_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+        ['column_name' => 'updated_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+   ];
 
 
     public $generalError = '';
@@ -241,7 +248,7 @@ class RestApi extends Component
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];
-        $defaultFields = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
+        $defaultColumns = ['id', 'created_at', 'updated_at', 'created_by', 'updated_by'];
 
         // Validate if model_name and fields are present in the query
         if (empty($result['model_name']) || empty($result['fields'])) {
@@ -260,7 +267,7 @@ class RestApi extends Component
         // Merge existing $fieldsData with new ones without duplicates
         foreach ($result['fields'] as $newField) {
              $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name'])
-                   || in_array($newField['column_name'], $defaultFields);
+                   || in_array($newField['column_name'], $defaultColumns);
                 if ($alreadyExists) {
                     $duplicateColumns[] = $newField['column_name'];
                     continue;
@@ -528,8 +535,7 @@ class RestApi extends Component
         }
 
         $this->validate($rulesToValidate);
-
-
+        
         $fieldData = [
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,

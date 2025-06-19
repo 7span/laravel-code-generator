@@ -4,7 +4,6 @@ export default defineConfig({
   title: "Code Generator",
   description: "Your Files Generator Companion",
   srcDir: "src",
-  base: "/open-source/laravel-code-generator/",
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }]],
   themeConfig: {
     logo: "/logo.svg",

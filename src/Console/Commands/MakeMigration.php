@@ -95,6 +95,14 @@ class MakeMigration extends Command
             if (!$name) {
                 continue;
             }
+            if ($name === 'deleted_at') {
+                $fieldLines[] = "\$table->softDeletes();";
+                continue;
+            }
+            if ($name === 'deleted_by') {
+                $fieldLines[] = "\$table->integer('deleted_by')->nullable();";
+                continue;
+            }
 
             if ($isForeignKey && isset($field['foreign_model_name'])) {
 

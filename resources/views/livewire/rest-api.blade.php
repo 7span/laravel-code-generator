@@ -67,14 +67,8 @@
         <p class="text-green-600 text-sm mt-1">{{ $successMessage }}</p>
     @endif
 
-   <div class="flex items-center my-6">
-        <div class="flex-grow border-t border-dashed border-gray-400"></div>
-            <span class="mx-4 text-gray-500">OR</span>
-        <div class="flex-grow border-t border-dashed border-gray-400"></div>
-    </div>
-
     <!-- model input -->
-    <div class="pb-4" id="modelNameSection">
+    <div class="pb-4 pt-4" id="modelNameSection">
         <div>
             <h2 class="grey-900 text-xl font-semibold pb-2">Model Name</h2>
             <input type="text" class="border border-gray-300 rounded-lg px-4 py-2 w-full" placeholder="Enter Name"
@@ -94,7 +88,7 @@
             <h2 class="text-xl font-semibold">Fields </h2>
             <x-code-generator::button title="Add" @click="$wire.isAddFieldModalOpen=true; $wire.resetModal()" />
         </div>
-        <x-code-generator::field-table :$fieldsData  :$is_soft_delete_added />
+        <x-code-generator::field-table :$fieldsData  :$is_soft_delete_added :$defaultFields />
     </div>
 
     <!-- eloqunet relations -->

@@ -96,7 +96,8 @@ class MakeFactory extends Command
             'boolean'  => "'{$column}' => \$this->faker->boolean",
             'datetime' => "'{$column}' => \$this->faker->dateTime()",
             'date'     => "'{$column}' => \$this->faker->date()",
-            'time'     => "'{$column}' => \$this->faker->time()",
+            'timestamp' => "'{$column}' => \$this->faker->time()",
+            'varchar'  => "'{$column}' => \$this->faker->word",
             'email'    => "'{$column}' => \$this->faker->unique()->safeEmail",
             'name'     => "'{$column}' => \$this->faker->name",
             'uuid'     => "'{$column}' => \$this->faker->uuid",
@@ -116,6 +117,9 @@ class MakeFactory extends Command
         $factoryFieldLines = [];
 
         foreach ($fields as $column => $type) {
+            if (in_array($column, ['deleted_at', 'deleted_by'])) {
+                continue;
+            }
             $factoryFieldLines[] = $this->getFactoryField($column, $type) . ',';
         }
 

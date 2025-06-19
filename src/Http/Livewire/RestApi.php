@@ -22,6 +22,7 @@ class RestApi extends Component
     public $columnNames = [];
     public $baseFields = [];
     public $intermediateFields = [];
+    public $defaultFields = [];
 
 
     public $generalError = '';
@@ -59,11 +60,11 @@ class RestApi extends Component
     public $class_name, $data, $subject, $body;
 
     // Method checkboxes
-    public $is_index_method_added = false;
-    public $is_store_method_added = false;
-    public $is_show_method_added = false;
-    public $is_update_method_added = false;
-    public $is_destroy_method_added = false;
+    public $is_index_method_added = true;
+    public $is_store_method_added = true;
+    public $is_show_method_added = true;
+    public $is_update_method_added = true;
+    public $is_destroy_method_added = true;
 
     // File generation options
     public $is_model_file_added = false;
@@ -80,7 +81,7 @@ class RestApi extends Component
     public $is_factory_file_added = false;
     public $is_policy_file_added = false;
     public $is_select_all_files_checked = false;
-    public $is_select_all_methods_checked = false;
+    public $is_select_all_methods_checked = true;
     public $is_select_all_traits_checked = false;
 
     // Trait checkboxes
@@ -135,39 +136,19 @@ class RestApi extends Component
     // Mount component
     public function mount()
     {
-        $this->fieldsData = [
-        [
-            'id' => 'id',
-            'column_name' => 'id',
-            'data_type' => 'auto_increment',
-            'column_validation' => 'required',
-        ],
-        [
-            'id' => 'created_at',
-            'column_name' => 'created_at',
-            'data_type' => 'datetime',
-            'column_validation' => 'required',
-        ],
-        [
-            'id' => 'updated_at',
-            'column_name' => 'updated_at',
-            'data_type' => 'datetime',
-            'column_validation' => 'required',
-        ],
-        [
-            'id' => 'created_by',
-            'column_name' => 'created_by',
-            'data_type' => 'integer',
-            'column_validation' => 'nullable',
-        ],
-        [
-            'id' => 'updated_by',
-            'column_name' => 'updated_by',
-            'data_type' => 'integer',
-            'column_validation' => 'nullable',
-        ],
-        ];
+         $this->defaultFields = $this->getDefaultFields();
          $this->updatedIsSoftDeleteAdded();
+    }
+
+     protected function getDefaultFields(): array
+    {
+        return [
+            ['column_name' => 'id', 'data_type' => 'auto_increment', 'column_validation' => 'required'],
+            ['column_name' => 'created_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+            ['column_name' => 'updated_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+            ['column_name' => 'created_at', 'data_type' => 'datetime', 'column_validation' => 'required'],
+            ['column_name' => 'updated_at', 'data_type' => 'datetime', 'column_validation' => 'nullable'],
+        ];
     }
 
     // Update soft delete fields
@@ -175,15 +156,15 @@ class RestApi extends Component
     {
         $softDeleteFields = [
             [
-                'id' => 'deleted_by', 
-                'column_name' => 'deleted_by',
-                'data_type' => 'string',
-                'column_validation' => 'nullable',
-            ],
-            [
                 'id' => 'deleted_at', 
                 'column_name' => 'deleted_at',
                 'data_type' => 'datetime',
+                'column_validation' => 'nullable',
+            ],
+            [
+                'id' => 'deleted_by', 
+                'column_name' => 'deleted_by',
+                'data_type' => 'integer',
                 'column_validation' => 'nullable',
             ],
         ];
@@ -273,21 +254,40 @@ class RestApi extends Component
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];
+        $defaultColumns = array_column($this->getDefaultFields(), 'column_name');
+
+        // Validate if model_name and fields are present in the query
+        if (empty($result['model_name']) || empty($result['fields'])) {
+            $this->addError('prefill', 'Invalid CREATE TABLE query.');
+            $this->successMessage = null;
+            return;
+        }
+
+        // Add model name if it exists
+        if (!empty($result['model_name'])) {
+            $this->model_name = $result['model_name'];
+        }
+
+        $newFieldsAdded = false;
 
         // Merge existing $fieldsData with new ones without duplicates
         foreach ($result['fields'] as $newField) {
-            $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name']);
-            if ($alreadyExists) {
-                $duplicateColumns[] = $newField['column_name'];
-                continue;
-            }
+             $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name'])
+                   || in_array($newField['column_name'], $defaultColumns);
+                if ($alreadyExists) {
+                    $duplicateColumns[] = $newField['column_name'];
+                    continue;
+                }
             $this->fieldsData[] = $newField;
+            $newFieldsAdded = true;
         }
 
         if (!empty($duplicateColumns)) {
-           $this->addError('prefill', 'These columns already exist: ' . implode(', ', $duplicateColumns));
+           $this->addError('prefill', 'Skipped  following columns as they already exist: ' . implode(', ', $duplicateColumns).'.');
         }
-         $this->successMessage = "Model name and fields added successfully.";
+         if ($newFieldsAdded) {
+            session()->flash('success', 'Model name and fields added successfully!');
+        } 
     }
 
     // Live validation for form fields
@@ -541,8 +541,7 @@ class RestApi extends Component
         }
 
         $this->validate($rulesToValidate);
-
-
+        
         $fieldData = [
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,

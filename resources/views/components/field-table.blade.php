@@ -13,6 +13,14 @@
                 </tr>
             </thead>
             <tbody>
+              @foreach ($defaultFields as $field)
+                <tr>
+                    <td class="px-4 py-2">{{ $field['column_name'] }}</td>
+                    <td class="px-4 py-2">{{ $field['data_type'] }}</td>
+                    <td class="px-4 py-2">{{ $field['column_validation'] }}</td>
+                </tr>
+                @endforeach
+
                 @foreach ($fieldsData as $field)
                 <tr class=" even:bg-gray-100 ">
                     <td class="px-4 py-2">{{$field['column_name']}}</td>

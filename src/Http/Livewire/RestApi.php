@@ -22,13 +22,7 @@ class RestApi extends Component
     public $columnNames = [];
     public $baseFields = [];
     public $intermediateFields = [];
-    public array $defaultFields = [
-        ['column_name' => 'id', 'data_type' => 'auto_increment', 'column_validation' => 'required'],
-        ['column_name' => 'created_at', 'data_type' => 'datetime', 'column_validation' => 'required'],
-        ['column_name' => 'updated_at', 'data_type' => 'datetime', 'column_validation' => 'nullable'],
-        ['column_name' => 'created_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
-        ['column_name' => 'updated_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
-   ];
+    public $defaultFields = [];
 
 
     public $generalError = '';
@@ -142,7 +136,19 @@ class RestApi extends Component
     // Mount component
     public function mount()
     {
+         $this->defaultFields = $this->getDefaultFields();
          $this->updatedIsSoftDeleteAdded();
+    }
+
+     protected function getDefaultFields(): array
+    {
+        return [
+            ['column_name' => 'id', 'data_type' => 'auto_increment', 'column_validation' => 'required'],
+            ['column_name' => 'created_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+            ['column_name' => 'updated_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+            ['column_name' => 'created_at', 'data_type' => 'datetime', 'column_validation' => 'required'],
+            ['column_name' => 'updated_at', 'data_type' => 'datetime', 'column_validation' => 'nullable'],
+        ];
     }
 
     // Update soft delete fields
@@ -150,15 +156,15 @@ class RestApi extends Component
     {
         $softDeleteFields = [
             [
-                'id' => 'deleted_by', 
-                'column_name' => 'deleted_by',
-                'data_type' => 'integer',
-                'column_validation' => 'nullable',
-            ],
-            [
                 'id' => 'deleted_at', 
                 'column_name' => 'deleted_at',
                 'data_type' => 'datetime',
+                'column_validation' => 'nullable',
+            ],
+            [
+                'id' => 'deleted_by', 
+                'column_name' => 'deleted_by',
+                'data_type' => 'integer',
                 'column_validation' => 'nullable',
             ],
         ];

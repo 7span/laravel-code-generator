@@ -11,11 +11,9 @@ return new class extends Migration
         Schema::create('{{ tableName }}', function (Blueprint $table) {
             $table->id();
             {{ fieldDefinitions }}
-            $table->timestamps();
-            {{ softdelete }}
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
-            {{ deletedBy }}
+            $table->timestamps();
         });
     }
 

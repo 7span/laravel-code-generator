@@ -67,6 +67,9 @@ class MakeRequest extends Command
 
         foreach ($fields as $field) {
             [$name, $rule] = explode(':', $field);
+            if (in_array($name, ['deleted_at', 'deleted_by'])) {
+                continue;
+            }
             $lines[] = "'" . $name . "' => '" . $rule . "',";
         }
 

@@ -106,7 +106,10 @@ class MakeModel extends Command
             $fieldNames = [];
 
             foreach ($fields as $field) {
-                $fieldName = explode(':', $field)[0];
+                $fieldName = trim(explode(':', $field)[0]);
+                if (in_array($fieldName, ['deleted_at'])) {
+                    continue;
+                }
                 $fieldNames[] = "'" . trim($fieldName) . "',";
             }
 

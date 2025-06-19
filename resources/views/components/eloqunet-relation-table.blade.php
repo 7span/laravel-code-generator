@@ -6,7 +6,7 @@
         <!-- Table Header -->
         <thead class="bg-gray-200 rounded-t-lg">
             <th class="p-3 text-left text-sm">Related Model</th>
-            <th class="p-3 text-left text-sm">Data Type</th>
+            <th class="p-3 text-left text-sm">Relation Type</th>
             <th class="p-3 text-left text-sm">Foreign Key</th>
             <th class="p-3 text-left text-sm">Local Key</th>
             <th class="p-3 text-left text-sm">Intermediate Model</th>

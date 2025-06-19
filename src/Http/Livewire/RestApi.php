@@ -254,7 +254,7 @@ class RestApi extends Component
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];
-        $defaultColumns = collect($this->getDefaultFields())->pluck('column_name')->toArray();
+        $defaultColumns = array_column($this->getDefaultFields(), 'column_name');
 
         // Validate if model_name and fields are present in the query
         if (empty($result['model_name']) || empty($result['fields'])) {

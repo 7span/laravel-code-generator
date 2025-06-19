@@ -113,7 +113,7 @@ class MakeModel extends Command
                 $fieldNames[] = "'" . trim($fieldName) . "',";
             }
 
-            $fillableFields = implode(",\n        ", $fieldNames);
+            $fillableFields = implode("\n        ", $fieldNames);
         }
         return $fillableFields;
     }

@@ -5,6 +5,7 @@ export default defineConfig({
   description: "Your Files Generator Companion",
   srcDir: "src",
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }]],
+  base: '/open-source/laravel-codegen/',
   themeConfig: {
     logo: "/logo.svg",
     nav: [{ text: "Home", link: "/" }],

@@ -65,7 +65,7 @@ const members = [
     ]
   },
   {
-    avatar: 'https://avatars.githubusercontent.com/u/205601895?v=4',
+    avatar: 'https://github.com/dhaval-j-r-7span.png',
     name: 'Dhaval Rajput',
     title: 'Contributor',
     links: [
@@ -73,7 +73,7 @@ const members = [
     ]
   },
   {
-    avatar: 'https://avatars.githubusercontent.com/u/205601566?v=4',
+    avatar: 'https://github.com/mruganshi-7span.png',
     name: 'Mruganshi Chodavadiya',
     title: 'Contributor',
     links: [
@@ -81,7 +81,7 @@ const members = [
     ]
   },
   {
-    avatar: 'https://avatars.githubusercontent.com/u/92076426?s=64&v=4',
+    avatar: 'https://github.com/nikunj-7span.png',
     name: 'Nikunj Gadhiya',
     title: 'Contributor',
     links: [
@@ -89,7 +89,7 @@ const members = [
     ]
   },
   {
-    avatar: 'https://avatars.githubusercontent.com/u/109651349?s=64&v=4',
+    avatar: 'https://github.com/ujas-7span.png',
     name: 'Ujas Patel',
     title: 'Contributor',
     links: [

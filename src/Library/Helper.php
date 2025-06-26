@@ -96,14 +96,30 @@ class Helper
 
         // Extract columns
         if (preg_match('/\((.*)\)/s', $sql, $matches)) {
-            $columnsRaw = explode(',', $matches[1]);
+           $columnsRaw = preg_split('/,(?![^(]*\))/', $matches[1]);
 
             foreach ($columnsRaw as $col) {
+                 $col = trim($col);
+
+            // Skip foreign keys or standalone constraints
+            if (
+                preg_match('/^(FOREIGN\s+KEY|PRIMARY\s+KEY|CONSTRAINT|UNIQUE|CHECK)/i', $col)
+            ) {
+                continue;
+            }
+
                 if (preg_match('/`?(\w+)`?\s+(\w+)/', trim($col), $colMatch)) {
+                   $columnName = $colMatch[1];
+
+                // If the line contains only a primary key constraint (not inline), skip it
+                if (preg_match('/^PRIMARY\s+KEY/i', $col)) {
+                    continue;
+                }
                     $result['fields'][] = [
                         'id' => Str::random(),
-                        'column_name' => Str::snake($colMatch[1]),
+                        'column_name' => Str::lower($columnName),
                         'data_type' => Str::lower($colMatch[2]),
+                        'is_fillable' => true,
                         'column_validation' => 'required',
                     ];
                 }

@@ -100,6 +100,15 @@
         <x-code-generator::eloqunet-relation-table :$relationData :$relationTypes />
     </div>
 
+    <!-- Notifications -->
+    <div class="border border-grey-200 rounded-xl p-6 my-4 bg-white">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-semibold">Notifications</h2>
+            <x-code-generator::button title="Add" @click="$wire.isNotificationModalOpen=true; $wire.resetModal()" />
+        </div>
+        <x-code-generator::notification-table :$notificationData />
+    </div>
+
     <!-- checkboxes -->
     <div class="mb-2">
         <x-code-generator::add-files-methods :$errorMessage />
@@ -117,5 +126,5 @@
     <x-code-generator::delete-relation-modal />
     <x-code-generator::delete-field-modal />
     <x-code-generator::reset-form-modal />
-    <x-code-generator::notification-modal />
+    <x-code-generator::notification-modal :$isEditing />
 </div>

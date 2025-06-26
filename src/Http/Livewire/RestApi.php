@@ -24,6 +24,34 @@ class RestApi extends Component
     public $intermediateFields = [];
     public $defaultFields = [];
 
+    public $files = [
+            'is_migration_file_added',
+            'is_admin_crud_added',
+            'is_policy_file_added',
+            'is_observer_file_added',
+            'is_service_file_added',
+            'is_notification_file_added',
+            'is_resource_file_added',
+            'is_request_file_added',
+            'is_factory_file_added',
+            'is_model_file_added',
+        ];
+
+    public $methods = [ 
+            'is_store_method_added',
+            'is_show_method_added',
+            'is_update_method_added',
+            'is_destroy_method_added',
+            'is_index_method_added'
+        ];
+
+    public $traits = [
+            'is_boot_model_trait_added',
+            'is_pagination_trait_added',
+            'is_resource_filterable_trait_added',
+            'is_has_uuid_trait_added',
+            'is_has_user_action_trait_added',
+        ];
 
     public $generalError = '';
     public $errorMessage = "";
@@ -57,7 +85,7 @@ class RestApi extends Component
     public $data_type, $column_name, $column_validation;
 
     // Notification properties
-    public $class_name, $data, $subject, $body;
+    public $class_name, $data, $subject, $notification_blade_path , $notificationId;
 
     // Method checkboxes
     public $is_index_method_added = true;
@@ -91,6 +119,7 @@ class RestApi extends Component
     public $is_has_uuid_trait_added = false;
     public $is_has_user_action_trait_added = false;
     public $isEditing = false;
+    public $is_fillable = true;
 
     // Validation rules
     protected $rules = [
@@ -102,17 +131,17 @@ class RestApi extends Component
         'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'relation_type' => 'required',
         'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
-        'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-        'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-        'intermediate_foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-        'intermediate_local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'foreign_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'local_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'intermediate_foreign_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'intermediate_local_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
-        'data' => 'required|regex:/^[A-Za-z0-9_]+:[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+:[A-Za-z0-9_]+)*$/',
+        'data' => 'required|regex:/^([a-zA-Z0-9_]+)(,[a-zA-Z0-9_]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z_ ]+$/',
-        'body' => 'required|regex:/^[A-Za-z_ ]+$/',
+        'notification_blade_path' => 'required|regex:/^[a-zA-Z0-9_\/]+$/',
         'foreign_model_name' => 'required|regex:/^[A-Za-z][a-z0-9_]*$/',
         'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
         'on_update_action' => 'nullable|in:restrict,cascade,set null,no action',
@@ -183,20 +212,7 @@ class RestApi extends Component
     // select all files checkbox state
     public function updatedIsSelectAllFilesChecked($value)
     {
-        $files = [
-            'is_migration_file_added',
-            'is_admin_crud_added',
-            'is_policy_file_added',
-            'is_observer_file_added',
-            'is_service_file_added',
-            'is_notification_file_added',
-            'is_resource_file_added',
-            'is_request_file_added',
-            'is_factory_file_added',
-            'is_model_file_added',
-        ];
-
-        foreach ($files as $file) {
+        foreach ($this->files as $file) {
             $this->$file = $value;
         }
     }
@@ -204,15 +220,7 @@ class RestApi extends Component
    // select all methods checkbox state
     public function updatedIsSelectAllMethodsChecked($value)
     {
-         $methods = [
-            'is_store_method_added',
-            'is_show_method_added',
-            'is_update_method_added',
-            'is_destroy_method_added',
-            'is_index_method_added',
-        ];
-
-        foreach ($methods as $method) {
+        foreach ($this->methods as $method) {
             $this->$method = $value;
         }
     }
@@ -220,15 +228,7 @@ class RestApi extends Component
     // select all traits checkbox state
      public function updatedIsSelectAllTraitsChecked($value)
     {
-        $traits = [
-            'is_boot_model_trait_added',
-            'is_pagination_trait_added',
-            'is_resource_filterable_trait_added',
-            'is_has_uuid_trait_added',
-            'is_has_user_action_trait_added',
-        ];
-
-        foreach ($traits as $trait) {
+        foreach ($this->traits as $trait) {
             $this->$trait = $value;
         }
     }
@@ -294,8 +294,26 @@ class RestApi extends Component
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
+
+        $this->updateCheckboxGroup($propertyName, $this->methods, 'is_select_all_methods_checked');
+        $this->updateCheckboxGroup($propertyName, $this->files, 'is_select_all_files_checked');
+        $this->updateCheckboxGroup($propertyName, $this->traits, 'is_select_all_traits_checked');
     }
 
+    // Update checkbox group state based on individual checkbox state
+    private function updateCheckboxGroup($propertyName, $group, $selectAllProperty)
+    {
+        if (in_array($propertyName, $group)) {
+            $allChecked = true;
+            foreach ($group as $item) {
+                if (!$this->$item) {
+                    $allChecked = false;
+                    break;
+                }
+            }
+            $this->$selectAllProperty = $allChecked;
+        }
+    }
 
     // collect the model names when the modal is opened
     public function updatedIsAddRelModalOpen($value)
@@ -396,6 +414,11 @@ class RestApi extends Component
             'intermediate_local_key',
             'on_delete_action',
             'on_update_action',
+            'class_name',
+            'data',
+            'subject',
+            'notification_blade_path',
+            'isEditing'
         ]);
         $this->resetErrorBag();
     }
@@ -546,6 +569,7 @@ class RestApi extends Component
             'data_type' => $this->data_type,
             'column_name' => $this->column_name,
             'column_validation' => $this->column_validation,
+            'is_fillable' => $this->is_fillable ?? false,
             'is_foreign_key' => $this->is_foreign_key ?? false,
             'foreign_model_name' => $this->foreign_model_name,
             'referenced_column' => $this->referenced_column,
@@ -573,26 +597,51 @@ class RestApi extends Component
     // Save notification data
     public function saveNotification(): void
     {
-        $this->validate([
+        $rules = [
             'class_name' => $this->rules['class_name'],
             'data' => $this->rules['data'],
             'subject' => $this->rules['subject'],
-            'body' => $this->rules['body'],
-        ]);
+            'notification_blade_path' => $this->rules['notification_blade_path'],
+        ];
+
+        $this->validate($rules);
 
         // Store notification data
-        $this->notificationData = [
-            [
+        $notificationData = [
                 'class_name' => $this->class_name,
                 'data' => $this->data,
                 'subject' => $this->subject,
-                'body' => $this->body,
-            ]
+                'notification_blade_path' => $this->notification_blade_path,
         ];
 
+        // Update existing notification or add new one
+        if ($this->notificationId) {
+             foreach ($this->notificationData as &$notification) {
+                if ($notification['id'] === $this->notificationId) {
+                    $notification = ['id' => $this->notificationId] + $notificationData;
+                    break;
+                }
+            }
+            unset($notification);
+        } else {
+            $this->notificationData[] = array_merge(['id' => Str::random(8)],$notificationData);
+        }
         $this->isNotificationModalOpen = false;
-        $this->reset(['class_name', 'data', 'subject', 'body']);
+        $this->reset(['class_name', 'data', 'subject', 'notification_blade_path']);
+        $this->notificationId = null;
     }
+
+     // Open Edit Notification Modal
+    public function openEditNotificationModal($notificationId) 
+    {
+        $this->notificationId = $notificationId;
+        $this->isEditing = true;
+        $this->isNotificationModalOpen = true;
+        $notification = collect($this->notificationData)->firstWhere('id', $notificationId);
+        if ($notification) {
+            $this->fill($notification);
+        }
+    } 
 
     //Validate inputs before generation 
     private function validateInputs(): bool
@@ -674,7 +723,7 @@ class RestApi extends Component
         ]);
 
         // Format field and relation strings
-        $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
+        $fieldString = collect($this->fieldsData)->where('is_fillable', true)->pluck('column_name')->implode(', ');
 
         // Generate files based on flags
         if ($this->is_model_file_added) {
@@ -800,7 +849,7 @@ class RestApi extends Component
             'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
             '--model' => $modelName,
             '--data' => $notificationData['data'] ?? '',
-            '--body' => $notificationData['body'] ?? '',
+            '--view' => $notificationData['notification_blade_path'] ?? '',
             '--subject' => $notificationData['subject'] ?? '',
             '--overwrite' => $overwrite
         ]);
@@ -810,6 +859,11 @@ class RestApi extends Component
     private function generateResource($modelName, $overwrite)
     {
         Artisan::call('code-generator:resource', [
+            'model' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+
+        Artisan::call('code-generator:resource-collection', [
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);

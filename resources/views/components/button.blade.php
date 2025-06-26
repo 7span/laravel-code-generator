@@ -5,7 +5,7 @@
 ])
 
 @php
-    $buttonColor = in_array($title, ['Reset', 'Cancel','Delete']) ? 'bg-red-500' : 'bg-blue-500';
+    $buttonColor = $title === 'Cancel' ? 'bg-gray-500': (in_array($title, ['Reset', 'Delete']) ? 'bg-red-500' : 'bg-blue-500');
 @endphp
 
 <button {{ $attributes->merge(['class' => $buttonColor . ' text-white py-2 pl-3 pr-4 rounded-lg flex items-center justify-center relative']) }}>

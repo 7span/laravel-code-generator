@@ -47,6 +47,16 @@
                 @enderror
             </div>
 
+            <div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" wire:model.live="is_fillable" class="form-checkbox text-indigo-600" checked />
+                    <span class="text-sm text-gray-800">Add in Fillables?</span>
+                </div>
+                @error('is_fillable')
+                <span class="text-red-600 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
             <!-- Foreign Key Option -->
             <div>
                 <div class="flex items-center gap-2">
@@ -57,7 +67,6 @@
                 <span class="text-red-600 text-sm">{{ $message }}</span>
                 @enderror
             </div>
-
 
             @if ($this->is_foreign_key)
 

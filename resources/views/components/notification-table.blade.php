@@ -20,10 +20,11 @@
                 <td class="px-4 py-2 text-gray-600">{{$notification['data']}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$notification['subject']}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$notification['notification_blade_path']}}</td>
-                <td class="px-4 py-2 flex items-center">
-                <button wire:click="openEditNotificationModal('{{ $notification['id'] }}')" class="text-red-500">
+                <td class="px-4 py-2">
+                <button wire:click="openDeleteNotificationModal('{{ $notification['id']}}')">
                         <x-code-generator::delete-svg />
-                <button wire:click="openEditNotificationModal('{{ $notification['id'] }}')" class="text-red-500">
+                </button>
+                <button wire:click="openEditNotificationModal('{{ $notification['id']}}')">
                         <x-code-generator::edit-svg />
                 </button>
                 </td>

@@ -127,4 +127,5 @@
     <x-code-generator::delete-field-modal />
     <x-code-generator::reset-form-modal />
     <x-code-generator::notification-modal :$isEditing />
+    <x-code-generator::delete-notification-modal />
 </div>

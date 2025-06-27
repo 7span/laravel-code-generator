@@ -71,6 +71,7 @@ class RestApi extends Component
     public $isAddFieldModalOpen = false;
     public $isDeleteFieldModalOpen = false;
     public $isNotificationModalOpen = false;
+    public $isDeleteNotificationModalOpen = false;
     public $isResetFormModalOpen = false;
     
     // Form inputs
@@ -141,7 +142,7 @@ class RestApi extends Component
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'data' => 'required|regex:/^([a-zA-Z0-9_]+)(,[a-zA-Z0-9_]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z_ ]+$/',
-        'notification_blade_path' => 'required|regex:/^[a-zA-Z0-9_\/]+$/',
+        'notification_blade_path' => 'nullable|regex:/^[a-zA-Z0-9_\/]+$/',
         'foreign_model_name' => 'required|regex:/^[A-Za-z][a-z0-9_]*$/',
         'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
         'on_update_action' => 'nullable|in:restrict,cascade,set null,no action',
@@ -324,14 +325,6 @@ class RestApi extends Component
                 ->map(function ($name) {
                     return Str::studly(Str::singular($name));
                 })->toArray();
-        }
-    }
-
-    // Update notification file checkbox state and open modal if checked
-    public function updatedIsNotificationFileAdded($value): void
-    {
-        if ($value) {
-            $this->isNotificationModalOpen = true;
         }
     }
 
@@ -596,7 +589,12 @@ class RestApi extends Component
 
     // Save notification data
     public function saveNotification(): void
-    {
+    { 
+        if ($this->isDuplicateNotification()) {
+            $this->addError('class_name', 'You have already taken this class name');
+            return;
+        }
+
         $rules = [
             'class_name' => $this->rules['class_name'],
             'data' => $this->rules['data'],
@@ -631,6 +629,26 @@ class RestApi extends Component
         $this->notificationId = null;
     }
 
+    // Check for duplicate notification class 
+    protected function isDuplicateNotification(): bool
+    {
+        foreach ($this->notificationData as $notification) {
+            if (
+                $notification['class_name'] === $this->class_name &&
+                (!$this->notificationId || $notification['id'] !== $this->notificationId)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function openDeleteNotificationModal($id): void
+    {
+        $this->notificationId = $id;
+        $this->isDeleteNotificationModalOpen = true;
+    }
+
      // Open Edit Notification Modal
     public function openEditNotificationModal($notificationId) 
     {
@@ -642,6 +660,15 @@ class RestApi extends Component
             $this->fill($notification);
         }
     } 
+
+    // Deletes field from table
+    public function deleteNotification(): void
+    {
+        $this->notificationData = array_filter($this->notificationData, function ($notification) {
+            return $notification['id'] !== $this->notificationId;
+        });
+        $this->isDeleteNotificationModalOpen = false;
+    }
 
     //Validate inputs before generation 
     private function validateInputs(): bool

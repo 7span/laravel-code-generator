@@ -4,10 +4,10 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-
 
 class MakeObserver extends Command
 {
@@ -18,19 +18,14 @@ class MakeObserver extends Command
 
     protected $description = 'Generate an observer class for a specified model.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $observerClass = Str::studly($this->argument('model')) . "Observer";
 
         // Define the path for the observer file
-        $observerFilePath = base_path(config('code-generator.paths.observer', 'App\Observers') . "/{$observerClass}.php");
+        $observerFilePath = base_path(config('code-generator.paths.default.observer') . "/{$observerClass}.php");
 
-        $this->createDirectoryIfMissing(dirname($observerFilePath));
+        File::ensureDirectoryExists(dirname($observerFilePath));
 
         $contents = $this->getReplacedContent($observerClass);
 
@@ -43,14 +38,6 @@ class MakeObserver extends Command
     }
 
     /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/observer.stub';
-    }
-
-    /**
      * Get the variables to replace in the stub file.
      *
      * @param string $observerClass
@@ -60,10 +47,10 @@ class MakeObserver extends Command
     {
         $relatedModel = $this->argument('model');
         return [
-            'namespace'              => config('code-generator.paths.observer', 'App\Observers'),
+            'namespace'              => Helper::convertPathToNamespace(config('code-generator.paths.default.observer')),
             'class'                  => $observerClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace'  => "use " . config('code-generator.paths.model', 'App\Models') . '\\' . Str::studly($relatedModel),
+            'relatedModelNamespace'  => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . '\\' . Str::studly($relatedModel),
             'modelInstance'          => Str::camel($relatedModel),
         ];
     }
@@ -71,13 +58,12 @@ class MakeObserver extends Command
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/observer.stub');
 
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
@@ -94,17 +80,6 @@ class MakeObserver extends Command
      */
     protected function getReplacedContent($observerClass): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($observerClass));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        // Create the directory if it doesn't exist
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($observerClass));
     }
 }

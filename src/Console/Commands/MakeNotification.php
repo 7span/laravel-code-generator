@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -23,19 +24,15 @@ class MakeNotification extends Command
 
     protected $description = 'Generate a custom notification with optional data, body, and subject.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $notificationClass = Str::studly($this->argument('className'));
 
         // Define the path for the notification file
-        $notificationFilePath = base_path(config('code-generator.paths.notification', 'App\Notification') . "/{$notificationClass}.php");
+        $notificationFilePath = base_path(config('code-generator.paths.default.notification') . "/{$notificationClass}Notification.php");
 
-        $this->createDirectoryIfMissing(dirname($notificationFilePath));
+        File::ensureDirectoryExists(dirname($notificationFilePath));
+
 
         $content = $this->getReplacedContent($notificationClass);
 
@@ -50,13 +47,12 @@ class MakeNotification extends Command
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/notification.stub');
 
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
@@ -73,17 +69,7 @@ class MakeNotification extends Command
      */
     protected function getReplacedContent($notificationClass): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($notificationClass));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($notificationClass));
     }
 
     /**
@@ -108,10 +94,10 @@ class MakeNotification extends Command
         $relatedModel = $this->option('model');
 
         return [
-            'namespace'              => config('code-generator.paths.notification', '   App\Notification'),
+            'namespace'              => Helper::convertPathToNamespace(config('code-generator.paths.default.notification')),
             'class'                  => $notificationClass,
             'model'                  => $relatedModel,
-            'relatedModelNamespace'  => "use " . config('code-generator.paths.model', 'App\Models') . '\\' . $relatedModel,
+            'relatedModelNamespace'  => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . '\\' . $relatedModel,
             'modelObject'            => '$' . (Str::camel($relatedModel)),
             'subject'                => $this->option('subject'),
             'body'                   => (string) $this->option('body'),

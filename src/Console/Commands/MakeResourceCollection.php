@@ -4,10 +4,10 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-
 
 class MakeResourceCollection extends Command
 {
@@ -16,19 +16,14 @@ class MakeResourceCollection extends Command
                                                               {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a resource collection class for a specified model.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource collection file
-        $resourceFilePath = base_path(config('code-generator.paths.resource', 'App\Http\Resources') . "/{$modelName}/Collection.php");
+        $resourceFilePath = base_path(config('code-generator.paths.default.resource') . "/{$modelName}/Collection.php");
 
-        $this->createDirectoryIfMissing(dirname($resourceFilePath));
+        File::ensureDirectoryExists(dirname($resourceFilePath));
         $content = $this->getReplacedContent($modelName);
 
         // Create or overwrite file and get log the status and message
@@ -40,14 +35,6 @@ class MakeResourceCollection extends Command
     }
 
     /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/resource-collection.stub';
-    }
-
-    /**
      * Get the variables to replace in the stub file.
      *
      * @param string $modelName
@@ -56,9 +43,9 @@ class MakeResourceCollection extends Command
     protected function getStubVariables($modelName): array
     {
         return [
-            'namespace' => config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$modelName}",
+            'namespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource') . "/{$modelName}"),
             'modelName' => $modelName,
-            'resourceNamespace' => config('code-generator.paths.resource', 'App\Http\Resources'),
+            'resourceNamespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource')),
         ];
     }
 
@@ -70,9 +57,7 @@ class MakeResourceCollection extends Command
      */
     protected function getReplacedContent($modelName): string
     {
-        $stubPath = $this->getStubPath();
-
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/resource-collection.stub');
 
         $stubVariables = $this->getStubVariables($modelName);
         foreach ($stubVariables as $search => $replace) {
@@ -80,15 +65,5 @@ class MakeResourceCollection extends Command
         }
 
         return $content;
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
     }
 }

@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -17,17 +18,12 @@ class MakePolicy extends Command
 
     protected $description = 'Generate a policy class for a specified model.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $policyClass = Str::studly($this->argument('model')) . "Policy";
         // Define the path for the policy file
-        $policyFilePath = base_path(config('code-generator.paths.policy', 'App\Policies') . "/{$policyClass}.php");
-        $this->createDirectoryIfMissing(dirname($policyFilePath));
+        $policyFilePath = base_path(config('code-generator.paths.default.policy') . "/{$policyClass}.php");
+        File::ensureDirectoryExists(dirname($policyFilePath));
 
         $content = $this->getReplacedContent($policyClass);
 
@@ -37,14 +33,6 @@ class MakePolicy extends Command
             $content,
             CodeGeneratorFileType::POLICY
         );
-    }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/policy.stub';
     }
 
     /**
@@ -58,10 +46,10 @@ class MakePolicy extends Command
         $relatedModel = $this->argument('model');
 
         return [
-            'namespace'             => config('code-generator.paths.policy', 'App\Policies'),
+            'namespace'             => Helper::convertPathToNamespace(config('code-generator.paths.default.policy')),
             'class'                 => $policyClass,
             'model'                 => Str::studly($relatedModel),
-            'relatedModelNamespace' => "use " . config('code-generator.paths.model', 'App\Models') . "\\" . Str::studly($relatedModel),
+            'relatedModelNamespace' => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\" . Str::studly($relatedModel),
             'modelInstance'         => Str::camel($relatedModel),
         ];
     }
@@ -73,9 +61,9 @@ class MakePolicy extends Command
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/policy.stub');
 
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
@@ -92,17 +80,6 @@ class MakePolicy extends Command
      */
     protected function getReplacedContent($policyClass): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($policyClass));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        // Create the directory if it doesn't exist
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($policyClass));
     }
 }

@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -20,19 +21,14 @@ class MakeFactory extends Command
 
     protected $description = 'Generate a factory file for a given model with optional fields';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the factory file
-        $factoryFilePath = base_path(config('code-generator.paths.factory', 'Database\Factories') . "/{$modelName}Factory.php");
+        $factoryFilePath = base_path(config('code-generator.paths.default.factory') . "/{$modelName}Factory.php");
 
-        $this->createDirectoryIfMissing(dirname($factoryFilePath));
+        File::ensureDirectoryExists(dirname($factoryFilePath));
 
         // Parse fields from the --fields option
         $fields = $this->parseFieldsOption($this->option('fields'));
@@ -45,14 +41,6 @@ class MakeFactory extends Command
             $content,
             CodeGeneratorFileType::FACTORY
         );
-    }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/factory.stub';
     }
 
     /**
@@ -136,8 +124,8 @@ class MakeFactory extends Command
     protected function getStubVariables(string $modelName, array $fields): array
     {
         return [
-            'factoryNamespace'       => config('code-generator.paths.factory', 'Database\Factories'),
-            'relatedModelNamespace'  => config('code-generator.paths.model', 'App\Models') . "\\" . $modelName,
+            'factoryNamespace'       => Helper::convertPathToNamespace(config('code-generator.paths.default.factory')),
+            'relatedModelNamespace'  => Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\" . $modelName,
             'factory'                => $modelName . "Factory",
             'fields'                 => $this->generateFactoryFields($fields),
         ];
@@ -146,13 +134,12 @@ class MakeFactory extends Command
     /**
      * Replace the variables in the stub content with actual values.
      *
-     * @param  string  $stubPath
      * @param  array  $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/factory.stub');
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -169,16 +156,6 @@ class MakeFactory extends Command
      */
     protected function getReplacedContent(string $modelName, array $fields): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($modelName, $fields));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing(string $path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($modelName, $fields));
     }
 }

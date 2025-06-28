@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -20,18 +21,13 @@ class MakeRequest extends Command
 
     protected $description = 'Generate a custom form request with validation rules';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $relatedModelName = Str::studly($this->argument('model'));
 
         // Define the path for the request file
-        $requestFilePath = base_path(config('code-generator.paths.request', 'App\Http\Requests') . "/{$relatedModelName}" . "/Request.php");
-        $this->createDirectoryIfMissing(dirname($requestFilePath));
+        $requestFilePath = base_path(config('code-generator.paths.default.request') . "/{$relatedModelName}" . "/Request.php");
+        File::ensureDirectoryExists(dirname($requestFilePath));
 
         $content = $this->getReplacedContent($relatedModelName);
 
@@ -41,14 +37,6 @@ class MakeRequest extends Command
             $content,
             CodeGeneratorFileType::REQUEST
         );
-    }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/request.stub';
     }
 
     /**
@@ -86,7 +74,7 @@ class MakeRequest extends Command
     {
         $relatedModelName = $this->argument('model');
         return [
-            'namespace'        => config('code-generator.paths.request', 'App\Http\Requests') . '\\' . $relatedModelName,
+            'namespace'        => Helper::convertPathToNamespace(config('code-generator.paths.default.request')) . '\\' . $relatedModelName,
             'class'            => 'Request',
             'validationFields' => $this->getValidationFields(),
         ];
@@ -94,14 +82,13 @@ class MakeRequest extends Command
 
     /**
      * Replace stub variables with actual content.
-     *
-     * @param string $stubPath
+     * 
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/request.stub');
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -117,16 +104,6 @@ class MakeRequest extends Command
      */
     protected function getReplacedContent($relatedModelName): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($relatedModelName));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($relatedModelName));
     }
 }

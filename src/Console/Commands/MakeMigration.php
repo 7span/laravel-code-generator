@@ -4,7 +4,7 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -21,11 +21,6 @@ class MakeMigration extends Command
 
     protected $description = 'Create a custom migration file with optional fields, soft deletes, and deleted by functionality.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $tableName = Str::plural(Str::snake($this->argument('model')));
@@ -33,9 +28,9 @@ class MakeMigration extends Command
 
         // Define the migration file name and path
         $migrationFileName = "{$timestamp}_create_{$tableName}_table.php";
-        $migrationFilePath = base_path(config('code-generator.paths.migration', 'Database\Migrations')) . "/{$migrationFileName}";
+        $migrationFilePath = base_path(config('code-generator.paths.default.migration')) . "/{$migrationFileName}";
 
-        $this->createDirectoryIfMissing(dirname($migrationFilePath));
+        File::ensureDirectoryExists(dirname($migrationFilePath));
 
         $contents = $this->getReplacedContent($tableName);
 
@@ -45,14 +40,6 @@ class MakeMigration extends Command
             $contents,
             CodeGeneratorFileType::MIGRATION
         );
-    }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/migration.stub';
     }
 
     /**
@@ -140,32 +127,21 @@ class MakeMigration extends Command
      */
     protected function getReplacedContent(string $tableName): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($tableName));
+        return $this->getStubContents($this->getStubVariables($tableName));
     }
 
     /**
      * Replace the variables in the stub content with actual values.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/migration.stub');
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
         return $content;
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path)
-    {
-        if (!$this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
     }
 }

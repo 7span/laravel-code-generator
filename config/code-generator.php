@@ -24,21 +24,26 @@ return [
     | with the namespace App\Models\Abc.
     |
     */
-
     'paths' => [
-        'model' => 'App\Models',
-        'migration' => 'Database\Migrations',
-        'factory' => 'Database\Factories',
-        'notification' => 'App\Notifications',
-        'observer' => 'App\Observers',
-        'policy' => 'App\Policies',
-        'service' => 'App\Services',
-        'controller' => 'App\Http\Controllers',
-        'admin_controller' => 'App\Http\Controllers\Admin',
-        'request' => 'App\Http\Requests',
-        'resource' => 'App\Http\Resources',
-        'trait' => 'App\Traits',
+        'default' => [
+            'model' => 'app/Models',
+            'migration' => 'database/migrations',
+            'factory' => 'database/factories',
+            'notification' => 'app/Notifications',
+            'observer' => 'app/Observers',
+            'policy' => 'app/Policies',
+            'service' => 'app/Services',
+            'controller' => 'app/Http/Controllers',
+            'request' => 'app/Http/Requests',
+            'resource' => 'app/Http/Resources',
+            'trait' => 'app/Traits',
+        ],
+        'custom' => [
+            'admin_controller' => 'app/Http/Controllers/Admin',
+        ],
     ],
+
+
 
     /*
     |--------------------------------------------------------------------------

@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -15,19 +16,15 @@ class MakeService extends Command
     protected $signature = 'code-generator:service {model : The name of the service class to generate.}
                                                   {--overwrite : is overwriting this file is selected}';
     protected $description = 'Create a new service class with predefined methods for resource';
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
 
     public function handle()
     {
         $serviceClass = Str::studly($this->argument('model'));
 
         // Define the path for the service file
-        $serviceFilePath = base_path(config('code-generator.paths.service', 'App\Services') . "/{$serviceClass}Service.php");
+        $serviceFilePath = base_path(config('code-generator.paths.default.service') . "/{$serviceClass}Service.php");
 
-        $this->createDirectoryIfMissing(dirname($serviceFilePath));
+        File::ensureDirectoryExists(dirname($serviceFilePath));
 
         $content = $this->getReplacedContent($serviceClass);
 
@@ -42,13 +39,12 @@ class MakeService extends Command
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/service.stub');
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -65,28 +61,8 @@ class MakeService extends Command
     protected function getReplacedContent(string $serviceClass): string
     {
         return $this->getStubContents(
-            $this->getStubPath(),
             $this->getStubVariables($serviceClass)
         );
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing(string $path): void
-    {
-        // Create the directory if it doesn't exist
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
-    }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/service.stub';
     }
 
     /**
@@ -102,8 +78,8 @@ class MakeService extends Command
         $modelInstance = $modelVariable . 'Model';
 
         return [
-            'serviceClassNamespace' => config('code-generator.paths.service', 'App\Services'),
-            'relatedModelNamespace' => "use " . config('code-generator.paths.model', 'App\Models') . "\\{$modelName}",
+            'serviceClassNamespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.service')),
+            'relatedModelNamespace' => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\{$modelName}",
             'serviceClass'          => "{$modelName}Service",
             'modelObject'           => "private {$modelName} \${$modelInstance}",
             'resourceMethod'        => $this->getResourceMethod($modelInstance),

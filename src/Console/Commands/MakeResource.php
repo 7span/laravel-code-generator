@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -17,19 +18,14 @@ class MakeResource extends Command
 
     protected $description = 'Generate a resource class for a specified model.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $modelName = Str::studly($this->argument('model'));
 
         // Define the path for the resource file
-        $resourceFilePath = base_path(config('code-generator.paths.resource', 'App\Http\Resources') . "/{$modelName}/Resource.php");
+        $resourceFilePath = base_path(config('code-generator.paths.default.resource') . "/{$modelName}/Resource.php");
 
-        $this->createDirectoryIfMissing(dirname($resourceFilePath));
+        File::ensureDirectoryExists(dirname($resourceFilePath));
 
         $content = $this->getReplacedContent($modelName);
 
@@ -42,14 +38,6 @@ class MakeResource extends Command
     }
 
     /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/resource.stub';
-    }
-
-    /**
      * Get the variables to replace in the stub file.
      *
      * @param string $modelName
@@ -58,23 +46,22 @@ class MakeResource extends Command
     protected function getStubVariables($modelName): array
     {
         return [
-            'namespace'       => config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$modelName}",
+            'namespace'       => Helper::convertPathToNamespace(config('code-generator.paths.default.resource') . "/{$modelName}"),
             'class'           => 'Resource',
             'modelName'       => $modelName,
-            'relatedModelNamespace'  => "use " . config('code-generator.paths.model', 'App\Models') . "\\{$modelName};",
+            'relatedModelNamespace'  => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model') . "/{$modelName}") . ";",
         ];
     }
 
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/resource.stub');
 
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
@@ -91,16 +78,6 @@ class MakeResource extends Command
      */
     protected function getReplacedContent($modelName): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($modelName));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($modelName));
     }
 }

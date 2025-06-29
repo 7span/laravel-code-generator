@@ -11,8 +11,6 @@ class {{ class }} extends Model
 {
     {{ traits }}
 
-    protected $table = '';
-
     protected $fillable = [
         {{ fillableFields }}
         'created_by',

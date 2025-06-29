@@ -9,7 +9,7 @@ class {{ serviceClass }} {
 
     {{ traits }}
 
-    public function __construct( {{ modelObject }}) {  }
+    public function __construct({{ modelObject }}) {  }
 
     public function collection(array $inputs=null)
     {

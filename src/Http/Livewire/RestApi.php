@@ -810,6 +810,11 @@ class RestApi extends Component
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
+
+        Artisan::call('code-generator:resource-collection', [
+            'model' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
     }
 
     // Generate request file

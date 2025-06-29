@@ -27,7 +27,7 @@ class MakeResourceCollection extends Command
         $content = $this->getReplacedContent($modelName);
 
         // Create or overwrite file and get log the status and message
-        $this->createOrOverwriteFile(
+        $this->saveFile(
             $resourceFilePath,
             $content,
             CodeGeneratorFileType::RESOURCE_COLLECTION

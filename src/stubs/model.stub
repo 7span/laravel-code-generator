@@ -24,8 +24,8 @@ class {{ class }} extends Model
     protected function casts()
     {
         return [
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
             {{ deletedAt }}
         ];
     }

@@ -82,7 +82,7 @@ class MakeModel extends Command
                 : '',
             'relation' => $relationMethods,
             'fillableFields' => $this->getFillableFields($this->option('fields')),
-            'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'datetime'," : '',
+            'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'timestamp'," : '',
             'deletedBy' => $isSoftDeleteIncluded ? "'deleted_by'," : '',
             'hiddenFields' => implode(', ', $hiddenFields),
         ];

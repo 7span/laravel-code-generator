@@ -108,20 +108,30 @@ class Helper
                 continue;
             }
 
-                if (preg_match('/`?(\w+)`?\s+(\w+)/', trim($col), $colMatch)) {
-                   $columnName = $colMatch[1];
+                // Match column name and data type
+            if (preg_match('/`?(\w+)`?\s+(\w+)(\s*\(([^)]*)\))?/i', $col, $colMatch)) {
+                $columnName = $colMatch[1];
+                $dataType = strtolower($colMatch[2]);
 
-                // If the line contains only a primary key constraint (not inline), skip it
-                if (preg_match('/^PRIMARY\s+KEY/i', $col)) {
-                    continue;
+                $field = [
+                    'id' => Str::random(),
+                    'column_name' => Str::lower($columnName),
+                    'data_type' => $dataType,
+                    'is_fillable' => true,
+                    'column_validation' => 'required',
+                ];
+
+                // Extract ENUM or SET values
+                if (in_array($dataType, ['enum', 'set']) && preg_match('/\((.*?)\)/', $col, $enumMatch)) {
+                    // Clean up values (remove quotes and spaces)
+                    $values = array_map(
+                        fn($v) => trim($v, " '\""),
+                        explode(',', $enumMatch[1])
+                    );
+                    $field['enum_values'] = implode(',', $values);
                 }
-                    $result['fields'][] = [
-                        'id' => Str::random(),
-                        'column_name' => Str::lower($columnName),
-                        'data_type' => Str::lower($colMatch[2]),
-                        'is_fillable' => true,
-                        'column_validation' => 'required',
-                    ];
+
+                $result['fields'][] = $field;
                 }
             }
         }

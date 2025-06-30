@@ -33,13 +33,13 @@ return [
             'observer' => 'app/Observers',
             'policy' => 'app/Policies',
             'service' => 'app/Services',
-            'controller' => 'app/Http/Controllers',
+            'controller' => 'app/Http/Controllers/Api',
             'request' => 'app/Http/Requests',
             'resource' => 'app/Http/Resources',
             'trait' => 'app/Traits',
         ],
         'custom' => [
-            'admin_controller' => 'app/Http/Controllers/Admin',
+            'admin_controller' => 'app/Http/Controllers/Api/Admin',
         ],
     ],
 

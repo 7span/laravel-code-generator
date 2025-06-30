@@ -78,8 +78,7 @@ class MakeModel extends Command
             'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(
                 fn($model) => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\$model;",
                 $relatedModelImports
-            ))
-                : '',
+            )) : '',
             'relation' => $relationMethods,
             'fillableFields' => $this->getFillableFields($this->option('fields')),
             'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'timestamp'," : '',
@@ -180,7 +179,7 @@ class MakeModel extends Command
                 Str::camel(Str::plural($relation['related_model'])) :
                 Str::camel($relation['related_model']);
 
-            $method = self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
+            $method = 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
 
             if (in_array($relationType, ['hasOneThrough', 'hasManyThrough'])) {
                 $args = [
@@ -209,7 +208,7 @@ class MakeModel extends Command
             $methods[] = $method;
         }
 
-        return rtrim(implode(PHP_EOL, $methods));
+        return rtrim(implode(PHP_EOL . self::INDENT, $methods));
     }
 
     /**

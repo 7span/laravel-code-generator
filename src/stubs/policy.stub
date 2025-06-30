@@ -2,9 +2,9 @@
 
 namespace {{ namespace }};
 
-use Illuminate\Auth\Access\Response;
-{{ relatedModelNamespace }};
 use App\Models\User;
+{{ relatedModelNamespace }};
+use Illuminate\Auth\Access\Response;
 
 class {{ class }}
 {

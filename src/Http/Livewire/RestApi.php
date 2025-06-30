@@ -844,7 +844,7 @@ class RestApi extends Component
     private  function copyTraits(array $selectedTraits): void
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
-        $destination = base_path(Helper::convertPathToNamespace('code-generator.paths.default.trait'));
+        $destination = base_path(Helper::convertPathToNamespace(config('code-generator.paths.default.trait')));
 
         if (!File::exists($source)) {
             return;
@@ -886,8 +886,8 @@ class RestApi extends Component
         if ($value) {
             $this->columnNames = [];
             $this->columnNames = Helper::getColumnNamesByModel($value);
-            $this->reset('foreign_key');
         }
+        $this->reset('foreign_key');
     }
 
     // loads intermediate fields when intermediate model changes

@@ -22,8 +22,8 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_policy_file_added">
-                    <span class="ml-2 text-sm">Policy</span>
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_files_checked">
+                    <span class="ml-2 text-sm">Select All Files</span>
                 </label>
             </div>
         </div>
@@ -42,14 +42,8 @@
             </div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_notification_file_added">
-                    <span class="ml-2 text-sm">Notification</span>
-                </label>
-            </div>
-            <div class="mb-2">
-                <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_files_checked">
-                    <span class="ml-2 text-sm">Select All Files</span>
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_policy_file_added">
+                    <span class="ml-2 text-sm">Policy</span>
                 </label>
             </div>
         </div>

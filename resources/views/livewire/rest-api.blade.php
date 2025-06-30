@@ -121,11 +121,10 @@
     </div>
 
     <!-- Modals -->
+    <x-code-generator::delete-modal :$isDeleteModalOpen :$deleteModalTitle
+        :$deleteModalMessage :$deleteModalAction />
     <x-code-generator::add-relation-modal :$relationTypes :$isEditing />
     <x-code-generator::add-new-field-modal :$isEditing />
-    <x-code-generator::delete-relation-modal />
-    <x-code-generator::delete-field-modal />
     <x-code-generator::reset-form-modal />
     <x-code-generator::notification-modal :$isEditing />
-    <x-code-generator::delete-notification-modal />
 </div>

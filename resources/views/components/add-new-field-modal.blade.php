@@ -1,4 +1,4 @@
-<div wire:show="isAddFieldModalOpen" x-data x-cloak x-transition.duration.200ms
+<div wire:show="isAddFieldModalOpen" x-data="{ isEnumOrSet: $wire.entangle('data_type').live }" x-cloak x-transition.duration.200ms
     x-on:click.self="$wire.isAddFieldModalOpen=false"
     class="fixed top-0 left-0 flex items-center justify-center w-full h-full bg-gray-500 bg-opacity-50 z-50">
     <x-code-generator::modal :modalTitle="$isEditing ? 'Update Field' : 'Add Field'">
@@ -20,15 +20,25 @@
             </div>
 
             <!-- Data Type -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
-                <select id="column_type" class="w-full border rounded-md p-2" name="data_type"
-                    wire:model.live="data_type">
-                    <x-code-generator::data-type-option />
-                </select>
-                @error('data_type')
-                <span class="text-red-600 text-sm">{{ $message }}</span>
-                @enderror
+            <div class="flex items-start">
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
+                    <select id="column_type" class="w-full border rounded-md p-2" name="data_type"
+                        wire:model.live="data_type">
+                        <x-code-generator::data-type-option />
+                    </select>
+                    @error('data_type')
+                    <span class="text-red-600 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Enum Values Textbox -->
+                <div class="w-1/2 ml-4" x-show="isEnumOrSet === 'enum' || isEnumOrSet === 'set'">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Enum/Set Values</label>
+                    <input type="text" placeholder="e.g., value1,value2,value3" wire:model.live="enum_values"
+                        class="w-full border rounded-md p-2 placeholder:text-gray-400 placeholder:text-[16px]" />
+                    <p class="text-xs italic text-gray-500 mt-1">Enter comma-separated values for ENUM or SET.</p>
+                </div>
             </div>
 
             <!-- Validation -->

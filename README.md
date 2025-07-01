@@ -48,6 +48,10 @@ This package is designed to **accelerate API development** in Laravel by providi
 
 ---
 
+## 📽️ Demo
+
+   [![Watch the demo]](https://www.loom.com/share/631c4dbc840d475ea4516a8dafcc5b80)
+
 ## 🖥️ Usage
 
 1. **Access the UI**

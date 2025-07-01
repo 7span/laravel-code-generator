@@ -125,7 +125,12 @@ class MakeMigration extends Command
 
                 $foreignLine .= ';';
                 $fieldLines[] = $foreignLine;
-            } else {
+            } elseif (in_array($type, ['enum', 'set']) && !empty($field['enum_values'])) {
+            $enumValues = array_map(fn($val) => "'".trim($val)."'", explode(',', $field['enum_values']));
+            $valuesString = '[' . implode(', ', $enumValues) . ']';
+            $fieldLines[] = "\$table->{$type}('{$name}', {$valuesString});";
+            }
+            else {
                 $fieldLines[] = "\$table->{$type}('{$name}');";
             }
         }

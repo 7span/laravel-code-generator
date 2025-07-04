@@ -67,56 +67,81 @@ class MakeMigration extends Command
     protected function parseFieldsAndForeignKeys(): string
     {
         $fieldsOption = $this->option('fields');
-
-
         if (empty($fieldsOption)) {
             return '';
         }
 
-        $fieldLines = [];
+        $primaryLine = '';
+        $foreignKeyLines = [];
+        $mainFieldLines = [];
+        $auditFieldLines = [];
+        $timestampLine = '';
+        $softDeleteLine = '';
+
+        $auditFields = ['created_by', 'updated_by', 'deleted_by'];
+        $skipFields = array_merge(['id', 'created_at', 'updated_at', 'deleted_at'], $auditFields);
 
         foreach ($fieldsOption as $field) {
             $name = $field['column_name'] ?? null;
             $type = $field['data_type'] ?? 'string';
             $isForeignKey = $field['is_foreign_key'] ?? false;
-            if (!$name) {
+
+            if (!$name) continue;
+
+            if ($name === 'id') {
+                $primaryLine = "\$table->id();";
+                continue;
+            }
+            if ($name === 'created_at' || $name === 'updated_at') {
+                $timestampLine = "\$table->timestamps();";
                 continue;
             }
             if ($name === 'deleted_at') {
-                $fieldLines[] = "\$table->softDeletes();";
+                $softDeleteLine = "\$table->softDeletes();";
                 continue;
             }
-            if ($name === 'deleted_by') {
-                $fieldLines[] = "\$table->integer('deleted_by')->nullable();";
+
+            if (in_array($name, $auditFields, true)) {
+                $auditFieldLines[array_search($name, $auditFields, true)] = "\$table->{$type}('{$name}')->nullable();";
                 continue;
             }
 
             if ($isForeignKey && isset($field['foreign_model_name'])) {
-
                 $relatedModel = $field['foreign_model_name'];
                 $referenceKey = $field['referenced_column'] ?? 'id';
                 $relatedTable = Str::snake(Str::plural($relatedModel));
                 $foreignLine = "\$table->foreignId('{$name}')->references('{$referenceKey}')->on('{$relatedTable}')";
 
-                // Add ON DELETE action if provided
                 if (!empty($field['on_delete_action'])) {
                     $action = strtolower($field['on_delete_action']);
                     $foreignLine .= "->onDelete('{$action}')";
                 }
-
-                // Add ON UPDATE action if provided
                 if (!empty($field['on_update_action'])) {
                     $action = strtolower($field['on_update_action']);
                     $foreignLine .= "->onUpdate('{$action}')";
                 }
-
                 $foreignLine .= ';';
-                $fieldLines[] = $foreignLine;
-            } else {
-                $fieldLines[] = "\$table->{$type}('{$name}');";
+                $foreignKeyLines[] = $foreignLine;
+                continue;
+            }
+
+            if (!in_array($name, $skipFields, true)) {
+                $mainFieldLines[] = "\$table->{$type}('{$name}');";
             }
         }
-        return implode(PHP_EOL . SELF::INDENT . SELF::INDENT . SELF::INDENT, $fieldLines);
+
+        $allLines = [];
+        if ($primaryLine) {
+            $allLines[] = $primaryLine;
+        }
+        $allLines = array_merge($allLines, $foreignKeyLines, $mainFieldLines, $auditFieldLines);
+        if ($softDeleteLine) {
+            $allLines[] = $softDeleteLine;
+        }
+        if ($timestampLine) {
+            $allLines[] = $timestampLine;
+        }
+        return implode(PHP_EOL . self::INDENT . self::INDENT . self::INDENT, $allLines);
     }
 
     /**

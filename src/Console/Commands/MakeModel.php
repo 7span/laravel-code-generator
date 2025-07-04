@@ -98,13 +98,26 @@ class MakeModel extends Command
         if ($fieldsOption) {
             $fields = explode(',', $fieldsOption);
             $fieldNames = [];
+            $hasDeletedBy = false;
 
             foreach ($fields as $field) {
                 $fieldName = trim(explode(':', $field)[0]);
-                if (in_array($fieldName, ['deleted_at'])) {
+                if ($fieldName === 'deleted_at') {
                     continue;
                 }
-                $fieldNames[] = "'" . trim($fieldName) . "',";
+                if ($fieldName === 'deleted_by') {
+                    $hasDeletedBy = true;
+                    continue;
+                }
+                if (!in_array($fieldName, ['created_by', 'updated_by'])) {
+                    $fieldNames[] = "'" . $fieldName . "',";
+                }
+            }
+
+            $fieldNames[] = "'created_by',";
+            $fieldNames[] = "'updated_by',";
+            if ($hasDeletedBy) {
+                $fieldNames[] = "'deleted_by',";
             }
 
             $fillableFields = implode("\n        ", $fieldNames);

@@ -660,6 +660,7 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
+        $allFields = array_merge($this->getDefaultFields(), $this->fieldsData);
 
         // Prepare selected methods
         $selectedMethods = array_filter([
@@ -679,7 +680,7 @@ class RestApi extends Component
         }
 
         if ($this->is_migration_file_added) {
-            $this->generateMigration($this->model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
+            $this->generateMigration($this->model_name, $allFields, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
 
         $this->generateController($this->model_name, $selectedMethods, $this->is_service_file_added, $this->is_resource_file_added, $this->is_request_file_added, $this->is_overwrite_files, $this->is_admin_crud_added);

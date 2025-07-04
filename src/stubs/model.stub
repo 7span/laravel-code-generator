@@ -12,8 +12,6 @@ class {{ class }} extends Model
 
     protected $fillable = [
         {{ fillableFields }}
-        'created_by',
-        'updated_by',
     ];
 
     protected $hidden = [{{ hiddenFields }}];

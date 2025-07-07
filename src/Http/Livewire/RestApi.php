@@ -694,7 +694,7 @@ class RestApi extends Component
         }
 
         if ($this->is_service_file_added) {
-            $this->generateService($this->model_name, $this->is_overwrite_files);
+            $this->generateService($this->model_name, $this->is_overwrite_files, $selectedTraits);
         }
 
         if ($this->is_notification_file_added) {
@@ -781,10 +781,11 @@ class RestApi extends Component
     }
 
     // Generate service file
-    private function generateService($modelName, $overwrite)
+    private function generateService($modelName, $overwrite, $selectedTraits)
     {
         Artisan::call('code-generator:service', [
             'model' => $modelName,
+            '--traits' => implode(',', $selectedTraits),
             '--overwrite' => $overwrite
         ]);
     }

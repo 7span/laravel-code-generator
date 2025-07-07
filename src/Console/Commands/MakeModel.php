@@ -149,13 +149,18 @@ class MakeModel extends Command
         }
 
         // Add custom traits if specified
-        $customTraits = $this->option('traits');
-        if ($customTraits) {
-            foreach (explode(',', $customTraits) as $trait) {
+        $selectedTraits = $this->option('traits');
+        if ($selectedTraits) {
+            $allowedTraits = ['BaseModel', 'BootModel', 'SoftDeletes'];
+            foreach (explode(',', $selectedTraits) as $trait) {
                 $trait = trim($trait);
-                $traitUseStatements[] = 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\$trait;";
-                $traitNames[] = $trait;
+                if (in_array($trait, $allowedTraits)) {
+                    $traitUseStatements[] = 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\$trait;";
+                    $traitNames[] = $trait;
+                }
             }
+            $traitNames[] = 'HasFactory';
+            $traitUseStatements[] = 'use Illuminate\Database\Eloquent\Factories\HasFactory;';
         }
 
         return [

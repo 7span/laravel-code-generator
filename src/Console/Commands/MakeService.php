@@ -81,13 +81,15 @@ class MakeService extends Command
         return [
             'serviceClassNamespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.service')),
             'relatedModelNamespace' => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\{$modelName}",
-            'traitNameSpaces'       => $this->getTraitNameSpaces(),
+            'traitNameSpaces'       => str_contains($this->option('traits'), 'PaginationTrait')
+                ? "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\PaginationTrait;"
+                : '',
             'serviceClass'          => "{$modelName}Service",
             'modelObject'           => "private {$modelName} \${$modelObj}",
             'modelInstance'         => "\$" . $modelVariable,
-            'traits' => strpos($this->option('traits'), 'PaginationTrait') !== false
-                ? 'use BaseModel, PaginationTrait;'
-                : 'use BaseModel;',
+            'traits'                => str_contains($this->option('traits'), 'PaginationTrait')
+                ? 'use PaginationTrait;'
+                : '',
             'resourceMethod'        => $this->getResourceMethod($modelObj),
             'collectionMethod'      => $this->getCollectionMethod($modelVariable, $modelObj),
             'storeMethod'           => $this->getStoreMethod($modelVariable, $modelObj),
@@ -95,29 +97,6 @@ class MakeService extends Command
             'deleteMethod'          => $this->getDeleteMethod($modelVariable),
         ];
     }
-
-
-    /**
-     * Get the trait namespaces based on the 'traits' option.
-     *
-     * @return string
-     */
-    protected function getTraitNameSpaces(): string
-    {
-        $traits = $this->option('traits');
-        if (!$traits) {
-            return '';
-        }
-
-        $traitList = array_filter(array_map('trim', explode(',', $traits)));
-        if (!$traitList) {
-            return '';
-        }
-
-        $namespace = Helper::convertPathToNamespace(config('code-generator.paths.default.trait'));
-        return implode(PHP_EOL, array_map(fn($trait) => "use {$namespace}\\{$trait};", $traitList));
-    }
-
 
     /**
      * Generate the resource method for the service.

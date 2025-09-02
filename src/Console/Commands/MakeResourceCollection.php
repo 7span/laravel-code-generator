@@ -13,21 +13,26 @@ class MakeResourceCollection extends Command
 {
     use FileManager;
     protected $signature = 'code-generator:resource-collection {model : The name of the model for the resource collection}
-                                                              {--overwrite : is overwriting this file is selected}';
+                                                               {--adminCrud : is admin crud is selected}
+                                                               {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a resource collection class for a specified model.';
 
     public function handle()
     {
         $modelName = Str::studly($this->argument('model'));
+        $adminCrud = $this->option('adminCrud');
+        $this->generateResourceCollection($modelName);
+        if ($adminCrud) {
+            $this->generateResourceCollection($modelName, true);
+        }
+    }
 
-        // Define the path for the resource collection file
-        $resourceFilePath = base_path(config('code-generator.paths.default.resource') . "/{$modelName}/Collection.php");
-
+    protected function generateResourceCollection(string $relatedModelName, bool $isAdminCrudIncluded = false): void
+    {
+        $resourceFilePath = base_path(config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/") . "{$relatedModelName}" . "/Collection.php");
         File::ensureDirectoryExists(dirname($resourceFilePath));
-        $content = $this->getReplacedContent($modelName);
-
-        // Create or overwrite file and get log the status and message
-        $this->createOrOverwriteFile(
+        $content = $this->getReplacedContent($relatedModelName, $isAdminCrudIncluded);
+        $this->saveFile(
             $resourceFilePath,
             $content,
             CodeGeneratorFileType::RESOURCE_COLLECTION
@@ -38,12 +43,14 @@ class MakeResourceCollection extends Command
      * Get the variables to replace in the stub file.
      *
      * @param string $modelName
+     * @param bool $isAdminCrudIncluded
      * @return array
      */
-    protected function getStubVariables($modelName): array
+    protected function getStubVariables($modelName, bool $isAdminCrudIncluded = false): array
     {
+        $namespace = config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/");
         return [
-            'namespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource') . "/{$modelName}"),
+            'namespace' => Helper::convertPathToNamespace($namespace) . '\\' . $modelName,
             'modelName' => $modelName,
             'resourceNamespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource')),
         ];
@@ -53,13 +60,14 @@ class MakeResourceCollection extends Command
      * Generate the final content for the resource collection file.
      *
      * @param string $modelName
+     * @param bool $isAdminCrudIncluded
      * @return string
      */
-    protected function getReplacedContent($modelName): string
+    protected function getReplacedContent($modelName, bool $isAdminCrudIncluded = false): string
     {
         $content = file_get_contents(__DIR__ . '/../../stubs/resource-collection.stub');
 
-        $stubVariables = $this->getStubVariables($modelName);
+        $stubVariables = $this->getStubVariables($modelName, $isAdminCrudIncluded);
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }

@@ -17,6 +17,7 @@ class MakeRequest extends Command
 
     protected $signature = 'code-generator:request  {model : The related model for the observer.}
                                                    {--rules= :comma seperated list of rules (e.g, Name:required,email:nullable )} 
+                                                   {--adminCrud : is admin crud is selected}
                                                    {--overwrite : is overwriting this file is selected}';
 
     protected $description = 'Generate a custom form request with validation rules';
@@ -24,20 +25,27 @@ class MakeRequest extends Command
     public function handle()
     {
         $relatedModelName = Str::studly($this->argument('model'));
+        $adminCrud = $this->option('adminCrud');
 
-        // Define the path for the request file
-        $requestFilePath = base_path(config('code-generator.paths.default.request') . "/{$relatedModelName}" . "/Request.php");
+        $this->generateRequest($relatedModelName);
+        if ($adminCrud) {
+            $this->generateRequest($relatedModelName, true);
+        }
+    }
+
+    protected function generateRequest(string $relatedModelName, bool $isAdminCrudIncluded = false): void
+    {
+        $requestFilePath = base_path(config('code-generator.paths.default.request') . ($isAdminCrudIncluded ? "/Admin/" : "/") . "{$relatedModelName}" . "/Request.php");
         File::ensureDirectoryExists(dirname($requestFilePath));
+        $content = $this->getReplacedContent($relatedModelName, $isAdminCrudIncluded);
 
-        $content = $this->getReplacedContent($relatedModelName);
-
-        // Create or overwrite file and get log the status and message
         $this->saveFile(
             $requestFilePath,
             $content,
             CodeGeneratorFileType::REQUEST
         );
     }
+
 
     /**
      * Generate validation rules fields from command options.
@@ -70,11 +78,12 @@ class MakeRequest extends Command
      * @param string $relatedModelName
      * @return array
      */
-    protected function getStubVariables($relatedModelName): array
+    protected function getStubVariables($relatedModelName, bool $isAdminCrudIncluded = false): array
     {
         $relatedModelName = $this->argument('model');
+        $namespace = config('code-generator.paths.default.request') . ($isAdminCrudIncluded ? "/admin/" : "/");
         return [
-            'namespace'        => Helper::convertPathToNamespace(config('code-generator.paths.default.request')) . '\\' . $relatedModelName,
+            'namespace'        => Helper::convertPathToNamespace($namespace) . '\\' . $relatedModelName,
             'class'            => 'Request',
             'validationFields' => $this->getValidationFields(),
         ];
@@ -102,8 +111,8 @@ class MakeRequest extends Command
      * @param string $relatedModelName
      * @return string
      */
-    protected function getReplacedContent($relatedModelName): string
+    protected function getReplacedContent($relatedModelName, bool $isAdminCrudIncluded = false): string
     {
-        return $this->getStubContents($this->getStubVariables($relatedModelName));
+        return $this->getStubContents($this->getStubVariables($relatedModelName, $isAdminCrudIncluded));
     }
 }

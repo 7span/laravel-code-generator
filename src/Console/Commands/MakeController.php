@@ -43,8 +43,6 @@ class MakeController extends Command
     {
         $controllerClassName = Str::studly($modelName) . 'Controller';
 
-        // Determine controller path (normal or admin)
-        $pathKey = $isAdminCrudIncluded ? 'admin_controller' : 'controller';
         $controllerPath = $isAdminCrudIncluded
             ? config("code-generator.paths.custom.admin_controller")
             : config("code-generator.paths.default.controller");
@@ -100,7 +98,8 @@ class MakeController extends Command
         bool $includeServiceFile,
         bool $includeRequestFile,
         bool $includeResourceFile,
-        string $className
+        string $className,
+        bool $isAdminCrudIncluded
     ): string {
         $additionalUseStatements = [];
 
@@ -114,16 +113,20 @@ class MakeController extends Command
         // Add request file use statement
         $mainContent = str_replace(
             '{{ request }}',
-            $includeRequestFile ? 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.request')) . "\\{$className}\\Request as {$className}Request;" : '',
+            $includeRequestFile
+                ? 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.request'))
+                . ($isAdminCrudIncluded ? '\\Admin' : '')
+                . "\\{$className}\\Request as {$className}Request;"
+                : '',
             $mainContent
         );
 
         // Add resource file use statements
         $includeResourceFile ? array_push(
             $additionalUseStatements,
-            'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . "\\{$className}\\Resource as {$className}Resource;",
-            'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . "\\{$className}\\Collection as {$className}Collection;"
-        ) : null;
+            'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . ($isAdminCrudIncluded ? '\\Admin' : '') . "\\{$className}\\Resource as {$className}Resource;",
+            'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . ($isAdminCrudIncluded ? '\\Admin' : '') . "\\{$className}\\Collection as {$className}Collection;"
+        ) : '';
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
 
@@ -150,7 +153,6 @@ class MakeController extends Command
         $singularObj = '$' . $singularInstance . 'Obj';
 
         $methods = $isAdminCrudIncluded ?  ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
-        $methods = $isAdminCrudIncluded ? ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
         // Replace stub variables in base content
         foreach ($stubVariables as $search => $replace) {
             $mainContent = str_replace('{{ ' . $search . ' }}', $replace, $mainContent);
@@ -175,7 +177,8 @@ class MakeController extends Command
             $includeServiceFile,
             $includeRequestFile,
             $includeResourceFile,
-            $className
+            $className,
+            $isAdminCrudIncluded
         );
 
         // Append methods

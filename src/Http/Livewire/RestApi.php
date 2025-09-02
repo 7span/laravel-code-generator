@@ -237,7 +237,7 @@ class RestApi extends Component
     public function updatedIsForeignKey($value)
     {
         if ($value) {
-            $this->tableNames = Helper::getTableNamesFromMigrations();
+            $this->tableNames = Helper::getTableNamesFromDB();
         } else {
             $this->foreign_model_name = '';
             $this->referenced_column = '';
@@ -302,7 +302,7 @@ class RestApi extends Component
     {
         if ($value) {
             $this->relationTypes = Helper::getRelationTypes();
-            $this->modelNames = Helper::getModelName();
+            $this->modelNames = Helper::getModelNames();
         }
     }
 
@@ -660,7 +660,6 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
-
         // Prepare selected methods
         $selectedMethods = array_filter([
             $this->is_index_method_added ? 'index' : null,
@@ -701,11 +700,11 @@ class RestApi extends Component
         }
 
         if ($this->is_resource_file_added) {
-            $this->generateResource($this->model_name, $this->is_overwrite_files);
+            $this->generateResource($this->model_name,  $this->is_overwrite_files, $this->is_admin_crud_added);
         }
 
         if ($this->is_request_file_added) {
-            $this->generateRequest($this->model_name, $this->fieldsData, $this->is_overwrite_files);
+            $this->generateRequest($this->model_name, $this->fieldsData, $this->is_admin_crud_added, $this->is_overwrite_files);
         }
 
         if ($this->is_factory_file_added) {
@@ -804,16 +803,24 @@ class RestApi extends Component
     }
 
     // Generate resource file
-    private function generateResource($modelName, $overwrite)
+    private function generateResource($modelName, $overwrite, $adminCrud)
     {
         Artisan::call('code-generator:resource', [
             'model' => $modelName,
+            '--adminCrud' => $adminCrud,
+            '--overwrite' => $overwrite
+        ]);
+
+        Artisan::call('code-generator:resource-collection', [
+            'model' => $modelName,
+            '--adminCrud' => $adminCrud,
             '--overwrite' => $overwrite
         ]);
     }
 
+
     // Generate request file
-    private function generateRequest($modelName, $fields, $overwrite)
+    private function generateRequest($modelName, $fields, $adminCrud, $overwrite)
     {
         $ruleString = implode(',', array_map(function ($field) {
             return $field['column_name'] . ':' . $field['column_validation'];
@@ -822,6 +829,7 @@ class RestApi extends Component
         Artisan::call('code-generator:request', [
             'model' => $modelName,
             '--rules' => $ruleString,
+            '--adminCrud' => $adminCrud,
             '--overwrite' => $overwrite
         ]);
     }
@@ -875,7 +883,7 @@ class RestApi extends Component
     {
         if ($value) {
             $this->fieldNames = [];
-            $this->fieldNames = Helper::getColumnNamesByTable($value);
+            $this->fieldNames = Helper::getColumnsOfTable($value);
             $this->reset(['referenced_column']);
         }
     }
@@ -885,7 +893,7 @@ class RestApi extends Component
     {
         if ($value) {
             $this->columnNames = [];
-            $this->columnNames = Helper::getColumnNamesByModel($value);
+            $this->columnNames = Helper::getColumnsOfModel($value);
         }
         $this->reset('foreign_key');
     }
@@ -895,7 +903,7 @@ class RestApi extends Component
     {
         if ($value) {
             $this->intermediateFields = []; // Always reset first
-            $this->intermediateFields = Helper::getColumnNamesByModel($value);
+            $this->intermediateFields = Helper::getColumnsOfModel($value);
             $this->reset('intermediate_foreign_key', 'intermediate_local_key'); // Reset intermediate keys
         }
     }

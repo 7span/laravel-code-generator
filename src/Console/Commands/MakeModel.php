@@ -136,11 +136,6 @@ class MakeModel extends Command
         $traitUseStatements = [];
         $traitNames = [];
 
-        // Add HasFactory trait if factory file is included
-        if ($isFactoryIncluded) {
-            $traitUseStatements[] = 'use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;';
-            $traitNames[] = 'HasFactory';
-        }
 
         // Add SoftDeletes trait if soft delete is included
         if ($softDeleteIncluded) {
@@ -159,8 +154,11 @@ class MakeModel extends Command
                     $traitNames[] = $trait;
                 }
             }
-            $traitNames[] = 'HasFactory';
-            $traitUseStatements[] = 'use Illuminate\Database\Eloquent\Factories\HasFactory;';
+           // Add HasFactory trait if factory file is included
+            if ($isFactoryIncluded) {
+                $traitUseStatements[] = 'use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;';
+                $traitNames[] = 'HasFactory';
+            }
         }
 
         return [

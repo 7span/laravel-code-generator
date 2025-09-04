@@ -44,8 +44,6 @@ class MakeResourceCollection extends Command
     {
         return [
             'namespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource') . "/{$modelName}"),
-            'modelName' => $modelName,
-            'resourceNamespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource')),
         ];
     }
 

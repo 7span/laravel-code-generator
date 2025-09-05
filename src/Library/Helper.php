@@ -109,22 +109,59 @@ class Helper
         ];
 
         // Extract model name
-        if (preg_match('/CREATE\s+TABLE\s+`?(\w+)`?/i', $sql, $tableMatch)) {
-            $result['model_name'] = Str::singular(ucfirst($tableMatch[1]));
+        if (preg_match_all('/CREATE\s+TABLE\s+`?(\w+)`?/i', $sql, $tableMatch)) {
+            if (count($tableMatch[1]) > 1) {
+                return [
+                    'error' => 'Multiple table names detected: ' . implode(', ', $tableMatch[1])
+                ];
+            }
+
+            $result['model_name'] = Str::singular(ucfirst($tableMatch[1][0]));
         }
 
         // Extract columns
         if (preg_match('/\((.*)\)/s', $sql, $matches)) {
-            $columnsRaw = explode(',', $matches[1]);
+            // Split by commas, ignoring commas inside parentheses
+            $columnsRaw = preg_split('/,(?![^(]*\))/', $matches[1]);
 
             foreach ($columnsRaw as $col) {
-                if (preg_match('/`?(\w+)`?\s+(\w+)/', trim($col), $colMatch)) {
-                    $result['fields'][] = [
+                $col = trim($col);
+
+                // Match column name and data type
+                if (preg_match('/`?(\w+)`?\s+(\w+)(\s*\(([^)]*)\))?/i', $col, $colMatch)) {
+                    $columnName = $colMatch[1];
+                    $dataType = strtolower($colMatch[2]);
+
+                    $field = [
                         'id' => Str::random(),
-                        'column_name' => Str::snake($colMatch[1]),
-                        'data_type' => Str::lower($colMatch[2]),
+                        'column_name' => Str::lower($columnName),
+                        'data_type' => $dataType,
+                        'is_fillable' => true,
                         'column_validation' => 'required',
                     ];
+
+                    // Extract ENUM or SET values
+                    if (in_array($dataType, ['enum', 'set']) && preg_match('/\((.*?)\)/', $col, $enumMatch)) {
+                        $values = array_map(fn($v) => trim($v, " '\""), explode(',', $enumMatch[1]));
+                        $field['enum_values'] = implode(',', $values);
+                    }
+
+                    // Extract inline foreign key if exists
+                    if (preg_match('/REFERENCES\s+`?(\w+)`?\s*\(`?(\w+)`?\)/i', $col, $fkMatch)) {
+                        $field['is_foreign_key'] = true;
+                        $field['foreign_model_name'] = $fkMatch[1];
+                        $field['referenced_column'] = $fkMatch[2];
+
+                        // Match ON UPDATE and ON DELETE actions
+                        if (preg_match('/ON\s+UPDATE\s+([A-Z\s]+)/i', $col, $onUpdateMatch)) {
+                            $field['on_update_action'] = strtolower(trim($onUpdateMatch[1]));
+                        }
+                        if (preg_match('/ON\s+DELETE\s+([A-Z\s]+)/i', $col, $onDeleteMatch)) {
+                            $field['on_delete_action'] = strtolower(trim($onDeleteMatch[1]));
+                        }
+                    }
+
+                    $result['fields'][] = $field;
                 }
             }
         }

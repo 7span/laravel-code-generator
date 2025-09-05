@@ -251,6 +251,11 @@ class RestApi extends Component
     public function prefillQuery()
     {
         $result = Helper::parseCreateTable($this->query);
+        if (isset($result['error'])) {
+        $this->addError('prefill', $result['error']);
+        $this->successMessage = null;
+        return;
+        }
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];

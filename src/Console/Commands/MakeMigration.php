@@ -102,7 +102,7 @@ class MakeMigration extends Command
             }
 
             if (in_array($name, $auditFields, true)) {
-                $auditFieldLines[array_search($name, $auditFields, true)] = "\$table->{$type}('{$name}')->nullable();";
+                $auditFieldLines[array_search($name, $auditFields, true)] = "\$table->integer('{$name}')->nullable();";
                 continue;
             }
 

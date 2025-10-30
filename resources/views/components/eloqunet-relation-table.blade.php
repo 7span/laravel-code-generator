@@ -27,7 +27,7 @@
                 <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_foreign_key'] ?? '-'}}</td>
                 <td class="px-4 py-2 text-gray-600">{{$relation['intermediate_local_key'] ?? '-'}}</td>
                 <td class="px-4 py-2 flex items-center">
-                    <button wire:click="openDeleteModal('{{ $relation['id'] }}')" class="text-red-500">
+                    <button wire:click="openDeleteRelationModal('{{ $relation['id'] }}')" class="text-red-500">
                         <x-code-generator::delete-svg />
                     </button>
                     <button wire:click="openEditRelationModal('{{ $relation['id'] }}')" class="text-red-500">

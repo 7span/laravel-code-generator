@@ -122,12 +122,14 @@ class MakeMigration extends Command
                     $foreignLine .= "->onUpdate('{$action}')";
                 }
                 $foreignLine .= ';';
-                $foreignKeyLines[] = $foreignLine;
-                continue;
+                $fieldLines[] = $foreignLine;
+            } elseif (in_array($type, ['enum', 'set']) && !empty($field['enum_values'])) {
+            $enumValues = array_map(fn($val) => "'".trim($val)."'", explode(',', $field['enum_values']));
+            $valuesString = '[' . implode(', ', $enumValues) . ']';
+            $fieldLines[] = "\$table->{$type}('{$name}', {$valuesString});";
             }
-
-            if (!in_array($name, $skipFields, true)) {
-                $mainFieldLines[] = "\$table->{$type}('{$name}');";
+            else {
+                $fieldLines[] = "\$table->{$type}('{$name}');";
             }
         }
 

@@ -6,6 +6,7 @@
                     <th class="px-4 py-2 text-left text-sm">Column</th>
                     <th class="px-4 py-2 text-left text-sm">Data Type</th>
                     <th class="px-4 py-2 text-left text-sm">Validation</th>
+                    <th class="px-4 py-2 text-left text-sm">Is in Fillable</th>
                     <th class="px-4 py-2 text-left text-sm">Is ForeignKey</th>
                     <th class="px-4 py-2 text-left text-sm">Related Model</th>
                     <th class="px-4 py-2 text-left text-sm">Referenced Column</th>
@@ -26,6 +27,7 @@
                     <td class="px-4 py-2">{{$field['column_name']}}</td>
                     <td class="px-4 py-2">{{$field['data_type']}}</td>
                     <td class="px-4 py-2">{{$field['column_validation']}}</td>
+                    <td class="px-4 py-2">{{ !empty($field['is_fillable']) ? 'yes' : 'no' }}</td>
                     <td class="px-4 py-2">{{ !empty($field['is_foreign_key']) ? 'yes' : 'no' }}</td>
                     <td class="px-4 py-2">{{ !empty($field['foreign_model_name']) ? $field['foreign_model_name'] : '-' }}
                     </td>

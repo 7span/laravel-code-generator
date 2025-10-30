@@ -34,7 +34,7 @@ class Helper
      *
      * @return array<int, string>
      */
-    public static function getTableNamesFromMigrations()
+    public static function getTableNamesFromDB()
     {
         $tableNames = DB::table('information_schema.tables')
             ->select('TABLE_NAME as table_name')
@@ -50,18 +50,20 @@ class Helper
      *
      * @return array
      */
-    public static function getModelName()
+    public static function getModelNames()
     {
         $modelPath = base_path(config('code-generator.paths.default.model'));
         if (!File::isDirectory($modelPath)) {
             return [];
         }
 
-        return collect(File::files($modelPath))
-            ->filter(fn($file) => $file->getExtension() === 'php')
-            ->map(fn($file) => $file->getBasename('.php'))
-            ->values()
-            ->all();
+        $modelFiles = File::files($modelPath);
+        $modelNames = [];
+
+        foreach ($modelFiles as $file) {
+            $modelNames[] = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+        }
+        return $modelNames;
     }
 
     /**
@@ -70,7 +72,7 @@ class Helper
      * @param string $modelName
      * @return array<int, string>
      */
-    public static function getColumnNamesByModel($modelName)
+    public static function getColumnsOfModel($modelName)
     {
         $fullModelClass = self::convertPathToNamespace(config('code-generator.paths.default.model')) . '\\' . $modelName;
         if (class_exists($fullModelClass)) {
@@ -87,7 +89,7 @@ class Helper
      * @param string $tableName
      * @return array<int, string>
      */
-    public static function getColumnNamesByTable($tableName)
+    public static function getColumnsOfTable($tableName)
     {
         return Schema::hasTable($tableName)
             ? Schema::getColumnListing($tableName)

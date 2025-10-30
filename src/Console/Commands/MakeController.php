@@ -159,15 +159,10 @@ class MakeController extends Command
         }
 
         // Replace service property and constructor
-        $mainContent = str_replace(
-            '{{ singularService }}',
-            $includeServiceFile ? 'private $' . $singularInstance . 'Service;' : '',
-            $mainContent
-        );
 
         $mainContent = str_replace(
             '{{ serviceObj }}',
-            $includeServiceFile ? '$this->' . $singularInstance . 'Service = new ' . $className . 'Service;' : '',
+            $includeServiceFile ? 'private ' . $className . 'Service $' . $singularInstance . 'Service' : '',
             $mainContent
         );
 
@@ -202,7 +197,9 @@ class MakeController extends Command
 
             $methodContent = str_replace(
                 '{{ updaterRequestName }}',
-                $includeRequestFile ? "{$classObject}, {$className}Request \$request" : $classObject,
+                $includeRequestFile
+                    ? "{$className}Request \$request,{$classObject}"
+                    : "Request \$request,{$classObject}",
                 $methodContent
             );
 
@@ -211,7 +208,7 @@ class MakeController extends Command
             switch ($method) {
                 case 'index':
                     $indexReturn = $includeResourceFile
-                        ? "return \$this->collection(new Collection(\${$pluralVar}));"
+                        ? "return \$this->collection(new {$className}Collection(\${$pluralVar}));"
                         : "return \$this->success(\${$pluralVar});";
 
                     $indexBody = "\${$pluralVar} = \$this->{$singularInstance}Service->collection(\$request->all());" . PHP_EOL .
@@ -220,26 +217,26 @@ class MakeController extends Command
                     $methodContent = str_replace('{{ indexMethod }}', $includeServiceFile ? $indexBody : '', $methodContent);
                     break;
 
-                case 'store':
-                    $validated = $includeRequestFile ? '$request->validated()' : '';
-                    $storeBody = "{$singularObj} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
-
-                    $methodContent = str_replace('{{ storeMethod }}', $includeServiceFile ? $storeBody : '', $methodContent);
-                    break;
-
                 case 'show':
-                    $id = $singularInstance . '->id';
                     $showBody = $includeServiceFile
-                        ? "{$singularObj} = \$this->{$singularInstance}Service->resource(\${$id});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->resource(new Resource({$singularObj}));"
+                        ? "{$singularObj} = \$this->{$singularInstance}Service->resource(\${$singularInstance});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->resource(new {$className}Resource({$singularObj}));"
                         : '';
 
                     $methodContent = str_replace('{{ showMethod }}', $includeServiceFile ? $showBody : '', $methodContent);
                     break;
 
+                case 'store':
+                    $validated = $includeRequestFile ? '$request->validated()' : '$request->all()';
+                    $storeBody = "\${$singularInstance} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->success(\${$singularInstance});";
+
+                    $methodContent = str_replace('{{ storeMethod }}', $includeServiceFile ? $storeBody : '', $methodContent);
+                    break;
+
+
                 case 'update':
-                    $validated = $includeRequestFile ? ' $request->validated()' : '';
+                    $validated = $includeRequestFile ? ' $request->validated()' : '$request->all()';
                     $updateBody = "{$singularObj} = \$this->{$singularInstance}Service->update(\${$singularInstance},{$validated});" . PHP_EOL .
                         self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
 
@@ -247,7 +244,7 @@ class MakeController extends Command
                     break;
 
                 case 'destroy':
-                    $destroyBody = "\$result = \$this->{$singularInstance}Service->destroy(\${$singularInstance}->id);" . PHP_EOL .
+                    $destroyBody = "\$result = \$this->{$singularInstance}Service->destroy(\${$singularInstance});" . PHP_EOL .
                         self::INDENT . self::INDENT . 'return $this->success($result);';
 
                     $methodContent = str_replace('{{ destroyMethod }}', $includeServiceFile ? $destroyBody : '', $methodContent);

@@ -3,33 +3,37 @@
 namespace {{ serviceClassNamespace }};
 
 {{ relatedModelNamespace }};
+{{ traitNameSpaces }}
 
 class {{ serviceClass }} {
-    public function __construct( {{ modelObject }}) {  }
 
-public  function resource($id,$inputs)
-{
-    {{ resourceMethod }}
-}
+    {{ traits }}
 
-public function collection($inputs=null)
-{
-    {{ collectionMethod }}
-}
+    public function __construct({{ modelObject }}) {  }
 
-public function store($inputs)
-{
-    {{ storeMethod }}
-}
+    public function collection(array $inputs=null)
+    {
+        {{ collectionMethod }}
+    }
 
-public function update($id,$inputs)
-{
-    {{ updateMethod }}
-}
+    public  function resource({{ modelInstance }})
+    {
+        {{ resourceMethod }}
+    }
 
-public function destroy($id,$inputs = null)
-{
-    {{ deleteMethod }}
-}
+    public function store(array $inputs)
+    {
+        {{ storeMethod }}
+    }
+
+    public function update({{ modelInstance }},array $inputs)
+    {
+        {{ updateMethod }}
+    }
+
+    public function destroy($id,$inputs = null)
+    {
+        {{ deleteMethod }}
+    }
 
 }

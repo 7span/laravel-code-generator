@@ -195,12 +195,14 @@ class RestApi extends Component
                 'column_name' => 'deleted_at',
                 'data_type' => 'datetime',
                 'column_validation' => 'nullable',
+                'is_fillable' => true,
             ],
             [
                 'id' => 'deleted_by',
                 'column_name' => 'deleted_by',
                 'data_type' => 'int',
                 'column_validation' => 'nullable',
+                'is_fillable' => true,
             ],
         ];
 
@@ -265,6 +267,11 @@ class RestApi extends Component
     public function prefillQuery()
     {
         $result = Helper::parseCreateTable($this->query);
+        if (isset($result['error'])) {
+        $this->addError('prefill', $result['error']);
+        $this->successMessage = null;
+        return;
+        }
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];
@@ -754,6 +761,8 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
+        $allFields = array_merge($this->getDefaultFields(), $this->fieldsData);
+
         // Prepare selected methods
         $selectedMethods = array_filter([
             $this->is_index_method_added ? 'index' : null,
@@ -772,7 +781,7 @@ class RestApi extends Component
         }
 
         if ($this->is_migration_file_added) {
-            $this->generateMigration($this->model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
+            $this->generateMigration($this->model_name, $allFields, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
         $this->generateController($this->model_name, $selectedMethods, $this->is_service_file_added, $this->is_resource_file_added, $this->is_request_file_added, $this->is_overwrite_files, $this->is_admin_crud_added);
 
@@ -785,7 +794,7 @@ class RestApi extends Component
         }
 
         if ($this->is_service_file_added) {
-            $this->generateService($this->model_name, $this->is_overwrite_files);
+            $this->generateService($this->model_name, $this->is_overwrite_files, $selectedTraits);
         }
 
         if ($this->notificationData) {
@@ -872,10 +881,11 @@ class RestApi extends Component
     }
 
     // Generate service file
-    private function generateService($modelName, $overwrite)
+    private function generateService($modelName, $overwrite, $selectedTraits)
     {
         Artisan::call('code-generator:service', [
             'model' => $modelName,
+            '--traits' => implode(',', $selectedTraits),
             '--overwrite' => $overwrite
         ]);
     }
@@ -907,6 +917,11 @@ class RestApi extends Component
         Artisan::call('code-generator:resource-collection', [
             'model' => $modelName,
             '--adminCrud' => $adminCrud,
+            '--overwrite' => $overwrite
+        ]);
+
+        Artisan::call('code-generator:resource-collection', [
+            'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
 

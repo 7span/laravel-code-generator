@@ -76,19 +76,24 @@ class MakeFactory extends Command
      */
     protected function getFactoryField(string $column, string $type): string
     {
+        $type = match ($type) {
+            'double', 'float', 'decimal' => 'float',
+            default => $type,
+        };
         $fakerTypeMapping = [
-            'string'   => "'{$column}' => \$this->faker->word",
-            'text'     => "'{$column}' => \$this->faker->text",
-            'integer'  => "'{$column}' => \$this->faker->numberBetween(1, 100)",
-            'bigint'   => "'{$column}' => \$this->faker->randomNumber()",
-            'boolean'  => "'{$column}' => \$this->faker->boolean",
-            'datetime' => "'{$column}' => \$this->faker->dateTime()",
-            'date'     => "'{$column}' => \$this->faker->date()",
-            'timestamp' => "'{$column}' => \$this->faker->time()",
-            'varchar'  => "'{$column}' => \$this->faker->word",
-            'email'    => "'{$column}' => \$this->faker->unique()->safeEmail",
-            'name'     => "'{$column}' => \$this->faker->name",
-            'uuid'     => "'{$column}' => \$this->faker->uuid",
+            'string'    => "'{$column}' => fake()->word",
+            'text'      => "'{$column}' => fake()->text",
+            'integer'   => "'{$column}' => fake()->numberBetween(1, 100)",
+            'bigint'    => "'{$column}' => fake()->randomNumber()",
+            'float'     => "'{$column}' => fake()->randomFloat(2, 0, 1000)",
+            'boolean'   => "'{$column}' => fake()->boolean",
+            'datetime'  => "'{$column}' => fake()->dateTime()",
+            'date'      => "'{$column}' => fake()->date()",
+            'timestamp' => "'{$column}' => fake()->time()",
+            'varchar'   => "'{$column}' => fake()->word",
+            'email'     => "'{$column}' => fake()->unique()->safeEmail",
+            'name'      => "'{$column}' => fake()->name",
+            'uuid'      => "'{$column}' => fake()->uuid",
         ];
 
         return $fakerTypeMapping[$type] ?? "'{$column}' => null";

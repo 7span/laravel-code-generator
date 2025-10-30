@@ -18,25 +18,24 @@ class MakeNotification extends Command
     protected $signature = 'code-generator:notification {className : Name of the notification class} 
                                                        {--model= : Related model name} 
                                                        {--data= : A comma-separated list of key-value pairs for notification data (e.g., key1:value1,key2:value2)} 
-                                                       {--body= : The body content of the notification} 
+                                                       {--view= : Path where blade file will be generated for notificaction (e.g , emails\Delivery)}
                                                        {--subject= : The subject of the notification}
                                                        {--overwrite : is overwriting this file is selected}';
 
-    protected $description = 'Generate a custom notification with optional data, body, and subject.';
+    protected $description = 'Generate a custom notification with optional data, bladefile and subject.';
 
     public function handle()
     {
-        $notificationClass = Str::studly($this->argument('className'));
+        $notificationClass = Str::studly($this->argument('className')) . 'Notification';
 
         // Define the path for the notification file
-        $notificationFilePath = base_path(config('code-generator.paths.default.notification') . "/{$notificationClass}Notification.php");
+        $notificationFilePath = base_path(config('code-generator.paths.default.notification') . "/{$notificationClass}.php");
 
         File::ensureDirectoryExists(dirname($notificationFilePath));
-
-
         $content = $this->getReplacedContent($notificationClass);
 
-        // Create or overwrite file and get log the status and message
+        $this->generateBladeFile($this->option('view'));
+
         $this->saveFile(
             $notificationFilePath,
             $content,
@@ -73,14 +72,6 @@ class MakeNotification extends Command
     }
 
     /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/notification.stub';
-    }
-
-    /**
      * Get the variables to replace in the stub file.
      *
      * @param string $notificationClass
@@ -88,9 +79,7 @@ class MakeNotification extends Command
      */
     protected function getStubVariables($notificationClass): array
     {
-        // Parse the --data option into an array
-        $dataOption = $this->option('data');
-        $parsedData = $this->parseDataOption($dataOption);
+        $parsedData = $this->parseDataOption($this->option('data'));
         $relatedModel = $this->option('model');
 
         return [
@@ -100,7 +89,7 @@ class MakeNotification extends Command
             'relatedModelNamespace'  => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . '\\' . $relatedModel,
             'modelObject'            => '$' . (Str::camel($relatedModel)),
             'subject'                => $this->option('subject'),
-            'body'                   => (string) $this->option('body'),
+            'bladePath'                   => $this->option('view') ? str_replace(['/'], '.', $this->option('view')) : null,
             'data'                   => $parsedData,
         ];
     }
@@ -113,20 +102,35 @@ class MakeNotification extends Command
      */
     protected function parseDataOption(?string $dataOption): string
     {
-        if (! $dataOption) {
+        if (!$dataOption) {
             return '';
         }
 
         $parsedData = [];
 
-        // Parse each key-value pair from the --data option
-        foreach (explode(',', $dataOption) as $pair) {
-            if (str_contains($pair, ':')) {
-                [$key, $value] = explode(':', $pair);
-                $parsedData[] = "'$key' => '$value'";
+        foreach (explode(',', $dataOption) as $key) {
+            $key = trim($key);
+            if ($key !== '') {
+                $parsedData[] = "'$key' => null";
             }
         }
 
-        return '[' . implode(', ', $parsedData) . ']';
+        if (!empty($parsedData)) {
+            return  implode(',' . PHP_EOL . self::INDENT . self::INDENT . self::INDENT . self::INDENT, $parsedData);
+        }
+        return '';
+    }
+
+    protected function generateBladeFile(string $bladePath)
+    {
+        if (!$bladePath) {
+            return;
+        }
+
+        $bladeFilePath = resource_path('views/' . str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $bladePath) . '.blade.php');
+
+        File::ensureDirectoryExists(dirname($bladeFilePath));
+        $contents = "<!-- Notification Blade View for {$bladePath} -->";
+        $this->saveFile($bladeFilePath, $contents, CodeGeneratorFileType::BLADE);
     }
 }

@@ -78,11 +78,10 @@ class MakeModel extends Command
             'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(
                 fn($model) => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\$model;",
                 $relatedModelImports
-            ))
-                : '',
+            )) : '',
             'relation' => $relationMethods,
             'fillableFields' => $this->getFillableFields($this->option('fields')),
-            'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'datetime'," : '',
+            'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'timestamp'," : '',
             'deletedBy' => $isSoftDeleteIncluded ? "'deleted_by'," : '',
             'hiddenFields' => implode(', ', $hiddenFields),
         ];
@@ -99,13 +98,26 @@ class MakeModel extends Command
         if ($fieldsOption) {
             $fields = explode(',', $fieldsOption);
             $fieldNames = [];
+            $hasDeletedBy = false;
 
             foreach ($fields as $field) {
                 $fieldName = trim(explode(':', $field)[0]);
-                if (in_array($fieldName, ['deleted_at'])) {
+                if ($fieldName === 'deleted_at') {
                     continue;
                 }
-                $fieldNames[] = "'" . trim($fieldName) . "',";
+                if ($fieldName === 'deleted_by') {
+                    $hasDeletedBy = true;
+                    continue;
+                }
+                if (!in_array($fieldName, ['created_by', 'updated_by'])) {
+                    $fieldNames[] = "'" . $fieldName . "',";
+                }
+            }
+
+            $fieldNames[] = "'created_by',";
+            $fieldNames[] = "'updated_by',";
+            if ($hasDeletedBy) {
+                $fieldNames[] = "'deleted_by',";
             }
 
             $fillableFields = implode("\n        ", $fieldNames);
@@ -124,11 +136,6 @@ class MakeModel extends Command
         $traitUseStatements = [];
         $traitNames = [];
 
-        // Add HasFactory trait if factory file is included
-        if ($isFactoryIncluded) {
-            $traitUseStatements[] = 'use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;';
-            $traitNames[] = 'HasFactory';
-        }
 
         // Add SoftDeletes trait if soft delete is included
         if ($softDeleteIncluded) {
@@ -137,12 +144,20 @@ class MakeModel extends Command
         }
 
         // Add custom traits if specified
-        $customTraits = $this->option('traits');
-        if ($customTraits) {
-            foreach (explode(',', $customTraits) as $trait) {
+        $selectedTraits = $this->option('traits');
+        if ($selectedTraits) {
+            $allowedTraits = ['BaseModel', 'BootModel', 'SoftDeletes'];
+            foreach (explode(',', $selectedTraits) as $trait) {
                 $trait = trim($trait);
-                $traitUseStatements[] = 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\$trait;";
-                $traitNames[] = $trait;
+                if (in_array($trait, $allowedTraits)) {
+                    $traitUseStatements[] = 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\$trait;";
+                    $traitNames[] = $trait;
+                }
+            }
+           // Add HasFactory trait if factory file is included
+            if ($isFactoryIncluded) {
+                $traitUseStatements[] = 'use Illuminate\\Database\\Eloquent\\Factories\\HasFactory;';
+                $traitNames[] = 'HasFactory';
             }
         }
 
@@ -180,7 +195,7 @@ class MakeModel extends Command
                 Str::camel(Str::plural($relation['related_model'])) :
                 Str::camel($relation['related_model']);
 
-            $method = self::INDENT . 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
+            $method = 'public function ' . $methodName . '()' . PHP_EOL . self::INDENT . '{' . PHP_EOL . self::INDENT . self::INDENT . 'return $this->' . $relationType . '(';
 
             if (in_array($relationType, ['hasOneThrough', 'hasManyThrough'])) {
                 $args = [
@@ -209,7 +224,7 @@ class MakeModel extends Command
             $methods[] = $method;
         }
 
-        return rtrim(implode(PHP_EOL, $methods));
+        return rtrim(implode(PHP_EOL . self::INDENT, $methods));
     }
 
     /**

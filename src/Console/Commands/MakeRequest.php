@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -16,26 +17,28 @@ class MakeRequest extends Command
 
     protected $signature = 'code-generator:request  {model : The related model for the observer.}
                                                    {--rules= :comma seperated list of rules (e.g, Name:required,email:nullable )} 
+                                                   {--adminCrud : is admin crud is selected}
                                                    {--overwrite : is overwriting this file is selected}';
 
     protected $description = 'Generate a custom form request with validation rules';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $relatedModelName = Str::studly($this->argument('model'));
+        $adminCrud = $this->option('adminCrud');
 
-        // Define the path for the request file
-        $requestFilePath = base_path(config('code-generator.paths.request', 'App\Http\Requests') . "/{$relatedModelName}" . "/Request.php");
-        $this->createDirectoryIfMissing(dirname($requestFilePath));
+        $this->generateRequest($relatedModelName);
+        if ($adminCrud) {
+            $this->generateRequest($relatedModelName, true);
+        }
+    }
 
-        $content = $this->getReplacedContent($relatedModelName);
+    protected function generateRequest(string $relatedModelName, bool $isAdminCrudIncluded = false): void
+    {
+        $requestFilePath = base_path(config('code-generator.paths.default.request') . ($isAdminCrudIncluded ? "/Admin/" : "/") . "{$relatedModelName}" . "/Request.php");
+        File::ensureDirectoryExists(dirname($requestFilePath));
+        $content = $this->getReplacedContent($relatedModelName, $isAdminCrudIncluded);
 
-        // Create or overwrite file and get log the status and message
         $this->saveFile(
             $requestFilePath,
             $content,
@@ -43,13 +46,6 @@ class MakeRequest extends Command
         );
     }
 
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/request.stub';
-    }
 
     /**
      * Generate validation rules fields from command options.
@@ -82,11 +78,12 @@ class MakeRequest extends Command
      * @param string $relatedModelName
      * @return array
      */
-    protected function getStubVariables($relatedModelName): array
+    protected function getStubVariables($relatedModelName, bool $isAdminCrudIncluded = false): array
     {
         $relatedModelName = $this->argument('model');
+        $namespace = config('code-generator.paths.default.request') . ($isAdminCrudIncluded ? "/admin/" : "/");
         return [
-            'namespace'        => config('code-generator.paths.request', 'App\Http\Requests') . '\\' . $relatedModelName,
+            'namespace'        => Helper::convertPathToNamespace($namespace) . '\\' . $relatedModelName,
             'class'            => 'Request',
             'validationFields' => $this->getValidationFields(),
         ];
@@ -94,14 +91,13 @@ class MakeRequest extends Command
 
     /**
      * Replace stub variables with actual content.
-     *
-     * @param string $stubPath
+     * 
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/request.stub');
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -115,18 +111,8 @@ class MakeRequest extends Command
      * @param string $relatedModelName
      * @return string
      */
-    protected function getReplacedContent($relatedModelName): string
+    protected function getReplacedContent($relatedModelName, bool $isAdminCrudIncluded = false): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($relatedModelName));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($relatedModelName, $isAdminCrudIncluded));
     }
 }

@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -25,16 +26,11 @@ class MakeModel extends Command
 
     protected $description = 'Generate a custom Eloquent model with optional fields, relations, soft deletes, and traits.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle(): void
     {
         $modelClass = Str::studly($this->argument('model'));
-        $modelFilePath = base_path(config('code-generator.paths.model', 'App\Models')) . "/{$modelClass}.php";
-        $this->createDirectoryIfMissing(dirname($modelFilePath));
+        $modelFilePath = base_path(config('code-generator.paths.default.model')) . "/{$modelClass}.php";
+        File::ensureDirectoryExists(dirname($modelFilePath));
         $content = $this->getReplacedContent($modelClass);
 
         // Create or overwrite file and get log the status and message
@@ -45,17 +41,12 @@ class MakeModel extends Command
         );
     }
 
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/model.stub';
-    }
-
     /**
      * Generate the final content for the model file.
      */
     protected function getReplacedContent(string $modelClass): string
     {
-        $stub = file_get_contents($this->getStubPath());
+        $stub = file_get_contents(__DIR__ . '/../../stubs/model.stub');
         $variables = $this->getStubVariables($modelClass);
 
         foreach ($variables as $key => $value) {
@@ -80,11 +71,15 @@ class MakeModel extends Command
         $relatedModelImports = $this->getRelatedModels();
 
         return [
-            'namespace' => config('code-generator.paths.model', 'App\Models'),
+            'namespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.model')),
             'class' => $modelClass,
             'traitNamespaces' => $traitInfo['uses'],
             'traits' => $traitInfo['apply'],
-            'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(fn($model) => "use " . config('code_generator.paths.model', 'App\Models') . "\\$model;", $relatedModelImports)) : '',
+            'relatedModelNamespaces' => ! empty($relatedModelImports) ? implode("\n", array_map(
+                fn($model) => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\$model;",
+                $relatedModelImports
+            ))
+                : '',
             'relation' => $relationMethods,
             'fillableFields' => $this->getFillableFields($this->option('fields')),
             'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'datetime'," : '',
@@ -146,7 +141,7 @@ class MakeModel extends Command
         if ($customTraits) {
             foreach (explode(',', $customTraits) as $trait) {
                 $trait = trim($trait);
-                $traitUseStatements[] = 'use ' . config('code-generator.paths.trait', 'App\Traits') . "\\$trait;";
+                $traitUseStatements[] = 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\$trait;";
                 $traitNames[] = $trait;
             }
         }
@@ -241,15 +236,5 @@ class MakeModel extends Command
         }
 
         return array_unique($models);
-    }
-
-    /**
-     * Create the directory if it does not exist.
-     */
-    protected function createDirectoryIfMissing(string $path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0755, true);
-        }
     }
 }

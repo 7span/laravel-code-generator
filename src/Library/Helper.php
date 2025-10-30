@@ -12,7 +12,7 @@ class Helper
     /**
      * Get the relation label mapping.
      *
-     * @return array<string, string> Array of relation 
+     * @return array<string, string>
      */
     public static function getRelationTypes(): array
     {
@@ -34,47 +34,68 @@ class Helper
      *
      * @return array<int, string>
      */
-    public static function getTableNamesFromMigrations()
+    public static function getTableNamesFromDB()
     {
-        // Get all migration records from the migrations table in database
-        $allMigrationNames = DB::table(config('database.migrations.table'), 'migrations')->get();
-
-        // Extract table names from migration file names
-        $tableNames = collect($allMigrationNames)->map(function ($migrationRecord) {
-
-            $migrationFileName = is_object($migrationRecord) ? $migrationRecord->migration : $migrationRecord['migration'];
-            if (preg_match('/create_(.*?)_table/', $migrationFileName, $matches)) {
-                return $matches[1];
-            }
-            return null;
-        })->filter()->unique()->values()->toArray();
+        $tableNames = DB::table('information_schema.tables')
+            ->select('TABLE_NAME as table_name')
+            ->where('table_schema', config('database.connections.mysql.database'))
+            ->where('TABLE_NAME', '!=', config('database.migrations.table', 'migrations')) // Exclude migrations table
+            ->pluck('table_name')
+            ->toArray();
         return $tableNames;
     }
 
     /**
-     * Get column names for a given model's table.
+     * Retrieves the names of all model files from the model directory.
      *
-     * @param string $modelName
-     * @return array<int, string> List of column names
+     * @return array
      */
-    public static function getColumnNames($modelName)
+    public static function getModelNames()
     {
-
-        // Try to resolve as a model class('App\Models\User'); fallback to table name if class does not exist
-        if (class_exists($modelName)) {
-            $model = new $modelName;
-            $tableName = method_exists($model, 'getTable') && !empty($model->getTable())
-                ? $model->getTable()
-                : Str::plural(Str::snake(class_basename($modelName)));
-        } else {
-            // Assume it's a table name
-            $tableName = Str::plural(Str::snake(class_basename($modelName)));
+        $modelPath = base_path(config('code-generator.paths.default.model'));
+        if (!File::isDirectory($modelPath)) {
+            return [];
         }
 
+        $modelFiles = File::files($modelPath);
+        $modelNames = [];
+
+        foreach ($modelFiles as $file) {
+            $modelNames[] = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+        }
+        return $modelNames;
+    }
+
+    /**
+     * Get column names for a given model name.
+     *
+     * @param string $modelName
+     * @return array<int, string>
+     */
+    public static function getColumnsOfModel($modelName)
+    {
+        $fullModelClass = self::convertPathToNamespace(config('code-generator.paths.default.model')) . '\\' . $modelName;
+        if (class_exists($fullModelClass)) {
+            $model = new $fullModelClass();
+            $tableName = method_exists($model, 'getTable') ? $model->getTable() : Str::plural(Str::snake(class_basename($modelName)));
+            return Schema::hasTable($tableName) ? Schema::getColumnListing($tableName) : [];
+        }
+        return [];
+    }
+
+    /**
+     * Get column names for a given table name.
+     *
+     * @param string $tableName
+     * @return array<int, string>
+     */
+    public static function getColumnsOfTable($tableName)
+    {
         return Schema::hasTable($tableName)
             ? Schema::getColumnListing($tableName)
             : [];
     }
+
 
     /**
      * Parse a CREATE TABLE SQL statement and extract model name and fields.
@@ -137,5 +158,15 @@ class Helper
         }
 
         return $result;
+    }
+
+    public static function convertPathToNamespace(string $path): string
+    {
+        // Replace / with \ and trim slashes
+        $segments = explode('/', trim($path, '/'));
+
+        $studlySegments = array_map([Str::class, 'studly'], $segments);
+
+        return implode('\\', $studlySegments);
     }
 }

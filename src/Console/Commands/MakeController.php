@@ -225,8 +225,8 @@ class MakeController extends Command
 
                 case 'store':
                     $validated = $includeRequestFile ? '$request->validated()' : '$request->all()';
-                    $storeBody = "\${$pluralVar} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->success(\${$pluralVar});";
+                    $storeBody = "\${$singularInstance} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->success(\${$singularInstance});";
 
                     $methodContent = str_replace('{{ storeMethod }}', $includeServiceFile ? $storeBody : '', $methodContent);
                     break;

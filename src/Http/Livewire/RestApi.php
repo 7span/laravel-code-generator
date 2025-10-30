@@ -160,12 +160,14 @@ class RestApi extends Component
                 'column_name' => 'deleted_at',
                 'data_type' => 'datetime',
                 'column_validation' => 'nullable',
+                'is_fillable' => true,
             ],
             [
                 'id' => 'deleted_by',
                 'column_name' => 'deleted_by',
                 'data_type' => 'integer',
                 'column_validation' => 'nullable',
+                'is_fillable' => true,
             ],
         ];
 

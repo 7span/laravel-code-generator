@@ -72,6 +72,7 @@ class MakeMigration extends Command
         }
 
         $primaryLine = '';
+        $fieldLines = [];
         $foreignKeyLines = [];
         $mainFieldLines = [];
         $auditFieldLines = [];
@@ -134,7 +135,7 @@ class MakeMigration extends Command
         if ($primaryLine) {
             $allLines[] = $primaryLine;
         }
-        $allLines = array_merge($allLines, $foreignKeyLines, $mainFieldLines, $auditFieldLines);
+        $allLines = array_merge($allLines, $fieldLines, $foreignKeyLines, $mainFieldLines, $auditFieldLines);
         if ($softDeleteLine) {
             $allLines[] = $softDeleteLine;
         }

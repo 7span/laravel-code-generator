@@ -4,35 +4,35 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
-
 
 class MakeResourceCollection extends Command
 {
     use FileManager;
     protected $signature = 'code-generator:resource-collection {model : The name of the model for the resource collection}
-                                                              {--overwrite : is overwriting this file is selected}';
+                                                               {--adminCrud : is admin crud is selected}
+                                                               {--overwrite : is overwriting this file is selected}';
     protected $description = 'Generate a resource collection class for a specified model.';
-
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
 
     public function handle()
     {
         $modelName = Str::studly($this->argument('model'));
+        $adminCrud = $this->option('adminCrud');
+        $this->generateResourceCollection($modelName);
+        if ($adminCrud) {
+            $this->generateResourceCollection($modelName, true);
+        }
+    }
 
-        // Define the path for the resource collection file
-        $resourceFilePath = base_path(config('code-generator.paths.resource', 'App\Http\Resources') . "/{$modelName}/Collection.php");
-
-        $this->createDirectoryIfMissing(dirname($resourceFilePath));
-        $content = $this->getReplacedContent($modelName);
-
-        // Create or overwrite file and get log the status and message
-        $this->createOrOverwriteFile(
+    protected function generateResourceCollection(string $relatedModelName, bool $isAdminCrudIncluded = false): void
+    {
+        $resourceFilePath = base_path(config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/") . "{$relatedModelName}" . "/Collection.php");
+        File::ensureDirectoryExists(dirname($resourceFilePath));
+        $content = $this->getReplacedContent($relatedModelName, $isAdminCrudIncluded);
+        $this->saveFile(
             $resourceFilePath,
             $content,
             CodeGeneratorFileType::RESOURCE_COLLECTION
@@ -40,25 +40,17 @@ class MakeResourceCollection extends Command
     }
 
     /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/resource-collection.stub';
-    }
-
-    /**
      * Get the variables to replace in the stub file.
      *
      * @param string $modelName
+     * @param bool $isAdminCrudIncluded
      * @return array
      */
-    protected function getStubVariables($modelName): array
+    protected function getStubVariables($modelName, bool $isAdminCrudIncluded = false): array
     {
+        $namespace = config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/");
         return [
-            'namespace' => config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$modelName}",
-            'modelName' => $modelName,
-            'resourceNamespace' => config('code-generator.paths.resource', 'App\Http\Resources'),
+            'namespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource') . "/{$modelName}"),
         ];
     }
 
@@ -66,29 +58,18 @@ class MakeResourceCollection extends Command
      * Generate the final content for the resource collection file.
      *
      * @param string $modelName
+     * @param bool $isAdminCrudIncluded
      * @return string
      */
-    protected function getReplacedContent($modelName): string
+    protected function getReplacedContent($modelName, bool $isAdminCrudIncluded = false): string
     {
-        $stubPath = $this->getStubPath();
+        $content = file_get_contents(__DIR__ . '/../../stubs/resource-collection.stub');
 
-        $content = file_get_contents($stubPath);
-
-        $stubVariables = $this->getStubVariables($modelName);
+        $stubVariables = $this->getStubVariables($modelName, $isAdminCrudIncluded);
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
 
         return $content;
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
     }
 }

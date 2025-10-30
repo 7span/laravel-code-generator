@@ -28,9 +28,10 @@
 
             <div class="space-y-3">
                 <div class="flex gap-2">
+                   
                     {{-- Related Model --}}
-                    <div class="w-1/2 relative" x-data="{ open: false }">
-                        <input wire:model.live="related_model" @focus="open = true" @click.away="open = false"
+                    <div class="w-1/2 relative" x-data="{ open: false, query: @entangle('related_model') }">
+                        <input wire:model.live="related_model" x-model="query" @focus="open = true" @input="open = true" @click.away="open = false"
                             type="text" placeholder="Select or type related model"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
 
@@ -39,7 +40,8 @@
                             class="absolute min-w-full z-20 left-0 mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto"
                             style="max-height: 160px;">
                             @foreach ($this->modelNames as $model)
-                            <li @click="$wire.set('related_model', '{{ $model }}'); open = false"
+                            <li x-show="'{{ strtolower($model) }}'.includes(query.toLowerCase())"
+                                @click="$wire.set('related_model', '{{ $model }}'); open = false"
                                 class="px-4 py-2 hover:bg-gray-200 cursor-pointer">
                                 {{ $model }}
                             </li>
@@ -53,8 +55,8 @@
                     </div>
 
                     {{-- Intermediate Model --}}
-                    <div class="w-1/2 relative" x-data="{ open: false }">
-                        <input wire:model.live="intermediate_model" @focus="open = true" @click.away="open = false"
+                    <div class="w-1/2 relative" x-data="{ open: false, query: @entangle('intermediate_model') }">
+                        <input wire:model.live="intermediate_model" x-model="query" @focus="open = true" @input="open = true" @click.away="open = false"
                             type="text" placeholder="Select or type intermediate model"
                             class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500"
                             :disabled="!['hasOneThrough', 'hasManyThrough'].includes(relationType)"
@@ -65,7 +67,8 @@
                             class="absolute min-w-full z-20 left-0 mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto"
                             style="max-height: 160px;">
                             @foreach ($this->modelNames as $model)
-                            <li @click="$wire.set('intermediate_model', '{{ $model }}'); open = false"
+                            <li x-show="'{{ strtolower($model) }}'.includes(query.toLowerCase())"
+                                @click="$wire.set('intermediate_model', '{{ $model }}'); open = false"
                                 class="px-4 py-2 hover:bg-gray-200 cursor-pointer">
                                 {{ $model }}
                             </li>

@@ -6,17 +6,12 @@ namespace {{ namespace }};
 {{ traitNamespaces }}
 use Illuminate\Database\Eloquent\Model;
 
-
 class {{ class }} extends Model
 {
     {{ traits }}
 
-    protected $table = '';
-
     protected $fillable = [
         {{ fillableFields }}
-        'created_by',
-        'updated_by',
     ];
 
     protected $hidden = [{{ hiddenFields }}];
@@ -24,12 +19,12 @@ class {{ class }} extends Model
     protected function casts()
     {
         return [
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
             {{ deletedAt }}
         ];
     }
 
-   {{ relation }}
+    {{ relation }}
 
 }

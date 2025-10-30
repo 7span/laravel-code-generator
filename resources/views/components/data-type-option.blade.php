@@ -1,43 +1,65 @@
 <div>
     <option value="">Select one</option>
-    <optgroup label="String fields">
-        <option value="lineString">Line String</option>
-        <option value="multiLineString">Multi Line String</option>
-        <option value="string">String</option>
+
+    <optgroup label="Common fields">
+        <option value="integer">INT</option>
+        <option value="string">VARCHAR</option>
+        <option value="text">TEXT</option>
+        <option value="date">DATE</option>
     </optgroup>
 
-    <optgroup label="Text fields">
-        <option value="mediumText">Medium text</option>
-        <option value="longText">Long text</option>
-        <option value="text">Text</option>
-        <option value="tinyText">Tiny text</option>
+    <optgroup label="Numeric">
+        <option value="tinyInteger">TINYINT</option>
+        <option value="smallInteger">SMALLINT</option>
+        <option value="mediumInteger">MEDIUMINT</option>
+        <option value="integer">INT</option>
+        <option value="bigInteger">BIGINT</option>
+        <option value="decimal">DECIMAL</option>
+        <option value="float">FLOAT</option>
+        <option value="double">DOUBLE</option>
+        <option value="double">REAL</option>
+        <option value="boolean">BIT</option>
+        <option value="boolean">BOOLEAN</option>
+        <option value="bigIncrements">SERIAL</option>
     </optgroup>
 
-    <optgroup label="Integer fields">
-        <option value="bigInteger">Big Integer</option>
-        <option value="integer">Integer</option>
-        <option value="mediumInteger">Medium Integer</option>
-        <option value="smallInteger">Small Integer</option>
-        <option value="tinyInteger">Tiny Integer</option>
+    <optgroup label="Date and time">
+        <option value="date">DATE</option>
+        <option value="dateTime">DATETIME</option>
+        <option value="timestamp">TIMESTAMP</option>
+        <option value="time">TIME</option>
+        <option value="year">YEAR</option>
     </optgroup>
 
-    <optgroup label="Unsigned Integer fields">
-        <option value="unsignedBigInteger">Unsigned Big Integer</option>
-        <option value="unsignedInteger">Unsigned Integer</option>
-        <option value="unsignedMediumInteger">Unsigned Medium Integer</option>
-        <option value="unsignedSmallInteger">Unsigned Small Integer</option>
-        <option value="unsignedTinyInteger">Unsigned Tiny Integer</option>
+    <optgroup label="String">
+        <option value="char">CHAR</option>
+        <option value="string">VARCHAR</option>
+        <option value="text">TINYTEXT</option>
+        <option value="text">TEXT</option>
+        <option value="mediumText">MEDIUMTEXT</option>
+        <option value="longText">LONGTEXT</option>
+        <option value="binary">BINARY</option>
+        <option value="binary">VARBINARY</option>
+        <option value="binary">TINYBLOB</option>
+        <option value="binary">BLOB</option>
+        <option value="binary">MEDIUMBLOB</option>
+        <option value="binary">LONGBLOB</option>
+        <option value="enum">ENUM</option>
+        <option value="set">SET</option>
     </optgroup>
 
-    <optgroup label="Other fields">
-        <option value="boolean">Boolean</option>
-        <option value="decimal">Decimal</option>
-        <option value="double">Double</option>
-        <option value="float">Float</option>
-        <option value="enum">Enum</option>
-        <option value="uuid">UUID</option>
-        <option value="date">Date</option>
-        <option value="foreignKey">Foreign Key</option>
+    <optgroup label="Spatial">
+        <option value="geometry">GEOMETRY</option>
+        <option value="point">POINT</option>
+        <option value="lineString">LINESTRING</option>
+        <option value="polygon">POLYGON</option>
+        <option value="multiPoint">MULTIPOINT</option>
+        <option value="multiLineString">MULTILINESTRING</option>
+        <option value="multiPolygon">MULTIPOLYGON</option>
+        <option value="geometryCollection">GEOMETRYCOLLECTION</option>
     </optgroup>
-
+    
+    <optgroup label="Other">
+        <option value="json">JSON</option>
+    </optgroup>
 </div>

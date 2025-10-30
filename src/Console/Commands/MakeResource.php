@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -13,68 +14,59 @@ class MakeResource extends Command
     use FileManager;
 
     protected $signature = 'code-generator:resource {model : The name of the model for the resource}
+                                                   {--adminCrud : is admin crud is selected}
                                                    {--overwrite : is overwriting this file is selected}';
 
     protected $description = 'Generate a resource class for a specified model.';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $modelName = Str::studly($this->argument('model'));
+        $adminCrud = $this->option('adminCrud');
+        $this->generateResource($modelName);
+        if ($adminCrud) {
+            $this->generateResource($modelName, true);
+        }
+    }
 
-        // Define the path for the resource file
-        $resourceFilePath = base_path(config('code-generator.paths.resource', 'App\Http\Resources') . "/{$modelName}/Resource.php");
-
-        $this->createDirectoryIfMissing(dirname($resourceFilePath));
-
-        $content = $this->getReplacedContent($modelName);
-
-        // Create or overwrite file and get log the status and message
+    protected function generateResource(string $relatedModelName, bool $isAdminCrudIncluded = false): void
+    {
+        $requestFilePath = base_path(config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/") . "{$relatedModelName}" . "/Resource.php");
+        File::ensureDirectoryExists(dirname($requestFilePath));
+        $content = $this->getReplacedContent($relatedModelName, $isAdminCrudIncluded);
         $this->saveFile(
-            $resourceFilePath,
+            $requestFilePath,
             $content,
-            CodeGeneratorFileType::RESOURCE
+            CodeGeneratorFileType::REQUEST
         );
     }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/resource.stub';
-    }
-
     /**
      * Get the variables to replace in the stub file.
      *
      * @param string $modelName
+     * @param bool $isAdminCrudIncluded
      * @return array
      */
-    protected function getStubVariables($modelName): array
+    protected function getStubVariables($modelName, bool $isAdminCrudIncluded = false): array
     {
+        $namespace = config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/");
         return [
-            'namespace'       => config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$modelName}",
+            'namespace'       => Helper::convertPathToNamespace($namespace) . '\\' . $modelName,
             'class'           => 'Resource',
             'modelName'       => $modelName,
-            'relatedModelNamespace'  => "use " . config('code-generator.paths.model', 'App\Models') . "\\{$modelName};",
+            'relatedModelNamespace'  => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model') . "/{$modelName}") . ";",
         ];
     }
 
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/resource.stub');
 
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
@@ -87,20 +79,11 @@ class MakeResource extends Command
      * Generate the final content for the resource file.
      *
      * @param string $modelName
+     * @param bool $isAdminCrudIncluded
      * @return string
      */
-    protected function getReplacedContent($modelName): string
+    protected function getReplacedContent($modelName, bool $isAdminCrudIncluded = false): string
     {
-        return $this->getStubContents($this->getStubPath(), $this->getStubVariables($modelName));
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing($path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
+        return $this->getStubContents($this->getStubVariables($modelName, $isAdminCrudIncluded));
     }
 }

@@ -4,20 +4,15 @@ namespace {{ namespace }};
 
 {{ relatedModelNamespace }};
 use App\Traits\ApiResponser;
+{{ service }}
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-{{ service }}
 {{ request }}
 
 class {{ className }} extends Controller
 {
     use ApiResponser;
 
-    {{ singularService }}
-
-    public function __construct()
-    {
-        {{ serviceObj }}
-    }
+    public function __construct({{ serviceObj }}){    }
  
     

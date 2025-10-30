@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -24,12 +25,6 @@ class MakeController extends Command
 
     protected $description = 'Generate a custom controller with optional methods and service injection';
 
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
-
-
     public function handle(): void
     {
         $modelName = $this->argument('model');
@@ -48,12 +43,12 @@ class MakeController extends Command
     {
         $controllerClassName = Str::studly($modelName) . 'Controller';
 
-        // Determine controller path (normal or admin)
-        $pathKey = $isAdminCrudIncluded ? 'admin_controller' : 'controller';
-        $controllerPath = config("code-generator.paths.{$pathKey}", $isAdminCrudIncluded ? 'Http/Controllers/Admin' : 'Http/Controllers');
+        $controllerPath = $isAdminCrudIncluded
+            ? config("code-generator.paths.custom.admin_controller")
+            : config("code-generator.paths.default.controller");
 
         $fullPath = base_path("{$controllerPath}/{$controllerClassName}.php");
-        $this->createDirectoryIfMissing(dirname($fullPath));
+        File::ensureDirectoryExists(dirname($fullPath));
 
         // Generate content
         $content = $this->getReplacedContent($controllerClassName, $isAdminCrudIncluded);
@@ -64,18 +59,12 @@ class MakeController extends Command
         $this->appendApiRoute($controllerClassName, $isAdminCrudIncluded);
     }
 
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/controller.stub';
-    }
-
     /**
      * Get the replaced content for the controller file.
      */
     public function getReplacedContent(string $controllerClassName, bool $isAdminCrudIncluded = false): string
     {
         return $this->getStubContents(
-            $this->getStubPath(),
             $this->getStubVariables($controllerClassName, $isAdminCrudIncluded),
             $isAdminCrudIncluded
         );
@@ -89,10 +78,14 @@ class MakeController extends Command
         $modelName = $this->argument('model') ? ucfirst($this->argument('model')) : '';
 
         return [
-            'namespace' => $isAdminCrudIncluded ? config('code-generator.paths.admin_controller', 'App\Http\Controllers\Admin') : config('code-generator.paths.controller', 'App\Http\Controllers'),
-            'class' => preg_replace('/Controller.*$/i', '', ucfirst($controllerClassName)),
+            'namespace' => Helper::convertPathToNamespace(
+                $isAdminCrudIncluded
+                    ? config('code-generator.paths.custom.admin_controller')
+                    : config('code-generator.paths.default.controller')
+            ),
+            'class' => Str::studly($modelName),
             'className' => $controllerClassName,
-            'relatedModelNamespace' => "use " . config('code-generator.paths.model', 'App\Models') . '\\' . $modelName,
+            'relatedModelNamespace' => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . '\\' . $modelName,
             'modelName' => $modelName,  // used in generating methods
         ];
     }
@@ -105,30 +98,35 @@ class MakeController extends Command
         bool $includeServiceFile,
         bool $includeRequestFile,
         bool $includeResourceFile,
-        string $className
+        string $className,
+        bool $isAdminCrudIncluded
     ): string {
         $additionalUseStatements = [];
 
         // Add service file use statement
         $mainContent = str_replace(
             '{{ service }}',
-            $includeServiceFile ? 'use ' . config('code-generator.paths.service', 'App\Services') . '\\' . $className . 'Service;' : '',
+            $includeServiceFile ? 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.service')) . '\\' . $className . 'Service;' : '',
             $mainContent
         );
 
         // Add request file use statement
         $mainContent = str_replace(
             '{{ request }}',
-            $includeRequestFile ? 'use ' . config('code-generator.paths.request', 'App\Http\Requests') . "\\{$className}\\Request as {$className}Request;" : '',
+            $includeRequestFile
+                ? 'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.request'))
+                . ($isAdminCrudIncluded ? '\\Admin' : '')
+                . "\\{$className}\\Request as {$className}Request;"
+                : '',
             $mainContent
         );
 
         // Add resource file use statements
         $includeResourceFile ? array_push(
             $additionalUseStatements,
-            'use ' . config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$className}\\Resource;",
-            'use ' . config('code-generator.paths.resource', 'App\Http\Resources') . "\\{$className}\\Collection;"
-        ) : null;
+            'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . ($isAdminCrudIncluded ? '\\Admin' : '') . "\\{$className}\\Resource as {$className}Resource;",
+            'use ' . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . ($isAdminCrudIncluded ? '\\Admin' : '') . "\\{$className}\\Collection as {$className}Collection;"
+        ) : '';
 
         $useInsert = implode(PHP_EOL, $additionalUseStatements);
 
@@ -142,12 +140,12 @@ class MakeController extends Command
     /**
      * Get the contents of the stub file with replaced variables.
      */
-    public function getStubContents(string $mainStub, array $stubVariables = [], bool $isAdminCrudIncluded = false): string
+    public function getStubContents(array $stubVariables = [], bool $isAdminCrudIncluded = false): string
     {
         $includeServiceFile = (bool) $this->option('service');
         $includeResourceFile = (bool) $this->option('resource');
         $includeRequestFile = (bool) $this->option('request');
-        $mainContent = file_get_contents($mainStub);
+        $mainContent = file_get_contents(__DIR__ . '/../../stubs/controller.stub');
 
         $className = $stubVariables['class'];
         $modelName = $stubVariables['modelName'];
@@ -155,22 +153,16 @@ class MakeController extends Command
         $singularObj = '$' . $singularInstance . 'Obj';
 
         $methods = $isAdminCrudIncluded ?  ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
-        $methods = $isAdminCrudIncluded ? ['index', 'store', 'show', 'update', 'destroy'] : explode(',', $this->option('methods') ?? '');
         // Replace stub variables in base content
         foreach ($stubVariables as $search => $replace) {
             $mainContent = str_replace('{{ ' . $search . ' }}', $replace, $mainContent);
         }
 
         // Replace service property and constructor
-        $mainContent = str_replace(
-            '{{ singularService }}',
-            $includeServiceFile ? 'private $' . $singularInstance . 'Service;' : '',
-            $mainContent
-        );
 
         $mainContent = str_replace(
             '{{ serviceObj }}',
-            $includeServiceFile ? '$this->' . $singularInstance . 'Service = new ' . $className . 'Service;' : '',
+            $includeServiceFile ? 'private ' . $className . 'Service $' . $singularInstance . 'Service' : '',
             $mainContent
         );
 
@@ -180,7 +172,8 @@ class MakeController extends Command
             $includeServiceFile,
             $includeRequestFile,
             $includeResourceFile,
-            $className
+            $className,
+            $isAdminCrudIncluded
         );
 
         // Append methods
@@ -204,7 +197,9 @@ class MakeController extends Command
 
             $methodContent = str_replace(
                 '{{ updaterRequestName }}',
-                $includeRequestFile ? "{$classObject}, {$className}Request \$request" : $classObject,
+                $includeRequestFile
+                    ? "{$className}Request \$request,{$classObject}"
+                    : "Request \$request,{$classObject}",
                 $methodContent
             );
 
@@ -213,7 +208,7 @@ class MakeController extends Command
             switch ($method) {
                 case 'index':
                     $indexReturn = $includeResourceFile
-                        ? "return \$this->collection(new Collection(\${$pluralVar}));"
+                        ? "return \$this->collection(new {$className}Collection(\${$pluralVar}));"
                         : "return \$this->success(\${$pluralVar});";
 
                     $indexBody = "\${$pluralVar} = \$this->{$singularInstance}Service->collection(\$request->all());" . PHP_EOL .
@@ -222,26 +217,26 @@ class MakeController extends Command
                     $methodContent = str_replace('{{ indexMethod }}', $includeServiceFile ? $indexBody : '', $methodContent);
                     break;
 
-                case 'store':
-                    $validated = $includeRequestFile ? '$request->validated()' : '';
-                    $storeBody = "{$singularObj} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
-
-                    $methodContent = str_replace('{{ storeMethod }}', $includeServiceFile ? $storeBody : '', $methodContent);
-                    break;
-
                 case 'show':
-                    $id = $singularInstance . '->id';
                     $showBody = $includeServiceFile
-                        ? "{$singularObj} = \$this->{$singularInstance}Service->resource(\${$id});" . PHP_EOL .
-                        self::INDENT . self::INDENT . "return \$this->resource(new Resource({$singularObj}));"
+                        ? "{$singularObj} = \$this->{$singularInstance}Service->resource(\${$singularInstance});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->resource(new {$className}Resource({$singularObj}));"
                         : '';
 
                     $methodContent = str_replace('{{ showMethod }}', $includeServiceFile ? $showBody : '', $methodContent);
                     break;
 
+                case 'store':
+                    $validated = $includeRequestFile ? '$request->validated()' : '$request->all()';
+                    $storeBody = "\${$singularInstance} = \$this->{$singularInstance}Service->store({$validated});" . PHP_EOL .
+                        self::INDENT . self::INDENT . "return \$this->success(\${$singularInstance});";
+
+                    $methodContent = str_replace('{{ storeMethod }}', $includeServiceFile ? $storeBody : '', $methodContent);
+                    break;
+
+
                 case 'update':
-                    $validated = $includeRequestFile ? ' $request->validated()' : '';
+                    $validated = $includeRequestFile ? ' $request->validated()' : '$request->all()';
                     $updateBody = "{$singularObj} = \$this->{$singularInstance}Service->update(\${$singularInstance},{$validated});" . PHP_EOL .
                         self::INDENT . self::INDENT . "return \$this->success({$singularObj});";
 
@@ -249,7 +244,7 @@ class MakeController extends Command
                     break;
 
                 case 'destroy':
-                    $destroyBody = "\$result = \$this->{$singularInstance}Service->destroy(\${$singularInstance}->id);" . PHP_EOL .
+                    $destroyBody = "\$result = \$this->{$singularInstance}Service->destroy(\${$singularInstance});" . PHP_EOL .
                         self::INDENT . self::INDENT . 'return $this->success($result);';
 
                     $methodContent = str_replace('{{ destroyMethod }}', $includeServiceFile ? $destroyBody : '', $methodContent);
@@ -260,13 +255,6 @@ class MakeController extends Command
         }
 
         return $mainContent . $methodContents . PHP_EOL . '}' . PHP_EOL;
-    }
-
-    protected function createDirectoryIfMissing(string $path): void
-    {
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0755, true);
-        }
     }
 
     /**
@@ -280,20 +268,35 @@ class MakeController extends Command
 
         $apiPath = base_path($isAdminCrudIncluded ? 'routes/api-admin.php' : 'routes/api.php');
         $stubPath = __DIR__ . '/../../stubs/' . ($isAdminCrudIncluded ? 'api.admin.route.stub' : 'api.routes.stub');
-        $controllerPath = config(
-            'code-generator.paths.' . ($isAdminCrudIncluded ? 'admin_controller' : 'controller'),
-            $isAdminCrudIncluded ? 'App\Http\Controllers\Admin' : 'App\Http\Controllers'
+        $pathKey = $isAdminCrudIncluded ? 'admin_controller' : 'controller';
+        $controllerNamespace = Helper::convertPathToNamespace(
+            $isAdminCrudIncluded
+                ? config('code-generator.paths.custom.' . $pathKey)
+                : config('code-generator.paths.default.' . $pathKey)
         );
+
+        $fullControllerClass = "{$controllerNamespace}\\{$controllerClassName}";
+        $useStatement = "use {$fullControllerClass};";
 
         $routeType = $methodCount === 5 ? 'apiResource' : 'resource';
         $routeOptions = $methodCount === 5 ? '' : "->only(['" . implode("', '", $methodsArray) . "'])";
-        $routeEntry = "Route::{$routeType}('{$resource}',{$controllerPath}\\{$controllerClassName}::class){$routeOptions};";
+        $routeEntry = "Route::{$routeType}('{$resource}', {$controllerClassName}::class){$routeOptions};";
 
-        // Load content (stub if file doesn't exist, else append)
+        // Load base content
         $baseContent = file_exists($apiPath)
             ? file_get_contents($apiPath)
             : file_get_contents($stubPath);
 
+        // Add use statement if not already present
+        if (!str_contains($baseContent, $useStatement)) {
+            $baseContent = preg_replace(
+                '/(<\?php\s+use\s+Illuminate\\\Support\\\Facades\\\Route;)/',
+                "$1\n$useStatement",
+                $baseContent
+            );
+        }
+
+        // Add route line at the end
         $finalContent = rtrim($baseContent) . PHP_EOL . $routeEntry . PHP_EOL;
 
         file_put_contents($apiPath, $finalContent);

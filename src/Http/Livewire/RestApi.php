@@ -26,6 +26,33 @@ class RestApi extends Component
     public $intermediateFields = [];
     public $defaultFields = [];
 
+    public $files = [
+            'is_migration_file_added',
+            'is_admin_crud_added',
+            'is_policy_file_added',
+            'is_observer_file_added',
+            'is_service_file_added',
+            'is_resource_file_added',
+            'is_request_file_added',
+            'is_factory_file_added',
+            'is_model_file_added',
+        ];
+
+    public $methods = [ 
+            'is_store_method_added',
+            'is_show_method_added',
+            'is_update_method_added',
+            'is_destroy_method_added',
+            'is_index_method_added'
+        ];
+
+    public $traits = [
+            'is_boot_model_trait_added',
+            'is_pagination_trait_added',
+            'is_resource_filterable_trait_added',
+            'is_has_uuid_trait_added',
+            'is_has_user_action_trait_added',
+        ];
 
     public $generalError = '';
     public $errorMessage = "";
@@ -46,8 +73,9 @@ class RestApi extends Component
     public $isAddFieldModalOpen = false;
     public $isDeleteFieldModalOpen = false;
     public $isNotificationModalOpen = false;
+    public $isDeleteNotificationModalOpen = false;
     public $isResetFormModalOpen = false;
-    
+
     // Form inputs
     public $model_name;
 
@@ -60,7 +88,7 @@ class RestApi extends Component
     public $data_type, $column_name, $column_validation;
 
     // Notification properties
-    public $class_name, $data, $subject, $body;
+    public $class_name, $data, $subject, $notification_blade_path , $notificationId;
 
     // Method checkboxes
     public $is_index_method_added = true;
@@ -75,7 +103,6 @@ class RestApi extends Component
     public $is_soft_delete_added = false;
     public $is_admin_crud_added = false;
     public $is_service_file_added = false;
-    public $is_notification_file_added = false;
     public $is_resource_file_added = false;
     public $is_request_file_added = false;
     public $is_trait_files_added = false;
@@ -94,6 +121,14 @@ class RestApi extends Component
     public $is_has_uuid_trait_added = false;
     public $is_has_user_action_trait_added = false;
     public $isEditing = false;
+    public $is_fillable = true;
+    public $isDeleteModalOpen = false;
+    public $deleteModalTitle = '';
+    public $deleteModalMessage = '';
+    public $deleteModalAction = '';
+    public $itemIdToDelete = null;
+    public $enum_values;
+
 
     // Validation rules
     protected $rules = [
@@ -105,17 +140,17 @@ class RestApi extends Component
         'related_model' => 'required|regex:/^[A-Z][A-Za-z]+$/',
         'relation_type' => 'required',
         'intermediate_model' => 'required|different:model_name|different:related_model|regex:/^[A-Z][A-Za-z]+$/',
-        'foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-        'local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-        'intermediate_foreign_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
-        'intermediate_local_key' => 'required|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'foreign_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'local_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'intermediate_foreign_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
+        'intermediate_local_key' => 'nullable|string|regex:/^[a-z]+(_[a-z]+)*$/',
         'data_type' => 'required',
         'column_name' => 'required|regex:/^[a-z_]+$/',
         'column_validation' => 'required',
         'class_name' => 'required|regex:/^[A-Z][A-Za-z]+$/',
-        'data' => 'required|regex:/^[A-Za-z0-9_]+:[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+:[A-Za-z0-9_]+)*$/',
+        'data' => 'required|regex:/^([a-zA-Z0-9_]+)(,[a-zA-Z0-9_]+)*$/',
         'subject' => 'required|regex:/^[A-Za-z_ ]+$/',
-        'body' => 'required|regex:/^[A-Za-z_ ]+$/',
+        'notification_blade_path' => 'nullable|regex:/^[a-zA-Z0-9_\/]+$/',
         'foreign_model_name' => 'required|regex:/^[A-Za-z][a-z0-9_]*$/',
         'on_delete_action' => 'nullable|in:restrict,cascade,set null,no action',
         'on_update_action' => 'nullable|in:restrict,cascade,set null,no action',
@@ -176,8 +211,8 @@ class RestApi extends Component
     {
         return [
             ['column_name' => 'id', 'data_type' => 'auto_increment', 'column_validation' => 'required'],
-            ['column_name' => 'created_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
-            ['column_name' => 'updated_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+            ['column_name' => 'created_by', 'data_type' => 'int', 'column_validation' => 'nullable'],
+            ['column_name' => 'updated_by', 'data_type' => 'int', 'column_validation' => 'nullable'],
             ['column_name' => 'created_at', 'data_type' => 'datetime', 'column_validation' => 'required'],
             ['column_name' => 'updated_at', 'data_type' => 'datetime', 'column_validation' => 'nullable'],
         ];
@@ -188,55 +223,44 @@ class RestApi extends Component
     {
         $softDeleteFields = [
             [
-                'id' => 'deleted_at', 
+                'id' => 'deleted_at',
                 'column_name' => 'deleted_at',
                 'data_type' => 'datetime',
                 'column_validation' => 'nullable',
+                'is_fillable' => true,
             ],
             [
-                'id' => 'deleted_by', 
+                'id' => 'deleted_by',
                 'column_name' => 'deleted_by',
-                'data_type' => 'integer',
+                'data_type' => 'int',
                 'column_validation' => 'nullable',
+                'is_fillable' => true,
             ],
         ];
 
         $this->fieldsData = collect($this->fieldsData)
             ->reject(function ($field) {
-                 return in_array($field['column_name'], ['deleted_by', 'deleted_at']);
-        })
-        ->when($this->is_soft_delete_added, function ($collection) use ($softDeleteFields) {
-            return $collection->concat($softDeleteFields);
-        })
-        ->values() 
-        ->toArray();
+                return in_array($field['column_name'], ['deleted_by', 'deleted_at']);
+            })
+            ->when($this->is_soft_delete_added, function ($collection) use ($softDeleteFields) {
+                return $collection->concat($softDeleteFields);
+            })
+            ->values()
+            ->toArray();
     }
 
     // select all files checkbox state
     public function updatedIsSelectAllFilesChecked($value)
     {
-        $files = [
-            'is_migration_file_added',
-            'is_admin_crud_added',
-            'is_policy_file_added',
-            'is_observer_file_added',
-            'is_service_file_added',
-            'is_notification_file_added',
-            'is_resource_file_added',
-            'is_request_file_added',
-            'is_factory_file_added',
-            'is_model_file_added',
-        ];
-
-        foreach ($files as $file) {
+        foreach ($this->files as $file) {
             $this->$file = $value;
         }
     }
 
-   // select all methods checkbox state
+    // select all methods checkbox state
     public function updatedIsSelectAllMethodsChecked($value)
     {
-         $methods = [
+        $methods = [
             'is_store_method_added',
             'is_show_method_added',
             'is_update_method_added',
@@ -250,17 +274,9 @@ class RestApi extends Component
     }
 
     // select all traits checkbox state
-     public function updatedIsSelectAllTraitsChecked($value)
+    public function updatedIsSelectAllTraitsChecked($value)
     {
-        $traits = [
-            'is_boot_model_trait_added',
-            'is_pagination_trait_added',
-            'is_resource_filterable_trait_added',
-            'is_has_uuid_trait_added',
-            'is_has_user_action_trait_added',
-        ];
-
-        foreach ($traits as $trait) {
+        foreach ($this->traits as $trait) {
             $this->$trait = $value;
         }
     }
@@ -269,7 +285,7 @@ class RestApi extends Component
     public function updatedIsForeignKey($value)
     {
         if ($value) {
-            $this->tableNames = Helper::getTableNamesFromMigrations();
+            $this->tableNames = Helper::getTableNamesFromDB();
         } else {
             $this->foreign_model_name = '';
             $this->referenced_column = '';
@@ -283,6 +299,11 @@ class RestApi extends Component
     public function prefillQuery()
     {
         $result = Helper::parseCreateTable($this->query);
+        if (isset($result['error'])) {
+        $this->addError('prefill', $result['error']);
+        $this->successMessage = null;
+        return;
+        }
         $this->model_name = $result['model_name'];
 
         $duplicateColumns = [];
@@ -304,48 +325,55 @@ class RestApi extends Component
 
         // Merge existing $fieldsData with new ones without duplicates
         foreach ($result['fields'] as $newField) {
-             $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name'])
-                   || in_array($newField['column_name'], $defaultColumns);
-                if ($alreadyExists) {
-                    $duplicateColumns[] = $newField['column_name'];
-                    continue;
-                }
+            $alreadyExists = collect($this->fieldsData)->contains('column_name', $newField['column_name'])
+                || in_array($newField['column_name'], $defaultColumns);
+            if ($alreadyExists) {
+                $duplicateColumns[] = $newField['column_name'];
+                continue;
+            }
             $this->fieldsData[] = $newField;
             $newFieldsAdded = true;
         }
 
         if (!empty($duplicateColumns)) {
-           $this->addError('prefill', 'Skipped  following columns as they already exist: ' . implode(', ', $duplicateColumns).'.');
+            $this->addError('prefill', 'Skipped  following columns as they already exist: ' . implode(', ', $duplicateColumns) . '.');
         }
-         if ($newFieldsAdded) {
+        if ($newFieldsAdded) {
             session()->flash('success', 'Model name and fields added successfully!');
-        } 
+        }
     }
 
     // Live validation for form fields
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
+
+        $this->updateCheckboxGroup($propertyName, $this->methods, 'is_select_all_methods_checked');
+        $this->updateCheckboxGroup($propertyName, $this->files, 'is_select_all_files_checked');
+        $this->updateCheckboxGroup($propertyName, $this->traits, 'is_select_all_traits_checked');
     }
 
+    // Update checkbox group state based on individual checkbox state
+    private function updateCheckboxGroup($propertyName, $group, $selectAllProperty)
+    {
+        if (in_array($propertyName, $group)) {
+            $allChecked = true;
+            foreach ($group as $item) {
+                if (!$this->$item) {
+                    $allChecked = false;
+                    break;
+                }
+            }
+            $this->$selectAllProperty = $allChecked;
+        }
+    }
 
     // collect the model names when the modal is opened
     public function updatedIsAddRelModalOpen($value)
     {
         if ($value) {
             $this->relationTypes = Helper::getRelationTypes();
-            $this->modelNames = collect(Helper::getTableNamesFromMigrations())
-                ->map(function ($name) {
-                    return Str::studly(Str::singular($name));
-                })->toArray();
-        }
-    }
-
-    // Update notification file checkbox state and open modal if checked
-    public function updatedIsNotificationFileAdded($value): void
-    {
-        if ($value) {
-            $this->isNotificationModalOpen = true;
+            $this->modelNames = Helper::getModelNames();
         }
     }
 
@@ -372,19 +400,22 @@ class RestApi extends Component
     }
 
     // Open delete modal
-    public function openDeleteModal($id): void
+    public function openDeleteRelationModal($id): void
     {
-        $this->relationId = $id;
-        $this->isRelDeleteModalOpen = true;
+        $this->itemIdToDelete = $id;
+        $this->deleteModalTitle = "Delete Relation";
+        $this->deleteModalMessage = "Are you sure you want to delete this relation?";
+        $this->deleteModalAction = 'deleteRelation';
+        $this->isDeleteModalOpen = true;
     }
 
     // Delete relation in table
     public function deleteRelation(): void
     {
         $this->relationData = array_filter($this->relationData, function ($relation) {
-            return $relation['id'] !== $this->relationId;
+            return $relation['id'] !== $this->itemIdToDelete;
         });
-        $this->isRelDeleteModalOpen = false;
+        $this->isDeleteModalOpen = false;
     }
 
     // Open edit relation modal
@@ -412,12 +443,14 @@ class RestApi extends Component
     public function resetModal()
     {
         $this->reset([
+            'isEditing',
             'related_model',
             'relation_type',
             'intermediate_model',
             'foreign_key',
             'local_key',
             'data_type',
+            'enum_values',
             'column_name',
             'column_validation',
             'fieldId',
@@ -428,6 +461,12 @@ class RestApi extends Component
             'intermediate_local_key',
             'on_delete_action',
             'on_update_action',
+            'class_name',
+            'data',
+            'subject',
+            'notification_blade_path',
+            'fieldNames',
+            'columnNames',
         ]);
         $this->resetErrorBag();
     }
@@ -524,17 +563,20 @@ class RestApi extends Component
     // Opens delete  Field Modal
     public function openDeleteFieldModal($id): void
     {
-        $this->fieldId = $id;
-        $this->isDeleteFieldModalOpen = true;
+        $this->itemIdToDelete = $id;
+        $this->deleteModalTitle = "Delete Field";
+        $this->deleteModalMessage = "Are you sure you want to delete this field?";
+        $this->deleteModalAction = "deleteField";
+        $this->isDeleteModalOpen = true;
     }
 
     // Deletes field from table
     public function deleteField(): void
     {
         $this->fieldsData = array_filter($this->fieldsData, function ($field) {
-            return $field['id'] !== $this->fieldId;
+            return $field['id'] !== $this->itemIdToDelete;
         });
-        $this->isDeleteFieldModalOpen = false;
+        $this->isDeleteModalOpen = false;
     }
 
     protected function isDuplicateColumn(): bool
@@ -573,11 +615,13 @@ class RestApi extends Component
         }
 
         $this->validate($rulesToValidate);
-        
+
         $fieldData = [
-            'data_type' => $this->data_type,
             'column_name' => $this->column_name,
+            'data_type' => $this->data_type,
+            'enum_values' => ($this->data_type === 'enum' || $this->data_type === 'set') ? $this->enum_values : null,
             'column_validation' => $this->column_validation,
+            'is_fillable' => $this->is_fillable ?? false,
             'is_foreign_key' => $this->is_foreign_key ?? false,
             'foreign_model_name' => $this->foreign_model_name,
             'referenced_column' => $this->referenced_column,
@@ -599,31 +643,93 @@ class RestApi extends Component
         }
         $this->isAddFieldModalOpen = false;
         $this->fieldId = null;
-        $this->reset(['column_name', 'data_type', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column', 'on_delete_action', 'on_update_action']);
+        $this->reset(['column_name', 'data_type','enum_values', 'column_validation', 'is_foreign_key', 'foreign_model_name', 'referenced_column', 'on_delete_action', 'on_update_action']);
     }
 
     // Save notification data
     public function saveNotification(): void
-    {
-        $this->validate([
+    { 
+        if ($this->isDuplicateNotification()) {
+            $this->addError('class_name', 'You have already taken this class name');
+            return;
+        }
+
+        $rules = [
             'class_name' => $this->rules['class_name'],
             'data' => $this->rules['data'],
             'subject' => $this->rules['subject'],
-            'body' => $this->rules['body'],
-        ]);
+            'notification_blade_path' => $this->rules['notification_blade_path'],
+        ];
+
+        $this->validate($rules);
 
         // Store notification data
-        $this->notificationData = [
-            [
+        $notificationData = [
                 'class_name' => $this->class_name,
                 'data' => $this->data,
                 'subject' => $this->subject,
-                'body' => $this->body,
-            ]
+                'notification_blade_path' => $this->notification_blade_path,
         ];
 
+        // Update existing notification or add new one
+        if ($this->notificationId) {
+             foreach ($this->notificationData as &$notification) {
+                if ($notification['id'] === $this->notificationId) {
+                    $notification = ['id' => $this->notificationId] + $notificationData;
+                    break;
+                }
+            }
+            unset($notification);
+        } else {
+            $this->notificationData[] = array_merge(['id' => Str::random(8)],$notificationData);
+        }
         $this->isNotificationModalOpen = false;
-        $this->reset(['class_name', 'data', 'subject', 'body']);
+        $this->reset(['class_name', 'data', 'subject', 'notification_blade_path']);
+        $this->notificationId = null;
+    }
+
+    // Check for duplicate notification class 
+    protected function isDuplicateNotification(): bool
+    {
+        foreach ($this->notificationData as $notification) {
+            if (
+                $notification['class_name'] === $this->class_name &&
+                (!$this->notificationId || $notification['id'] !== $this->notificationId)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function openDeleteNotificationModal($id): void
+    {
+        $this->itemIdToDelete = $id;
+        $this->deleteModalTitle = "Delete Notification Class";
+        $this->deleteModalMessage = "Are you sure you want to delete this notification class?";
+        $this->deleteModalAction = 'deleteNotification';
+        $this->isDeleteModalOpen = true;
+    }
+
+     // Open Edit Notification Modal
+    public function openEditNotificationModal($notificationId) 
+    {
+        $this->notificationId = $notificationId;
+        $this->isEditing = true;
+        $this->isNotificationModalOpen = true;
+        $notification = collect($this->notificationData)->firstWhere('id', $notificationId);
+        if ($notification) {
+            $this->fill($notification);
+        }
+    } 
+
+    // Deletes field from table
+    public function deleteNotification(): void
+    {
+        $this->notificationData = array_filter($this->notificationData, function ($notification) {
+            return $notification['id'] !== $this->itemIdToDelete;
+        });
+        $this->isDeleteModalOpen = false;
     }
 
     //Validate inputs before generation 
@@ -636,14 +742,6 @@ class RestApi extends Component
         $modelPath = app_path('Models/' . $this->model_name . '.php');
         if (File::exists($modelPath) && !$this->is_overwrite_files) {
             $this->errorMessage = "Model {$this->model_name} already exists if you want to overwrite it check the 'Overwrite Files' option";
-            session()->flash('error', $this->errorMessage);
-            $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
-            return false;
-        }
-
-        // Check if notification file is selected but no notification data is provided
-        if ($this->is_notification_file_added && empty($this->notificationData)) {
-            $this->errorMessage = "Please add notification data before generating files.";
             session()->flash('error', $this->errorMessage);
             $this->dispatch('show-toast', ['message' => $this->errorMessage, 'type' => 'error']);
             return false;
@@ -701,6 +799,7 @@ class RestApi extends Component
     private function generateFiles(): void
     {
         $selectedTraits = $this->getSelectedTraits();
+        $allFields = array_merge($this->getDefaultFields(), $this->fieldsData);
 
         // Prepare selected methods
         $selectedMethods = array_filter([
@@ -712,7 +811,7 @@ class RestApi extends Component
         ]);
 
         // Format field and relation strings
-        $fieldString = collect($this->fieldsData)->pluck('column_name')->implode(', ');
+        $fieldString = collect($this->fieldsData)->where('is_fillable', true)->pluck('column_name')->implode(', ');
 
         // Generate files based on flags
         if ($this->is_model_file_added) {
@@ -720,9 +819,8 @@ class RestApi extends Component
         }
 
         if ($this->is_migration_file_added) {
-            $this->generateMigration($this->model_name, $this->fieldsData, $this->is_soft_delete_added, $this->is_overwrite_files);
+            $this->generateMigration($this->model_name, $allFields, $this->is_soft_delete_added, $this->is_overwrite_files);
         }
-
         $this->generateController($this->model_name, $selectedMethods, $this->is_service_file_added, $this->is_resource_file_added, $this->is_request_file_added, $this->is_overwrite_files, $this->is_admin_crud_added);
 
         if ($this->is_policy_file_added) {
@@ -734,19 +832,19 @@ class RestApi extends Component
         }
 
         if ($this->is_service_file_added) {
-            $this->generateService($this->model_name, $this->is_overwrite_files);
+            $this->generateService($this->model_name, $this->is_overwrite_files, $selectedTraits);
         }
 
-        if ($this->is_notification_file_added) {
+        if ($this->notificationData) {
             $this->generateNotification($this->model_name, $this->is_overwrite_files);
         }
 
         if ($this->is_resource_file_added) {
-            $this->generateResource($this->model_name, $this->is_overwrite_files);
+            $this->generateResource($this->model_name,  $this->is_overwrite_files, $this->is_admin_crud_added);
         }
 
         if ($this->is_request_file_added) {
-            $this->generateRequest($this->model_name, $this->fieldsData, $this->is_overwrite_files);
+            $this->generateRequest($this->model_name, $this->fieldsData, $this->is_admin_crud_added, $this->is_overwrite_files);
         }
 
         if ($this->is_factory_file_added) {
@@ -821,10 +919,11 @@ class RestApi extends Component
     }
 
     // Generate service file
-    private function generateService($modelName, $overwrite)
+    private function generateService($modelName, $overwrite, $selectedTraits)
     {
         Artisan::call('code-generator:service', [
             'model' => $modelName,
+            '--traits' => implode(',', $selectedTraits),
             '--overwrite' => $overwrite
         ]);
     }
@@ -838,23 +937,41 @@ class RestApi extends Component
             'className' => $notificationData['class_name'] ?? $modelName . 'Notification',
             '--model' => $modelName,
             '--data' => $notificationData['data'] ?? '',
-            '--body' => $notificationData['body'] ?? '',
+            '--view' => $notificationData['notification_blade_path'] ?? '',
             '--subject' => $notificationData['subject'] ?? '',
             '--overwrite' => $overwrite
         ]);
     }
 
     // Generate resource file
-    private function generateResource($modelName, $overwrite)
+    private function generateResource($modelName, $overwrite, $adminCrud)
     {
         Artisan::call('code-generator:resource', [
+            'model' => $modelName,
+            '--adminCrud' => $adminCrud,
+            '--overwrite' => $overwrite
+        ]);
+
+        Artisan::call('code-generator:resource-collection', [
+            'model' => $modelName,
+            '--adminCrud' => $adminCrud,
+            '--overwrite' => $overwrite
+        ]);
+
+        Artisan::call('code-generator:resource-collection', [
+            'model' => $modelName,
+            '--overwrite' => $overwrite
+        ]);
+
+        Artisan::call('code-generator:resource-collection', [
             'model' => $modelName,
             '--overwrite' => $overwrite
         ]);
     }
 
+
     // Generate request file
-    private function generateRequest($modelName, $fields, $overwrite)
+    private function generateRequest($modelName, $fields, $adminCrud, $overwrite)
     {
         $ruleString = implode(',', array_map(function ($field) {
             return $field['column_name'] . ':' . $field['column_validation'];
@@ -863,6 +980,7 @@ class RestApi extends Component
         Artisan::call('code-generator:request', [
             'model' => $modelName,
             '--rules' => $ruleString,
+            '--adminCrud' => $adminCrud,
             '--overwrite' => $overwrite
         ]);
     }
@@ -885,7 +1003,7 @@ class RestApi extends Component
     private  function copyTraits(array $selectedTraits): void
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
-        $destination = base_path(config('code-generator.paths.trait', 'App\Traits'));
+        $destination = base_path(Helper::convertPathToNamespace(config('code-generator.paths.default.trait')));
 
         if (!File::exists($source)) {
             return;
@@ -916,7 +1034,7 @@ class RestApi extends Component
     {
         if ($value) {
             $this->fieldNames = [];
-            $this->fieldNames = Helper::getColumnNames($value);
+            $this->fieldNames = Helper::getColumnsOfTable($value);
             $this->reset(['referenced_column']);
         }
     }
@@ -926,9 +1044,9 @@ class RestApi extends Component
     {
         if ($value) {
             $this->columnNames = [];
-            $this->columnNames = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
-            $this->reset('foreign_key');
+            $this->columnNames = Helper::getColumnsOfModel($value);
         }
+        $this->reset('foreign_key');
     }
 
     // loads intermediate fields when intermediate model changes
@@ -936,7 +1054,7 @@ class RestApi extends Component
     {
         if ($value) {
             $this->intermediateFields = []; // Always reset first
-            $this->intermediateFields = Helper::getColumnNames('App\\' . config('code-generator.paths.model', 'Models') . '\\' . $value);
+            $this->intermediateFields = Helper::getColumnsOfModel($value);
             $this->reset('intermediate_foreign_key', 'intermediate_local_key'); // Reset intermediate keys
         }
     }

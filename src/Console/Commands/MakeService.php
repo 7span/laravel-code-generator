@@ -4,7 +4,8 @@ namespace Sevenspan\CodeGenerator\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
+use Sevenspan\CodeGenerator\Library\Helper;
 use Sevenspan\CodeGenerator\Traits\FileManager;
 use Sevenspan\CodeGenerator\Enums\CodeGeneratorFileType;
 
@@ -13,21 +14,18 @@ class MakeService extends Command
     use FileManager;
     const INDENT = '    ';
     protected $signature = 'code-generator:service {model : The name of the service class to generate.}
-                                                  {--overwrite : is overwriting this file is selected}';
+                                                   {--traits= : List of traits.}
+                                                   {--overwrite : is overwriting this file is selected}';
     protected $description = 'Create a new service class with predefined methods for resource';
-    public function __construct(protected Filesystem $files)
-    {
-        parent::__construct();
-    }
 
     public function handle()
     {
         $serviceClass = Str::studly($this->argument('model'));
 
         // Define the path for the service file
-        $serviceFilePath = base_path(config('code-generator.paths.service', 'App\Services') . "/{$serviceClass}Service.php");
+        $serviceFilePath = base_path(config('code-generator.paths.default.service') . "/{$serviceClass}Service.php");
 
-        $this->createDirectoryIfMissing(dirname($serviceFilePath));
+        File::ensureDirectoryExists(dirname($serviceFilePath));
 
         $content = $this->getReplacedContent($serviceClass);
 
@@ -42,13 +40,12 @@ class MakeService extends Command
     /**
      * Get the contents of the stub file with replaced variables.
      *
-     * @param string $stubPath
      * @param array $stubVariables
      * @return string
      */
-    protected function getStubContents(string $stubPath, array $stubVariables): string
+    protected function getStubContents(array $stubVariables): string
     {
-        $content = file_get_contents($stubPath);
+        $content = file_get_contents(__DIR__ . '/../../stubs/service.stub');
         foreach ($stubVariables as $search => $replace) {
             $content = str_replace('{{ ' . $search . ' }}', $replace, $content);
         }
@@ -65,28 +62,8 @@ class MakeService extends Command
     protected function getReplacedContent(string $serviceClass): string
     {
         return $this->getStubContents(
-            $this->getStubPath(),
             $this->getStubVariables($serviceClass)
         );
-    }
-
-    /**
-     * @param string $path
-     */
-    protected function createDirectoryIfMissing(string $path): void
-    {
-        // Create the directory if it doesn't exist
-        if (! $this->files->isDirectory($path)) {
-            $this->files->makeDirectory($path, 0777, true, true);
-        }
-    }
-
-    /**
-     * @return string
-     */
-    protected function getStubPath(): string
-    {
-        return __DIR__ . '/../../stubs/service.stub';
     }
 
     /**
@@ -99,16 +76,23 @@ class MakeService extends Command
     {
         $modelName = Str::studly($serviceClass);
         $modelVariable = Str::camel($serviceClass);
-        $modelInstance = $modelVariable . 'Model';
+        $modelObj = $modelVariable . 'Obj';
 
         return [
-            'serviceClassNamespace' => config('code-generator.paths.service', 'App\Services'),
-            'relatedModelNamespace' => "use " . config('code-generator.paths.model', 'App\Models') . "\\{$modelName}",
+            'serviceClassNamespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.service')),
+            'relatedModelNamespace' => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.model')) . "\\{$modelName}",
+            'traitNameSpaces'       => str_contains($this->option('traits'), 'PaginationTrait')
+                ? "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\PaginationTrait;"
+                : '',
             'serviceClass'          => "{$modelName}Service",
-            'modelObject'           => "private {$modelName} \${$modelInstance}",
-            'resourceMethod'        => $this->getResourceMethod($modelInstance),
-            'collectionMethod'      => $this->getCollectionMethod($modelVariable, $modelInstance),
-            'storeMethod'           => $this->getStoreMethod($modelVariable, $modelInstance),
+            'modelObject'           => "private {$modelName} \${$modelObj}",
+            'modelInstance'         => "\$" . $modelVariable,
+            'traits'                => str_contains($this->option('traits'), 'PaginationTrait')
+                ? 'use PaginationTrait;'
+                : '',
+            'resourceMethod'        => $this->getResourceMethod($modelObj),
+            'collectionMethod'      => $this->getCollectionMethod($modelVariable, $modelObj),
+            'storeMethod'           => $this->getStoreMethod($modelVariable, $modelObj),
             'updateMethod'          => $this->getUpdateMethod($modelVariable),
             'deleteMethod'          => $this->getDeleteMethod($modelVariable),
         ];
@@ -117,50 +101,46 @@ class MakeService extends Command
     /**
      * Generate the resource method for the service.
      *
-     * @param string $modelInstance
+     * @param string $modelObj
      * @return string
      */
-    protected function getResourceMethod(string $modelInstance): string
+    protected function getResourceMethod(string $modelObj): string
     {
-        $query = '$query';
+        $modelVar = Str::camel(str_replace('Obj', '', $modelObj));
+        $modelVariable = '$' . $modelVar;
 
-        return "{$query} = \$this->{$modelInstance}->getQB();" . PHP_EOL .
-            self::INDENT . "if (is_numeric(\$id)) {" . PHP_EOL .
-            self::INDENT . self::INDENT . "{$query} = {$query}->whereId(\$id);" . PHP_EOL .
-            self::INDENT . "} else {" . PHP_EOL .
-            self::INDENT . self::INDENT . "{$query} = {$query}->whereUuid(\$id);" . PHP_EOL .
-            self::INDENT . "}" . PHP_EOL .
-            self::INDENT . "return {$query}->firstOrFail();";
+        return "{$modelVariable} = \$this->{$modelObj}->findOrFail({$modelVariable}->id);" . PHP_EOL .
+            self::INDENT . self::INDENT . "return {$modelVariable};";
     }
 
     /**
      * Generate the collection method for the service.
      *
      * @param string $modelVar
-     * @param string $modelInstance
+     * @param string $modelObj
      * @return string
      */
-    protected function getCollectionMethod(string $modelVar, string $modelInstance): string
+    protected function getCollectionMethod(string $modelVar, string $modelObj): string
     {
-        $query = '$query';
+        $modelVariable = '$' . $modelVar;
 
-        return "{$query} = \$this->{$modelInstance}->getQB();" . PHP_EOL .
-            self::INDENT . "return (isset(\$inputs['limit']) && \$inputs['limit'] != -1) ? {$query}->paginate(\$inputs['limit']) : {$query}->get();";
+        return "{$modelVariable} = \$this->{$modelObj}->getQB();" . PHP_EOL .
+            self::INDENT . self::INDENT . "return \$this->paginationAttribute({$modelVariable});";
     }
 
     /**
      * Generate the store method for the service.
      *
      * @param string $modelVar
-     * @param string $modelInstance
+     * @param string $modelObj
      * @return string
      */
-    protected function getStoreMethod(string $modelVar, string $modelInstance): string
+    protected function getStoreMethod(string $modelVar, string $modelObj): string
     {
         $modelVariable = '$' . $modelVar;
 
-        return "{$modelVariable} = \$this->{$modelInstance}->create(\$inputs);" . PHP_EOL .
-            self::INDENT . "return {$modelVariable};";
+        return "{$modelVariable} = \$this->{$modelObj}->create(\$inputs);" . PHP_EOL .
+            self::INDENT . self::INDENT . "return {$modelVariable};";
     }
 
     /**
@@ -173,10 +153,9 @@ class MakeService extends Command
     {
         $modelVariable = '$' . $modelVar;
 
-        return "{$modelVariable} = \$this->resource(\$id);" . PHP_EOL .
-            self::INDENT . "{$modelVariable}->update(\$inputs);" . PHP_EOL .
-            self::INDENT . "{$modelVariable} = \$this->resource({$modelVariable}->id);" . PHP_EOL .
-            self::INDENT . "return {$modelVariable};";
+        return "{$modelVariable} = \$this->resource({$modelVariable});" . PHP_EOL .
+            self::INDENT . self::INDENT . "{$modelVariable}->update(\$inputs);" . PHP_EOL .
+            self::INDENT . self::INDENT . "return {$modelVariable};";
     }
 
     /**
@@ -189,9 +168,7 @@ class MakeService extends Command
     {
         $modelVariable = '$' . $modelVar;
 
-        return "{$modelVariable} = \$this->resource(\$id, \$inputs);" . PHP_EOL .
-            self::INDENT . "{$modelVariable}->delete();" . PHP_EOL .
-            self::INDENT . "\$data['message'] = __('deleteAccountSuccessMessage');" . PHP_EOL .
-            self::INDENT . "return \$data;";
+        return "{$modelVariable} = \$this->resource(\$id);" . PHP_EOL .
+            self::INDENT . self::INDENT . "return {$modelVariable}->delete();";
     }
 }

@@ -117,16 +117,42 @@ class Helper
 
         // Extract columns
         if (preg_match('/\((.*)\)/s', $sql, $matches)) {
-            $columnsRaw = explode(',', $matches[1]);
+           $columnsRaw = preg_split('/,(?![^(]*\))/', $matches[1]);
 
             foreach ($columnsRaw as $col) {
-                if (preg_match('/`?(\w+)`?\s+(\w+)/', trim($col), $colMatch)) {
-                    $result['fields'][] = [
-                        'id' => Str::random(),
-                        'column_name' => Str::snake($colMatch[1]),
-                        'data_type' => Str::lower($colMatch[2]),
-                        'column_validation' => 'required',
-                    ];
+                 $col = trim($col);
+
+            // Skip foreign keys or standalone constraints
+            if (
+                preg_match('/^(FOREIGN\s+KEY|PRIMARY\s+KEY|CONSTRAINT|UNIQUE|CHECK)/i', $col)
+            ) {
+                continue;
+            }
+
+                // Match column name and data type
+            if (preg_match('/`?(\w+)`?\s+(\w+)(\s*\(([^)]*)\))?/i', $col, $colMatch)) {
+                $columnName = $colMatch[1];
+                $dataType = strtolower($colMatch[2]);
+
+                $field = [
+                    'id' => Str::random(),
+                    'column_name' => Str::lower($columnName),
+                    'data_type' => $dataType,
+                    'is_fillable' => true,
+                    'column_validation' => 'required',
+                ];
+
+                // Extract ENUM or SET values
+                if (in_array($dataType, ['enum', 'set']) && preg_match('/\((.*?)\)/', $col, $enumMatch)) {
+                    // Clean up values (remove quotes and spaces)
+                    $values = array_map(
+                        fn($v) => trim($v, " '\""),
+                        explode(',', $enumMatch[1])
+                    );
+                    $field['enum_values'] = implode(',', $values);
+                }
+
+                $result['fields'][] = $field;
                 }
             }
         }

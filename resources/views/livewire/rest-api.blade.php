@@ -1,5 +1,17 @@
 <div class="w-full p-6">
 
+    @if ($isMigrationMissing)
+        <div class="w-full bg-orange-50 border border-orange-400 text-orange-800 p-3 rounded-lg mb-4 flex flex-wrap items-center justify-between">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-lg font-semibold mb-2">Migration not run</h2>
+                <p class="mb-0">Required migration for logs is missing. Please run the migration.</p>
+            </div>
+            <div class="mt-4 sm:mt-0 sm:ml-4">
+                <x-code-generator::button wire:click="runPackageMigration" :title="'Run Migration'" />
+            </div>
+        </div>
+    @endif
+
     <!-- Loading Overlay  -->
     <div  wire:loading wire:target="save"
         x-transition:enter="transition ease-out duration-100"
@@ -21,7 +33,7 @@
     @foreach (['success' => 'green', 'error' => 'red'] as $type => $color)
     @if (session()->has($type))
     <div  wire:key="{{ now()->timestamp }}-{{ $type }}" 
-        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2"
         x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"

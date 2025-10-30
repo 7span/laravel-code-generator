@@ -88,30 +88,37 @@
 
                 <!-- Related Table Name -->
                 <div class="mb-5">
-                    <div x-data="{ open: false }" class="relative">
+                    <div x-data="{ open: false, query: @entangle('foreign_model_name') }" class="relative">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Related Table Name</label>
-
-                        <input wire:model.live="foreign_model_name" @focus="open = true" @click.away="open = false"
-                            type="text" placeholder="Select or type related table"
-                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500" />
-
+                        <input type="text" wire:model.live="foreign_model_name"
+                            x-model="query"
+                            @focus="open = true"
+                            @input="open = true"
+                            @click.away="open = false"
+                            type="text"
+                            placeholder="Select or type related table"
+                            class="w-full border border-gray-300 rounded-md p-2 text-gray-700 placeholder:text-gray-400 focus:ring focus:ring-indigo-100 focus:border-indigo-500"
+                        />
                         @if (!empty($this->tableNames))
-                        <ul x-show="open"
-                            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto">
+                        <ul
+                            x-show="open"
+                            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto"
+                        >
                             @foreach ($this->tableNames as $table)
-                            <li @click="$wire.set('foreign_model_name', '{{ $table }}'); open = false"
-                                class="px-4 py-2 hover:bg-gray-200 cursor-pointer">
+                            <li
+                                x-show="'{{ strtolower($table) }}'.includes(query.toLowerCase())"
+                                @click="$wire.set('foreign_model_name', '{{ $table }}'); open = false"
+                                class="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                            >
                                 {{ $table }}
                             </li>
                             @endforeach
                         </ul>
                         @endif
-
                         @error('foreign_model_name')
                         <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
-
                 </div>
 
                 <!-- Referenced Column -->

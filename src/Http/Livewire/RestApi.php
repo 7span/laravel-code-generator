@@ -421,6 +421,8 @@ class RestApi extends Component
             'data',
             'subject',
             'notification_blade_path',
+            'fieldNames',
+            'columnNames',
         ]);
         $this->resetErrorBag();
     }

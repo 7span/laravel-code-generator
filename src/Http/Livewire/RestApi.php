@@ -7,6 +7,8 @@ use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Sevenspan\CodeGenerator\Library\Helper;
 
 class RestApi extends Component
@@ -56,6 +58,7 @@ class RestApi extends Component
     public $errorMessage = "";
     public $successMessage = '';
     public $query = '';
+    public bool $isMigrationMissing = false;
 
     // Foreign key properties
     public $is_foreign_key = false;
@@ -171,9 +174,38 @@ class RestApi extends Component
     // Mount component
     public function mount()
     {
-        $this->defaultFields = $this->getDefaultFields();
-        $this->updatedIsSoftDeleteAdded();
+         $this->defaultFields = $this->getDefaultFields();
+         $this->updatedIsSoftDeleteAdded();
+		 // Detect missing package migration table
+		 $this->isMigrationMissing = !Schema::hasTable('code_generator_file_logs');
     }
+
+	public function runPackageMigration(): void
+	{
+		try {
+			$migrationName = '2025_05_09_100733_create_code_generator_file_logs_table';
+			$alreadyRan = DB::table('migrations')->where('migration', $migrationName)->exists();
+
+			if (!Schema::hasTable('code_generator_file_logs') && !$alreadyRan) {
+				// Run only the package migration
+				Artisan::call('migrate', [
+					'--path' => 'vendor/sevenspan/code-generator/src/Migrations',
+					'--force' => true,
+				]);
+			}
+
+			// Refresh flag based on result
+			$this->isMigrationMissing = !Schema::hasTable('code_generator_file_logs');
+			if (!$this->isMigrationMissing) {
+				session()->flash('success', 'Package migration ran successfully.');
+			} else {
+				session()->flash('error', 'Package migration did not complete.');
+			}
+		} catch (\Throwable $e) {
+			$this->isMigrationMissing = true;
+			session()->flash('error', $e->getMessage());
+		}
+	}
 
     protected function getDefaultFields(): array
     {
@@ -728,6 +760,10 @@ class RestApi extends Component
     public function save(): void
     {
         try {
+            if ($this->isMigrationMissing) {
+                session()->flash('error', 'Package migration is not run yet. Please run the migration first.');
+                return;
+            }
             // Validate all inputs first
             if (!$this->validateInputs()) {
                 return;
@@ -744,6 +780,8 @@ class RestApi extends Component
             session()->flash('error', $e->getMessage());
         }
     }
+
+
 
     protected function getSelectedTraits(): array
     {

@@ -157,7 +157,7 @@ class MakeService extends Command
 
         return "{$modelVariable}->update(\$inputs);" . PHP_EOL .
             self::INDENT . self::INDENT . "\$data['message'] = '" . Str::headline($modelVar) . " has been updated successfully.';" . PHP_EOL .
-            self::INDENT . self::INDENT . "\$data['data'] = new Resource(\$this->resource({$modelVariable}->id));" . PHP_EOL .
+            self::INDENT . self::INDENT . "\$data['data'] = new Resource(\$this->resource({$modelVariable}));" . PHP_EOL .
             self::INDENT . self::INDENT . "return \$data;";
     }
 

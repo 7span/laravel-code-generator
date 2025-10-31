@@ -16,6 +16,10 @@ class {{ class }} extends Model
 
     protected $hidden = [{{ hiddenFields }}];
 
+    protected $relationship = [
+        {{ relationships }}
+    ];
+
     protected function casts()
     {
         return [

@@ -13,6 +13,6 @@ class {{ className }} extends Controller
 {
     use ApiResponser;
 
-    public function __construct({{ serviceObj }}){    }
+    public function __construct({{ serviceObj }}){  }
  
     

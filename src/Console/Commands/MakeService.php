@@ -156,7 +156,7 @@ class MakeService extends Command
         $modelVariable = '$' . $modelVar;
 
         return "{$modelVariable}->update(\$inputs);" . PHP_EOL .
-            self::INDENT . self::INDENT . "\$data['message'] = '{$modelVar} has been updated successfully.';" . PHP_EOL .
+            self::INDENT . self::INDENT . "\$data['message'] = '" . Str::headline($modelVar) . " has been updated successfully.';" . PHP_EOL .
             self::INDENT . self::INDENT . "\$data['data'] = new Resource(\$this->resource({$modelVariable}->id));" . PHP_EOL .
             self::INDENT . self::INDENT . "return \$data;";
     }
@@ -173,7 +173,7 @@ class MakeService extends Command
 
         return "{$modelVariable} = \$this->resource(\$id);" . PHP_EOL .
             self::INDENT . self::INDENT . " {$modelVariable}->delete();" . PHP_EOL .
-            self::INDENT . self::INDENT . "\$data['message'] = '{$modelVar} has been deleted successfully.';" . PHP_EOL .
+            self::INDENT . self::INDENT . "\$data['message'] = '" . Str::headline($modelVar) . " has been deleted successfully.';" . PHP_EOL .
             self::INDENT . self::INDENT . "return \$data;";
     }
 }

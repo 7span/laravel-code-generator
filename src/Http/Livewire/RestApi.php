@@ -211,8 +211,8 @@ class RestApi extends Component
     {
         return [
             ['column_name' => 'id', 'data_type' => 'auto_increment', 'column_validation' => 'required'],
-            ['column_name' => 'created_by', 'data_type' => 'int', 'column_validation' => 'nullable'],
-            ['column_name' => 'updated_by', 'data_type' => 'int', 'column_validation' => 'nullable'],
+            ['column_name' => 'created_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
+            ['column_name' => 'updated_by', 'data_type' => 'integer', 'column_validation' => 'nullable'],
             ['column_name' => 'created_at', 'data_type' => 'datetime', 'column_validation' => 'required'],
             ['column_name' => 'updated_at', 'data_type' => 'datetime', 'column_validation' => 'nullable'],
         ];
@@ -232,7 +232,7 @@ class RestApi extends Component
             [
                 'id' => 'deleted_by',
                 'column_name' => 'deleted_by',
-                'data_type' => 'int',
+                'data_type' => 'integer',
                 'column_validation' => 'nullable',
                 'is_fillable' => true,
             ],

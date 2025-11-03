@@ -118,7 +118,7 @@ class Helper
                 ];
             }
 
-            $result['model_name'] = Str::singular(ucfirst($tableMatch[1][0]));
+            $result['model_name'] = Str::studly(Str::singular($tableMatch[1][0]));
         }
 
         // Extract columns
@@ -129,20 +129,35 @@ class Helper
             foreach ($columnsRaw as $col) {
                 $col = trim($col);
 
-                // Match column name and data type
+                // Skip standalone FOREIGN KEY lines
+                if (preg_match('/\b(FOREIGN|PRIMARY|UNIQUE)\s+KEY\b|\bCONSTRAINT\b|^\s*KEY\b/i', $col)) {
+                    continue;
+                }
+
+                // Match column name + datatype
                 if (preg_match('/`?(\w+)`?\s+(\w+)(\s*\(([^)]*)\))?/i', $col, $colMatch)) {
                     $columnName = $colMatch[1];
-                    $dataType = strtolower($colMatch[2]);
+                    $dataType = self::mapSqlToLaravelDataType($colMatch[2]);
 
                     $field = [
                         'id' => Str::random(),
-                        'column_name' => Str::lower($columnName),
+                        'column_name' => $columnName,
                         'data_type' => $dataType,
                         'is_fillable' => true,
                         'column_validation' => 'required',
+                        'is_foreign_key' => false,
+                        'is_nullable' => str_contains(strtolower($col), 'null') && !str_contains(strtolower($col), 'not null'),
+                        'is_unique' => str_contains(strtolower($col), 'unique'),
+                        'is_auto_increment' => str_contains(strtolower($col), 'auto_increment'),
+                        'default_value' => null,
                     ];
 
-                    // Extract ENUM or SET values
+                    // Handle DEFAULT values
+                    if (preg_match('/DEFAULT\s+([^\s,]+)/i', $col, $defaultMatch)) {
+                        $field['default_value'] = trim($defaultMatch[1], "'\"");
+                    }
+
+                    // Handle ENUM/SET values
                     if (in_array($dataType, ['enum', 'set']) && preg_match('/\((.*?)\)/', $col, $enumMatch)) {
                         $values = array_map(fn($v) => trim($v, " '\""), explode(',', $enumMatch[1]));
                         $field['enum_values'] = implode(',', $values);
@@ -151,33 +166,117 @@ class Helper
                     // Extract inline foreign key if exists
                     if (preg_match('/REFERENCES\s+`?(\w+)`?\s*\(`?(\w+)`?\)/i', $col, $fkMatch)) {
                         $field['is_foreign_key'] = true;
-                        $field['foreign_model_name'] = $fkMatch[1];
+                        $field['foreign_model_name'] = Str::singular(ucfirst($fkMatch[1]));
                         $field['referenced_column'] = $fkMatch[2];
-
-                        // Match ON UPDATE and ON DELETE actions
-                        if (preg_match('/ON\s+UPDATE\s+([A-Z\s]+)/i', $col, $onUpdateMatch)) {
-                            $field['on_update_action'] = strtolower(trim($onUpdateMatch[1]));
-                        }
-                        if (preg_match('/ON\s+DELETE\s+([A-Z\s]+)/i', $col, $onDeleteMatch)) {
-                            $field['on_delete_action'] = strtolower(trim($onDeleteMatch[1]));
-                        }
                     }
 
-                    $result['fields'][] = $field;
+                    $result['fields'][$columnName] = $field;
+                }
+            }
+
+            //  Handle standalone FOREIGN KEY constraints
+            preg_match_all(
+                '/(?:CONSTRAINT\s+`?\w+`?\s+)?FOREIGN\s+KEY\s*\(`?(\w+)`?\)\s+REFERENCES\s+`?(\w+)`?\s*\(`?(\w+)`?\)(?:\s+ON\s+DELETE\s+(\w+(?:\s+\w+)?))?(?:\s+ON\s+UPDATE\s+(\w+(?:\s+\w+)?))?/i',
+                $sql,
+                $foreignMatches,
+                PREG_SET_ORDER
+            );
+
+            foreach ($foreignMatches as $fk) {
+                $column = $fk[1];
+                $refTable = $fk[2];
+                $refColumn = $fk[3];
+                $onDelete = isset($fk[4]) ? trim($fk[4]) : null;
+                $onUpdate = isset($fk[5]) ? trim($fk[5]) : null;
+
+                if (isset($result['fields'][$column])) {
+                    $result['fields'][$column]['is_foreign_key'] = true;
+                    $result['fields'][$column]['foreign_model_name'] = Str::singular(ucfirst($refTable));
+                    $result['fields'][$column]['referenced_column'] = $refColumn;
+                    $result['fields'][$column]['on_delete_action'] = $onDelete ? strtolower($onDelete) : null;
+                    $result['fields'][$column]['on_update_action'] = $onUpdate ? strtolower($onUpdate) : null;
                 }
             }
         }
 
+        $result['fields'] = array_values($result['fields']);
         return $result;
     }
 
     public static function convertPathToNamespace(string $path): string
     {
-        // Replace / with \ and trim slashes
         $segments = explode('/', trim($path, '/'));
 
         $studlySegments = array_map([Str::class, 'studly'], $segments);
 
         return implode('\\', $studlySegments);
+    }
+
+    /**
+     * Map SQL data types to Laravel migration method names.
+     *
+     * @param string 
+     * @return string 
+     */
+    public static function mapSqlToLaravelDataType(string $sqlDataType): string
+    {
+        $sqlDataType = strtolower($sqlDataType);
+
+        $mapping = [
+            // Numeric types
+            'tinyint' => 'tinyInteger',
+            'smallint' => 'smallInteger',
+            'mediumint' => 'mediumInteger',
+            'int' => 'integer',
+            'integer' => 'integer',
+            'bigint' => 'bigInteger',
+            'decimal' => 'decimal',
+            'numeric' => 'decimal',
+            'float' => 'float',
+            'double' => 'double',
+            'real' => 'double',
+            'bit' => 'boolean',
+            'boolean' => 'boolean',
+            'bool' => 'boolean',
+            'serial' => 'bigIncrements',
+
+            // Date and time types
+            'date' => 'date',
+            'datetime' => 'dateTime',
+            'timestamp' => 'timestamp',
+            'time' => 'time',
+            'year' => 'year',
+
+            // String types
+            'char' => 'char',
+            'varchar' => 'string',
+            'tinytext' => 'text',
+            'text' => 'text',
+            'mediumtext' => 'mediumText',
+            'longtext' => 'longText',
+            'binary' => 'binary',
+            'varbinary' => 'binary',
+            'tinyblob' => 'binary',
+            'blob' => 'binary',
+            'mediumblob' => 'binary',
+            'longblob' => 'binary',
+            'enum' => 'enum',
+            'set' => 'set',
+
+            // Spatial types
+            'geometry' => 'geometry',
+            'point' => 'point',
+            'linestring' => 'lineString',
+            'polygon' => 'polygon',
+            'multipoint' => 'multiPoint',
+            'multilinestring' => 'multiLineString',
+            'multipolygon' => 'multiPolygon',
+            'geometrycollection' => 'geometryCollection',
+
+            // Other types
+            'json' => 'json',
+        ];
+
+        return $mapping[$sqlDataType] ?? $sqlDataType;
     }
 }

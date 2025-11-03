@@ -84,7 +84,7 @@ class MakeModel extends Command
             'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'timestamp'," : '',
             'deletedBy' => $isSoftDeleteIncluded ? "'deleted_by'," : '',
             'hiddenFields' => implode(', ', $hiddenFields),
-            'relationships' => $this->getRelationshipsArray($relations),
+            'relationships' => $this->getRelationshipsArray($this->option('relations')),
         ];
     }
 

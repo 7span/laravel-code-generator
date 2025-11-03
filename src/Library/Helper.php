@@ -137,7 +137,7 @@ class Helper
                 // Match column name + datatype
                 if (preg_match('/`?(\w+)`?\s+(\w+)(\s*\(([^)]*)\))?/i', $col, $colMatch)) {
                     $columnName = $colMatch[1];
-                    $dataType = self::mapSqlToLaravelDataType($colMatch[2]);
+                    $dataType = config('site.data_types.parse_migration')[strtolower($colMatch[2])] ?? $colMatch[2];
 
                     $field = [
                         'id' => Str::random(),
@@ -210,73 +210,5 @@ class Helper
         $studlySegments = array_map([Str::class, 'studly'], $segments);
 
         return implode('\\', $studlySegments);
-    }
-
-    /**
-     * Map SQL data types to Laravel migration method names.
-     *
-     * @param string 
-     * @return string 
-     */
-    public static function mapSqlToLaravelDataType(string $sqlDataType): string
-    {
-        $sqlDataType = strtolower($sqlDataType);
-
-        $mapping = [
-            // Numeric types
-            'tinyint' => 'tinyInteger',
-            'smallint' => 'smallInteger',
-            'mediumint' => 'mediumInteger',
-            'int' => 'integer',
-            'integer' => 'integer',
-            'bigint' => 'bigInteger',
-            'decimal' => 'decimal',
-            'numeric' => 'decimal',
-            'float' => 'float',
-            'double' => 'double',
-            'real' => 'double',
-            'bit' => 'boolean',
-            'boolean' => 'boolean',
-            'bool' => 'boolean',
-            'serial' => 'bigIncrements',
-
-            // Date and time types
-            'date' => 'date',
-            'datetime' => 'dateTime',
-            'timestamp' => 'timestamp',
-            'time' => 'time',
-            'year' => 'year',
-
-            // String types
-            'char' => 'char',
-            'varchar' => 'string',
-            'tinytext' => 'text',
-            'text' => 'text',
-            'mediumtext' => 'mediumText',
-            'longtext' => 'longText',
-            'binary' => 'binary',
-            'varbinary' => 'binary',
-            'tinyblob' => 'binary',
-            'blob' => 'binary',
-            'mediumblob' => 'binary',
-            'longblob' => 'binary',
-            'enum' => 'enum',
-            'set' => 'set',
-
-            // Spatial types
-            'geometry' => 'geometry',
-            'point' => 'point',
-            'linestring' => 'lineString',
-            'polygon' => 'polygon',
-            'multipoint' => 'multiPoint',
-            'multilinestring' => 'multiLineString',
-            'multipolygon' => 'multiPolygon',
-            'geometrycollection' => 'geometryCollection',
-
-            // Other types
-            'json' => 'json',
-        ];
-
-        return $mapping[$sqlDataType] ?? $sqlDataType;
     }
 }

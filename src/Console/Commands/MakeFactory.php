@@ -84,7 +84,7 @@ class MakeFactory extends Command
             'string'    => "'{$column}' => fake()->word",
             'text'      => "'{$column}' => fake()->text",
             'integer'   => "'{$column}' => fake()->numberBetween(1, 100)",
-            'bigint'    => "'{$column}' => fake()->randomNumber()",
+            'bigInteger'    => "'{$column}' => fake()->randomNumber()",
             'float'     => "'{$column}' => fake()->randomFloat(2, 0, 1000)",
             'boolean'   => "'{$column}' => fake()->boolean",
             'datetime'  => "'{$column}' => fake()->dateTime()",

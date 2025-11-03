@@ -16,6 +16,7 @@ class MakeService extends Command
     protected $signature = 'code-generator:service {model : The name of the service class to generate.}
                                                    {--traits= : List of traits.}
                                                    {--overwrite : is overwriting this file is selected}';
+
     protected $description = 'Create a new service class with predefined methods for resource';
 
     public function handle()
@@ -84,6 +85,7 @@ class MakeService extends Command
             'traitNameSpaces'       => str_contains($this->option('traits'), 'PaginationTrait')
                 ? "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.trait')) . "\\PaginationTrait;"
                 : '',
+            'resourceNameSpace'     => "use " . Helper::convertPathToNamespace(config('code-generator.paths.default.resource')) . "\\{$modelName}\\Resource;",
             'serviceClass'          => "{$modelName}Service",
             'modelObject'           => "private {$modelName} \${$modelObj}",
             'modelInstance'         => "\$" . $modelVariable,
@@ -109,7 +111,7 @@ class MakeService extends Command
         $modelVar = Str::camel(str_replace('Obj', '', $modelObj));
         $modelVariable = '$' . $modelVar;
 
-        return "{$modelVariable} = \$this->{$modelObj}->findOrFail({$modelVariable}->id);" . PHP_EOL .
+        return "{$modelVariable} = \$this->{$modelObj}->getQB()->findOrFail({$modelVariable}->id);" . PHP_EOL .
             self::INDENT . self::INDENT . "return {$modelVariable};";
     }
 
@@ -153,9 +155,10 @@ class MakeService extends Command
     {
         $modelVariable = '$' . $modelVar;
 
-        return "{$modelVariable} = \$this->resource({$modelVariable});" . PHP_EOL .
-            self::INDENT . self::INDENT . "{$modelVariable}->update(\$inputs);" . PHP_EOL .
-            self::INDENT . self::INDENT . "return {$modelVariable};";
+        return "{$modelVariable}->update(\$inputs);" . PHP_EOL .
+            self::INDENT . self::INDENT . "\$data['message'] = '" . Str::headline($modelVar) . " has been updated successfully.';" . PHP_EOL .
+            self::INDENT . self::INDENT . "\$data['data'] = new Resource(\$this->resource({$modelVariable}));" . PHP_EOL .
+            self::INDENT . self::INDENT . "return \$data;";
     }
 
     /**
@@ -169,6 +172,8 @@ class MakeService extends Command
         $modelVariable = '$' . $modelVar;
 
         return "{$modelVariable} = \$this->resource(\$id);" . PHP_EOL .
-            self::INDENT . self::INDENT . "return {$modelVariable}->delete();";
+            self::INDENT . self::INDENT . " {$modelVariable}->delete();" . PHP_EOL .
+            self::INDENT . self::INDENT . "\$data['message'] = '" . Str::headline($modelVar) . " has been deleted successfully.';" . PHP_EOL .
+            self::INDENT . self::INDENT . "return \$data;";
     }
 }

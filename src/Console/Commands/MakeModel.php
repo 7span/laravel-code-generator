@@ -84,6 +84,7 @@ class MakeModel extends Command
             'deletedAt' => $isSoftDeleteIncluded ? "'deleted_at' => 'timestamp'," : '',
             'deletedBy' => $isSoftDeleteIncluded ? "'deleted_by'," : '',
             'hiddenFields' => implode(', ', $hiddenFields),
+            'relationships' => $this->getRelationshipsArray($this->option('relations')),
         ];
     }
 
@@ -251,5 +252,46 @@ class MakeModel extends Command
         }
 
         return array_unique($models);
+    }
+
+    /**
+     * Build the relationships array content for the model stub.
+     */
+    protected function getRelationshipsArray($relations): string
+    {
+        $relations = $this->option('relations');
+        if (!$relations) return '';
+
+        $entries = [];
+        $pluralRelations = [
+            'hasMany',
+            'belongsToMany',
+            'hasManyThrough',
+            'morphMany',
+            'morphToMany',
+        ];
+
+        foreach ($relations as $relation) {
+            if (!is_array($relation) || empty($relation['related_model']) || empty($relation['relation_type'])) {
+                continue;
+            }
+
+            $methodName = in_array($relation['relation_type'], $pluralRelations)
+                ? Str::camel(Str::plural($relation['related_model']))
+                : Str::camel($relation['related_model']);
+
+            $lines = [];
+            $lines[] = "'{$methodName}' => [";
+            $lines[] = self::INDENT . "'model' => " . Str::studly($relation['related_model']) . "::class,";
+            $lines[] = '],';
+
+            $entries[] = implode(PHP_EOL . self::INDENT . self::INDENT, $lines);
+        }
+
+        if (empty($entries)) {
+            return '';
+        }
+
+        return implode(PHP_EOL . self::INDENT . self::INDENT, $entries);
     }
 }

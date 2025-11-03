@@ -4,6 +4,7 @@ namespace {{ serviceClassNamespace }};
 
 {{ relatedModelNamespace }};
 {{ traitNameSpaces }}
+{{ resourceNameSpace }}
 
 class {{ serviceClass }} {
 

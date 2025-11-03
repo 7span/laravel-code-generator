@@ -23,6 +23,11 @@ class CodeGeneratorServiceProvider extends ServiceProvider
             __DIR__ . '/../config/code-generator.php',
             'code-generator'
         );
+        // Merge site data-type mapping config
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/site.php',
+            'site'
+        );
 
         // Register package artisan commands
         $this->commands([

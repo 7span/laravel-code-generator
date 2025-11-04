@@ -994,7 +994,7 @@ class RestApi extends Component
     private  function copyTraits(array $selectedTraits): void
     {
         $source = __DIR__ . '/../../TraitsLibrary/Traits';
-        $destination = base_path(Helper::convertPathToNamespace(config('code-generator.paths.default.trait')));
+        $destination = base_path(config('code-generator.paths.default.trait'));
 
         if (!File::exists($source)) {
             return;

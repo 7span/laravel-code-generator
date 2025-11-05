@@ -47,7 +47,6 @@ class RestApi extends Component
         ];
 
     public $traits = [
-            'is_boot_model_trait_added',
             'is_pagination_trait_added',
             'is_resource_filterable_trait_added',
             'is_has_uuid_trait_added',
@@ -115,7 +114,6 @@ class RestApi extends Component
     public $is_select_all_traits_checked = false;
 
     // Trait checkboxes
-    public $is_boot_model_trait_added = false;
     public $is_pagination_trait_added = false;
     public $is_resource_filterable_trait_added = false;
     public $is_has_uuid_trait_added = false;
@@ -788,11 +786,10 @@ class RestApi extends Component
         return array_filter([
             'ApiResponser',
             'BaseModel',
-            $this->is_boot_model_trait_added ? 'BootModel' : null,
             $this->is_pagination_trait_added ? 'PaginationTrait' : null,
             $this->is_resource_filterable_trait_added ? 'ResourceFilterable' : null,
             $this->is_has_uuid_trait_added ? 'HasUuid' : null,
-            $this->is_has_user_action_trait_added ? 'HasUserAction' : null,
+            $this->is_has_user_action_trait_added ? 'HasUserActions' : null,
         ]);
     }
     // Generate all selected files

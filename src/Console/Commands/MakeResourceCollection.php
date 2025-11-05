@@ -50,7 +50,7 @@ class MakeResourceCollection extends Command
     {
         $namespace = config('code-generator.paths.default.resource') . ($isAdminCrudIncluded ? "/Admin/" : "/");
         return [
-            'namespace' => Helper::convertPathToNamespace(config('code-generator.paths.default.resource') . "/{$modelName}"),
+            'namespace' => Helper::convertPathToNamespace($namespace) . '\\' . $modelName,
         ];
     }
 

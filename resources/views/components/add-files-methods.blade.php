@@ -103,12 +103,6 @@
         <div>
             <div class="mb-2">
                 <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_boot_model_trait_added">
-                    <span class="ml-2 text-sm">BootModel.php</span>
-                </label>
-            </div>
-            <div class="mb-2">
-                <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_pagination_trait_added">
                     <span class="ml-2 text-sm">PaginationTrait.php</span>
                 </label>
@@ -117,6 +111,12 @@
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_resource_filterable_trait_added">
                     <span class="ml-2 text-sm">ResourceFilterable.php</span>
+                </label>
+            </div>
+            <div class="mb-2">
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_traits_checked">
+                    <span class="ml-2 text-sm">Select All Traits</span>
                 </label>
             </div>
         </div>
@@ -130,13 +130,7 @@
             <div class="mb-2">
                 <label class="flex items-center">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_has_user_action_trait_added">
-                    <span class="ml-2 text-sm">HasUserAction.php</span>
-                </label>
-            </div>
-            <div class="mb-2">
-                <label class="flex items-center">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-red-500" wire:model.live="is_select_all_traits_checked">
-                    <span class="ml-2 text-sm">Select All Traits</span>
+                    <span class="ml-2 text-sm">HasUserActions.php</span>
                 </label>
             </div>
         </div>

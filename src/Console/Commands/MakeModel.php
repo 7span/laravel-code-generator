@@ -147,7 +147,7 @@ class MakeModel extends Command
         // Add custom traits if specified
         $selectedTraits = $this->option('traits');
         if ($selectedTraits) {
-            $allowedTraits = ['BaseModel', 'BootModel', 'SoftDeletes'];
+            $allowedTraits = ['BaseModel', 'HasUserActions', 'SoftDeletes', 'HasUuid'];
             foreach (explode(',', $selectedTraits) as $trait) {
                 $trait = trim($trait);
                 if (in_array($trait, $allowedTraits)) {
